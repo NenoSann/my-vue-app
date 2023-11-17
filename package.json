@@ -32,6 +32,7 @@
     "tailwindcss": "^3.3.5"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "ol": "^8.2.0"
   }
 }
