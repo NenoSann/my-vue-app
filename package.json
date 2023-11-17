@@ -25,7 +25,11 @@
     "@electron-forge/maker-zip": "^7.0.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.0.0",
     "@electron-forge/plugin-vite": "^7.0.0",
-    "electron": "27.1.0"
+    "autoprefixer": "^10.4.16",
+    "daisyui": "^4.3.1",
+    "electron": "27.1.0",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0"
