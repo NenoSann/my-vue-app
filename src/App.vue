@@ -1,9 +1,17 @@
 <template>
-    <Map></Map>
+    <div id="app">
+        <SideBar></SideBar>
+        <Channel></Channel>
+    </div>
 </template>
   
 <script setup>
-import model from './component/model.vue';
-import Map from './component/Map.vue';
-console.log('👋 This message is being logged by "App.vue", included via Vite');
+import SideBar from './component/SideBar.vue'
+import Channel from './view/Channel.vue';
 </script>
+<style scoped>
+#app {
+    @apply flex flex-row;
+    @apply h-screen w-screen;
+}
+</style>
