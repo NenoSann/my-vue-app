@@ -8,4 +8,14 @@ export default defineConfig({
     conditions: ['node'],
     mainFields: ['module', 'jsnext:main', 'jsnext'],
   },
+  server: {
+    proxy: {
+      '/api': {
+        // target: 'http://localhost:8080',
+        target: 'http://43.163.234.220:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      }
+    }
+  }
 });

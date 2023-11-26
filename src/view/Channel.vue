@@ -21,6 +21,9 @@ import { io } from 'socket.io-client';
 const input = ref<string>('');
 const messages = ref<string[]>([]);
 const socket = io('http://43.163.234.220:8080');
+// const socket = io('http://localhost:8080', {
+//     autoConnect: false
+// });
 const sendMessage = function () {
     socket.emit('message', input.value);
     input.value = '';

@@ -1,13 +1,19 @@
 <template>
     <div id="app">
-        <SideBar></SideBar>
-        <Channel></Channel>
+        <RouterView>
+        </RouterView>
     </div>
 </template>
   
-<script setup>
-import SideBar from './component/SideBar.vue'
-import Channel from './view/Channel.vue';
+<script setup lang="ts">
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router'
+const router = useRouter();
+onMounted(() => {
+    if (localStorage.getItem('user') === null) {
+        router.push('/login');
+    }
+})
 </script>
 <style scoped>
 #app {
