@@ -133,7 +133,7 @@ electron_1.app.on('ready', function () {
                 case 0: return [4 /*yield*/, testFs(data)];
                 case 1:
                     _a.sent();
-                    return [2 /*return*/, "running test fs! Data: ".concat(data)];
+                    return [2 /*return*/, 'success'];
             }
         });
     }); });

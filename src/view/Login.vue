@@ -14,6 +14,7 @@ const user = User();
 onMounted(async () => {
     loginInfo.value = await login('lianghengcn@gmail.com', '2440060505');
     user.login('lianghengcn@gmail.com', '2440060505');
+    await window.storeUserInfo(JSON.stringify(user)).then;
 })
 </script>
 

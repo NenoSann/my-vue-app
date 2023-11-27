@@ -1,4 +1,7 @@
 {
+  "include": [
+    "src/Interface/preload.d.ts"
+  ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
     /* Projects */

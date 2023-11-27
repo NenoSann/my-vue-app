@@ -13,5 +13,6 @@ contextBridge.exposeInMainWorld('versions', {
 contextBridge.exposeInMainWorld('storeUserInfo', {
     save: async (data: string) => {
         const result = await ipcRenderer.invoke('testFS', data);
+        console.log(result);
     }
 })

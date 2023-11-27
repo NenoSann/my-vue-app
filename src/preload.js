@@ -54,6 +54,7 @@ electron_1.contextBridge.exposeInMainWorld('storeUserInfo', {
                 case 0: return [4 /*yield*/, electron_1.ipcRenderer.invoke('testFS', data)];
                 case 1:
                     result = _a.sent();
+                    console.log(result);
                     return [2 /*return*/];
             }
         });

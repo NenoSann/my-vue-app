@@ -74,7 +74,7 @@ const testFs = async function (content: string) {
 app.on('ready', () => {
     ipcMain.handle('testFS', async (event, data) => {
         await testFs(data);
-        return `running test fs! Data: ${data}`;
+        return 'success'
     })
     ipcMain.handle('ping', () => 'pong');
 });
