@@ -24,6 +24,7 @@ const User = defineStore('User', {
                 const user = await login(email, password);
                 this.data = user.user;
                 localStorage.setItem('user', JSON.stringify(user.user));
+                return user.user;
             } catch (error) {
                 console.log('login fail');
                 console.error(error);
