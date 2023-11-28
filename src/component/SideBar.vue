@@ -1,6 +1,8 @@
 <template>
     <div class="side-bar flex flex-col p-3">
-        <TheIcon @click="router.push('/login')"></TheIcon>
+        <div class="me border-b-2">
+            <TheIcon @click="router.push('/login')"></TheIcon>
+        </div>
     </div>
 </template>
 

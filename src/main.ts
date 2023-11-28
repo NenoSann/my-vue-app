@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeImage } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -8,6 +8,7 @@ if (require('electron-squirrel-startup')) {
 
 const createWindow = () => {
     // Create the browser window.
+    const icon = nativeImage.createFromPath('../assets/icon.png');
     const mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -17,6 +18,7 @@ const createWindow = () => {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
         },
+        icon: icon
     });
 
     // and load the index.html of the app.

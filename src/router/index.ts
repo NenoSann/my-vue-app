@@ -13,6 +13,11 @@ const router = createRouter({
             path: '/login',
             name: 'loginPage',
             component: Login
+        },
+        {
+            path: '/channels/@me',
+            name: 'myHomePage',
+            component: Home
         }
     ]
 })
