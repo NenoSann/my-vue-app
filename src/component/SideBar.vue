@@ -16,6 +16,7 @@ const router = useRouter();
 .side-bar {
     @apply grow-0;
     @apply w-20 h-full;
-    @apply bg-white;
+    @apply bg-neutral;
+    @apply bg-neutral;
 }
 </style>
