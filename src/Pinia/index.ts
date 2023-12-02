@@ -33,4 +33,28 @@ const User = defineStore('User', {
     }
 })
 
-export { pinia, User }
+const Socket_Users = defineStore('Socket_Users', {
+    state: () => {
+        return {
+            usermap: new Map<string, {
+                avatar: string,
+                username: string,
+                socketid: string
+            }>()
+        }
+    }
+})
+
+const Socket_Target = defineStore('Socket_Target', {
+    state: () => {
+        return {
+            isActive: false,
+            type: '',
+            socketid: '',
+            avatar: '',
+            name: ''
+        }
+    }
+})
+
+export { pinia, User, Socket_Users, Socket_Target }

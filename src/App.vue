@@ -24,6 +24,8 @@ const router = useRouter();
 onMounted(() => {
     if (localStorage.getItem('user') === null) {
         router.push('/login');
+    } else {
+        router.push('/channels/@me')
     }
 })
 </script>

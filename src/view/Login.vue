@@ -33,7 +33,7 @@
         </div>
     </div>
     <div class="back daisy-btn-circle daisy-btn-sm border-2 absolute backdrop-blur-md cursor-pointer top-4 left-4
-                hover:bg-gray-400 border- hover:transition-all transition-all" tabindex="0">
+                hover:bg-gray-400 border- hover:transition-all transition-all" @click="router.back()" tabindex="0">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)">
             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -66,16 +66,11 @@ const Login = async function () {
     loginInfo.value = await user.login(credential.email, credential.password);
     user.login(credential.email, credential.password).then(async (res) => {
         loginInfo.value = res;
-        await (window as Window).storeUserInfo.save(JSON.stringify(user.$state));
+        // await (window as Window).storeUserInfo.save(JSON.stringify(user.$state));
         router.push('/channels/@me')
     })
     loading.value = false;
 }
-onMounted(async () => {
-    // loginInfo.value = await login('lianghengcn@gmail.com', '2440060505');
-    // user.login('lianghengcn@gmail.com', '2440060505');
-    // await (window as Window).storeUserInfo.save(JSON.stringify(user.$state));
-})
 </script>
 
 <style scoped>

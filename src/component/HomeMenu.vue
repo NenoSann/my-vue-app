@@ -35,7 +35,7 @@
                         </g>
                     </svg>商店</a></li>
         </ul>
-        <div class="h-full bg-base-200">
+        <div class="h-full flex flex-col bg-base-200">
             <div class="flex items-center px-5">
                 <p class="text-sm font-semibold">私信</p>
                 <div class="daisy-tooltip ml-auto" data-tip="创建私信">
@@ -50,13 +50,14 @@
                     </svg>
                 </div>
             </div>
+            <UserList></UserList>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-const router = useRouter();
+import UserList from './UserList.vue';
 
 </script>
 
