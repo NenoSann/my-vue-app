@@ -20,6 +20,7 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router'
 import Popup from './component/Popup.vue';
 import type { Window } from './Interface/preload'
+import { socket } from './Socket.io';
 const router = useRouter();
 onMounted(() => {
     if (localStorage.getItem('user') === null) {
@@ -27,6 +28,7 @@ onMounted(() => {
     } else {
         router.push('/channels/@me')
     }
+    socket.connect();
 })
 </script>
 <style scoped>

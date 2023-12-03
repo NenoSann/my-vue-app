@@ -17,7 +17,7 @@
             </TransitionGroup>
         </div>
         <textarea :disabled="!SocketTarget?.isActive" class="relative daisy-textarea h-1/4 resize-none w-full rounded-none"
-            v-model="input"></textarea>
+            v-model="input" @keyup.ctrl.enter="sendMessage"></textarea>
         <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4 " @click="sendMessage">SEND
         </div>
     </div>
@@ -25,38 +25,38 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
-import { io } from 'socket.io-client';
-import { User, Socket_Users, Socket_Target } from '../Pinia';
+import { socket } from '../Socket.io/index';
+import { User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
 const input = ref<string>('');
 const SocketTarget = computed(() => {
     return Socket_Target().$state;
 })
 const SocketUsers = Socket_Users();
+const SocketMessage = Socket_Message();
+const user = User();
 const messages = ref<{
     content: string,
     type: 'from' | 'to',
     sendername: string,
     time?: string
 }[]>([]);
-const socket = io('http://localhost:8080', {
-    auth: {
-        username: User()._id
-    },
-    extraHeaders: {
-        'x-username': User().name,
-        'x-avatar': User().avatar,
-        'x-id': User()._id
-    }
-});
 
 const sendMessage = function () {
     socket.emit('private_message', {
         content: input.value,
         to: SocketTarget.value.socketid,
-        senderid: User()._id,
-        sendername: User().name,
-        senderavatar: User().avatar
+        senderid: user._id,
+        sendername: user.name,
+        senderavatar: user.avatar
     });
+    if (!SocketMessage.messages.has(user._id)) {
+        SocketMessage.messages.set(user._id, []);
+    }
+    SocketMessage.messages.get(user._id)?.push({
+        type: 'from',
+        content: input.value,
+        date: new Date()
+    })
     messages.value.push({
         content: input.value,
         type: 'from',
@@ -67,39 +67,6 @@ const sendMessage = function () {
 
 
 onMounted(() => {
-    socket.on('connect', () => {
-        console.log(`socket is ${socket.connected}`);
-    });
-    socket.on('message', (args: any) => {
-        messages.value.push(args);
-    })
-    socket.on('users', (data: string) => {
-        // when server send usermap we replace it;
-        SocketUsers.usermap = new Map(JSON.parse(data));
-        if (SocketUsers.usermap.get(User()._id) !== undefined) {
-            // what type ?
-            (SocketUsers.usermap.get(User()._id) as {
-                avatar: string;
-                username: string;
-                socketid: string;
-            }).username = 'You';
-        }
-        console.log('users data: ', new Map(JSON.parse(data)));
-    })
-    socket.on('disconnect', () => {
-
-    })
-    socket.on('user_connected', (data: any) => {
-        console.log('user_connected', data);
-        SocketUsers.usermap.set(data.userid, data.userInfo);
-        console.log('now the usermap is :', SocketUsers.usermap)
-    })
-    socket.on('user_disconnect', (userid: string) => {
-        console.log('user_disconnect', userid);
-        SocketUsers.usermap.delete(userid);
-        console.log('now the usermap is :', SocketUsers.usermap);
-    })
-
     socket.on('private_message', (data: {
         content: string,
         from: string,

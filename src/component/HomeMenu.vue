@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import UserList from './UserList.vue';
-
+const router = useRouter();
 </script>
 
 <style scoped>

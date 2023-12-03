@@ -18,6 +18,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Socket_Users, Socket_Target } from '../Pinia';
+import { useRouter, useRoute } from 'vue-router'
+const router = useRouter();
+const route = useRoute();
 const SocketUsers = Socket_Users();
 const SocketTarget = Socket_Target();
 const userlist = computed(() => {
@@ -29,7 +32,8 @@ const handleLiSelect = (user: [string, { avatar: string, socketid: string, usern
     SocketTarget.avatar = user[1].avatar;
     SocketTarget.name = user[1].username;
     SocketTarget.socketid = user[1].socketid;
-    console.log(SocketTarget.$state);
+    const fullpath = '/channels/@me'
+    router.replace(fullpath + '/' + user[0]);
 }
 </script>
 

@@ -15,6 +15,11 @@ const router = createRouter({
             component: Login
         },
         {
+            path: '/channels/@me/:userid',
+            name: 'myHomePageWithUser',
+            component: Home
+        },
+        {
             path: '/channels/@me',
             name: 'myHomePage',
             component: Home

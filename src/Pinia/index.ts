@@ -57,4 +57,15 @@ const Socket_Target = defineStore('Socket_Target', {
     }
 })
 
-export { pinia, User, Socket_Users, Socket_Target }
+const Socket_Message = defineStore('Socket_Message', {
+    state: () => {
+        return {
+            messages: new Map<string, {
+                type: 'from' | 'to',
+                content: string,
+                date: Date
+            }[]>()
+        }
+    }
+})
+export { pinia, User, Socket_Users, Socket_Target, Socket_Message }
