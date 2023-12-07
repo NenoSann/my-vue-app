@@ -23,9 +23,10 @@ socket.on('users', (data: string) => {
     if (SocketUsers.usermap.get(user._id) !== undefined) {
         // what type ?
         (SocketUsers.usermap.get(user._id) as {
-            avatar: string;
-            username: string;
-            socketid: string;
+            avatar: string,
+            username: string,
+            socketid: string,
+            userid: string,
         }).username = 'You';
     }
     console.log('users data: ', new Map(JSON.parse(data)));
@@ -49,13 +50,15 @@ socket.on('private_message', (data: {
     sendername: string,
     senderavatar: string
 }) => {
+    console.log('got private message : ', data)
     if (!SocketMessage.messages.has(data.senderid)) {
-        SocketMessage.messages.set(data.senderid, []);
+        SocketMessage.messages.set(data.senderid, { data: [], total: 0 });
     }
-    SocketMessage.messages.get(data.senderid)?.push({
+    SocketMessage.messages.get(data.senderid)?.data.push({
         type: 'to',
         content: data.content,
         date: new Date()
     })
+    SocketMessage.messages.get(data.senderid)!.total += 1;
 })
 export { socket }

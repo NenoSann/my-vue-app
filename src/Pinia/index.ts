@@ -52,7 +52,8 @@ const Socket_Target = defineStore('Socket_Target', {
             type: '',
             socketid: '',
             avatar: '',
-            name: ''
+            name: '',
+            userid: ''
         }
     }
 })
@@ -61,10 +62,13 @@ const Socket_Message = defineStore('Socket_Message', {
     state: () => {
         return {
             messages: new Map<string, {
-                type: 'from' | 'to',
-                content: string,
-                date: Date
-            }[]>()
+                data: {
+                    type: 'from' | 'to',
+                    content: string,
+                    date: Date
+                }[],
+                total: number
+            }>()
         }
     }
 })

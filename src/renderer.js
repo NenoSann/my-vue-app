@@ -1,8 +1,8 @@
 import "./style.css";
 import devtools from '@vue/devtools';
-if (process.env.NODE_ENV === 'development') {
-    devtools.connect(/* host, port */)
-}
+// if (process.env.NODE_ENV === 'development') {
+//     devtools.connect(/* host, port */)
+// }
 import { createApp } from 'vue';
 import App from './App.vue';
 import { router } from './router'
