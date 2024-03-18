@@ -15,4 +15,11 @@ contextBridge.exposeInMainWorld('storeUserInfo', {
         const result = await ipcRenderer.invoke('testFS', data);
         console.log(result);
     }
+});
+
+contextBridge.exposeInMainWorld('socket', {
+    createSocket: async () => {
+        const result = await ipcRenderer.invoke('socket')
+        console.log('create result!', result);
+    }
 })

@@ -80,6 +80,7 @@ app.on('ready', () => {
         return 'success'
     })
     ipcMain.handle('ping', () => 'pong');
+    ipcMain.handle('createSocket', () => 'well');
 });
 
 
