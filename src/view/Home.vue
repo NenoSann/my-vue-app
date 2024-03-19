@@ -12,11 +12,6 @@ import { onMounted } from 'vue';
 import SideBar from '../component/SideBar.vue';
 import UserHome from '../component/UserHome.vue';
 import { useRoute } from 'vue-router';
-import { socket } from '../Socket.io';
-const route = useRoute();
-onMounted(() => {
-    socket.connect();
-})
 </script>
 
 <style scoped>

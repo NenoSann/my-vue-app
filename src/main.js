@@ -40,7 +40,7 @@ exports.testFs = void 0;
 var electron_1 = require("electron");
 var path = require("path");
 var fs = require("fs/promises");
-// import Socketio from './Socket.io/class';
+var Node_Socket_1 = require("./Node_Socket");
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     electron_1.app.quit();
@@ -129,6 +129,15 @@ var testFs = function (content) {
     });
 };
 exports.testFs = testFs;
+var createSocket = function (url, name, _id, avatar) {
+    return __awaiter(this, void 0, void 0, function () {
+        var socket;
+        return __generator(this, function (_a) {
+            socket = Node_Socket_1.default.getInstance('http://43.163.234.220:8081', 'Test', '65f811052ad56bf6b24a7c5f', 'default');
+            return [2 /*return*/, socket];
+        });
+    });
+};
 electron_1.app.on('ready', function () {
     electron_1.ipcMain.handle('testFS', function (event, data) { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -141,5 +150,5 @@ electron_1.app.on('ready', function () {
         });
     }); });
     electron_1.ipcMain.handle('ping', function () { return 'pong'; });
-    electron_1.ipcMain.handle('createSocket', function () { return 'well'; });
+    electron_1.ipcMain.handle('socket', function () { return console.log(createSocket('1', '1', '1', '1')); });
 });

@@ -7,9 +7,10 @@
                 <a tabindex="0">
                     <div class="daisy-avatar daisy-online w-6">
                         <img class="rounded-full"
-                            :src="user[1]?.avatar === 'default' ? '../../assets/icon.png' : user[1]?.avatar" :alt="user[0]">
+                            :src="user[1]?.avatar === 'default' ? '../../assets/icon.png' : user[1]?.avatar"
+                            :alt="user[0]">
                     </div>
-                    {{ user[1]?.username }}
+                    {{ user[0] }}
                 </a>
             </li>
         </ul>

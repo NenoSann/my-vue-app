@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('versions', {
     ping: () => ipcRenderer.invoke('ping')
 })
 
+
+
 contextBridge.exposeInMainWorld('storeUserInfo', {
     save: async (data: string) => {
         const result = await ipcRenderer.invoke('testFS', data);
@@ -18,8 +20,7 @@ contextBridge.exposeInMainWorld('storeUserInfo', {
 });
 
 contextBridge.exposeInMainWorld('socket', {
-    createSocket: async () => {
-        const result = await ipcRenderer.invoke('socket')
-        console.log('create result!', result);
-    }
+    createSocket: (...args) => ipcRenderer.invoke('socket:create', ...args),
+    getUserMap: () => ipcRenderer.invoke('socket:getUserMap'),
+    close: () => ipcRenderer.send('socket:close')
 })

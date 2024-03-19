@@ -61,16 +61,5 @@ electron_1.contextBridge.exposeInMainWorld('storeUserInfo', {
     }); }
 });
 electron_1.contextBridge.exposeInMainWorld('socket', {
-    createSocket: function () { return __awaiter(void 0, void 0, void 0, function () {
-        var result;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, electron_1.ipcRenderer.invoke('socket')];
-                case 1:
-                    result = _a.sent();
-                    console.log('create result!', result);
-                    return [2 /*return*/];
-            }
-        });
-    }); }
+    createSocket: function () { return electron_1.ipcRenderer.invoke('socket'); }
 });

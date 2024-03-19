@@ -1,3 +1,7 @@
+// This file is deprecated, it used to be a web-side socket.io client, but now I move
+// the socket.io client into electron main process, but this file remain, reuse it when
+// neccessary
+//
 import { pinia, User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
 import { io } from "socket.io-client";
 const user = User(pinia);
@@ -5,14 +9,9 @@ const SocketUsers = Socket_Users(pinia);
 const SocketMessage = Socket_Message();
 const socket = io('http://43.163.234.220:8081', {
     auth: {
-        username: user._id,
-        id: user.name,
+        username: user.name,
+        id: user._id,
         avatar: user.avatar
-    },
-    extraHeaders: {
-        'x-username': user.name,
-        'x-avatar': user.avatar,
-        'x-id': user._id
     },
     autoConnect: false
 });

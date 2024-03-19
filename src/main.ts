@@ -1,7 +1,9 @@
 import { app, BrowserWindow, ipcMain, nativeImage } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-// import Socketio from './Socket.io/class';
+import Socketio from './Node_Socket/index.ts';
+import { Socket } from 'socket.io-client';
+// import { channelRegister } from './IPC/socket.ts';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -18,6 +20,7 @@ const createWindow = () => {
         autoHideMenuBar: true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: true
         },
         icon: icon
     });
@@ -61,27 +64,15 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-const testFs = async function (content: string) {
-    console.log('test fs running')
-    const targetPath = path.join(__dirname, 'user');
-    fs.access(targetPath).then(async () => {
-        await fs.writeFile(path.join(targetPath, 'test'), content);
-        console.log('create success');
-    }).catch(async (error) => {
-        await fs.mkdir(targetPath);
-        await fs.writeFile(path.join(targetPath, 'test'), content);
-        console.log('create success');
-    });
-};
+
+const createSocket = async function (name: string, _id: string, avatar: string) {
+    const socket = Socketio.getInstance(name, _id, avatar);
+    return socket;
+}
 
 app.on('ready', () => {
-    ipcMain.handle('testFS', async (event, data) => {
-        await testFs(data);
-        return 'success'
-    })
     ipcMain.handle('ping', () => 'pong');
-    ipcMain.handle('createSocket', () => 'well');
+    ipcMain.handle('socket:create', (event, name, _id, avatar) => { Socketio.getInstance(name, _id, avatar) });
+    ipcMain.handle('socket:getUserMap', (event, name, _id, avatar) => console.log(createSocket(name, _id, avatar)));
+    ipcMain.on('socket:close', () => Socketio.getInstance().close());
 });
-
-
-export { testFs }
