@@ -1,6 +1,7 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 import { contextBridge, ipcRenderer } from "electron"
+import type { PrivateMessage } from "./Interface/user";
 import * as path from 'path';
 contextBridge.exposeInMainWorld('versions', {
     node: () => process.versions.node,
@@ -37,5 +38,6 @@ contextBridge.exposeInMainWorld('socket', {
     onUserConnected: (callback: Function) => ipcRenderer.on('userConnected', (_event, val) => callback(val)),
     onUserDisconnected: (callback: Function) => ipcRenderer.on('userDiconnected', (_event, val) => callback(val)),
     onClose: (callback: Function) => ipcRenderer.on('close', (_event, val) => callback(val)),
-    onUserMap: (callback: Function) => ipcRenderer.on('usermap', (_event, usermap) => callback(usermap))
+    onUserMap: (callback: Function) => ipcRenderer.on('usermap', (_event, usermap) => callback(usermap)),
+    onPrivateMessage: (callback: Function) => ipcRenderer.on('privateMessage', (_event, message: PrivateMessage) => callback(message))
 })

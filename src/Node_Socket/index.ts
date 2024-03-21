@@ -36,14 +36,16 @@ class Socketio {
             mainWindow?.webContents.send('usermap', this.usermap);
         });
 
-        this.socket.on('user_connected', (data: any) => {
+        this.socket.on('user_connected', (data: SocketUserInfo) => {
             console.log('user connected!', data);
-            this.usermap.set(data.userid, data.userInfo);
+            this.usermap.set(data.userid, data);
+            mainWindow?.webContents.send('userConnected', data);
         });
 
         this.socket.on('user_disconnect', (userid: string) => {
             console.log('user disconnected! ', userid);
             this.usermap.delete(userid);
+            mainWindow?.webContents.send('userDiconnected', userid);
         });
 
         this.socket.on('private_message', (data: PrivateMessage) => {
@@ -52,7 +54,7 @@ class Socketio {
                 this.message.set(data.senderid, []);
             }
             this.message.get(data.senderid)?.push(data);
-            Socketio.eventEmitter.emit('private_message', data);
+            mainWindow?.webContents.send('privateMessage', data);
         });
     }
 
