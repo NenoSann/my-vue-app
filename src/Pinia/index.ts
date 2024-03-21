@@ -15,13 +15,14 @@ const User = defineStore('User', {
         if (localStorage.getItem('user')) {
             return JSON.parse(localStorage.getItem('user') as string) as user;
         } else {
-            return null as unknown as user;
+            return {} as unknown as user;
         }
     },
     actions: {
         async login(email: string, password: string) {
             try {
                 const user = await login(email, password);
+                console.log('user: ', user);
                 this.data = user.user;
                 localStorage.setItem('user', JSON.stringify(user.user));
                 return user.user;
@@ -31,6 +32,14 @@ const User = defineStore('User', {
             }
         }
     }
+})
+
+const Socket_Info = defineStore('Socket_Info', {
+    state: () => {
+        return {
+            Socket_ID: String || null
+        }
+    },
 })
 
 const Socket_Users = defineStore('Socket_Users', {
@@ -72,4 +81,4 @@ const Socket_Message = defineStore('Socket_Message', {
         }
     }
 })
-export { pinia, User, Socket_Users, Socket_Target, Socket_Message }
+export { pinia, User, Socket_Info, Socket_Users, Socket_Target, Socket_Message }

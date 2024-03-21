@@ -20,7 +20,22 @@ contextBridge.exposeInMainWorld('storeUserInfo', {
 });
 
 contextBridge.exposeInMainWorld('socket', {
-    createSocket: (...args) => ipcRenderer.invoke('socket:create', ...args),
+    // send
+    createSocket: (...args) => {
+        try {
+            ipcRenderer.invoke('socket:create', ...args);
+            return true;
+        } catch (error) {
+            console.error(error);
+        }
+    },
     getUserMap: () => ipcRenderer.invoke('socket:getUserMap'),
-    close: () => ipcRenderer.send('socket:close')
+    close: () => ipcRenderer.send('socket:close'),
+
+    // received
+    onConnect: (callback: Function) => ipcRenderer.on('connect', (_event, val) => callback(val)),
+    onUserConnected: (callback: Function) => ipcRenderer.on('userConnected', (_event, val) => callback(val)),
+    onUserDisconnected: (callback: Function) => ipcRenderer.on('userDiconnected', (_event, val) => callback(val)),
+    onClose: (callback: Function) => ipcRenderer.on('close', (_event, val) => callback(val)),
+    onUserMap: (callback: Function) => ipcRenderer.on('usermap', (_event, usermap) => callback(usermap))
 })

@@ -1,5 +1,6 @@
 const { io, Socket } = require("socket.io-client");
 // import { io, Socket } from 'socket.io-client';
+import { mainWindow } from "../main.ts";
 import type { SocketUserInfo, PrivateMessage } from "../Interface/user";
 import { EventEmitter } from "events";
 type EventCallback = (args: any[]) => void;
@@ -10,7 +11,7 @@ class Socketio {
     private usermap: Map<string, SocketUserInfo>;
     private message: Map<string, Array<PrivateMessage>>;
     private friends: Array<SocketUserInfo>;
-    private eventEmitter: EventEmitter;
+    private static eventEmitter: EventEmitter;
 
     private constructor(url: string, name: string, _id: string, avatar: string) {
         this.socket = io(url, {
@@ -23,26 +24,26 @@ class Socketio {
         this.usermap = new Map();
         this.message = new Map();
         this.friends = [];
-        this.eventEmitter = new EventEmitter();
+        Socketio.eventEmitter = new EventEmitter();
         this.socket.on('connect', () => {
             console.log('nodejs socket client connected');
+            mainWindow?.webContents.send('connect', this.socket.id);
         })
         this.socket.on('users', (data: string) => {
             // when server sends new usermap, we replace it
+            console.log('got usermap from server \n', data);
             this.usermap = new Map(JSON.parse(data));
-            this.eventEmitter.emit('users', this.usermap);
+            mainWindow?.webContents.send('usermap', this.usermap);
         });
 
         this.socket.on('user_connected', (data: any) => {
             console.log('user connected!', data);
             this.usermap.set(data.userid, data.userInfo);
-            this.eventEmitter.emit('user_connected', data.userid, data.userInfo);
         });
 
         this.socket.on('user_disconnect', (userid: string) => {
             console.log('user disconnected! ', userid);
             this.usermap.delete(userid);
-            this.eventEmitter.emit('user_disconnect', userid);
         });
 
         this.socket.on('private_message', (data: PrivateMessage) => {
@@ -51,7 +52,7 @@ class Socketio {
                 this.message.set(data.senderid, []);
             }
             this.message.get(data.senderid)?.push(data);
-            this.eventEmitter.emit('private_message', data);
+            Socketio.eventEmitter.emit('private_message', data);
         });
     }
 
@@ -71,7 +72,7 @@ class Socketio {
     }
 
     public subscribe(event: string, callback: EventCallback): void {
-        this.eventEmitter.on(event, callback);
+        Socketio.eventEmitter.on(event, callback);
     }
 
     public getUserMap() {
@@ -79,12 +80,13 @@ class Socketio {
     }
 
     public unsubscribe(event: string, callback: EventCallback): void {
-        this.eventEmitter.off(event, callback);
+        Socketio.eventEmitter.off(event, callback);
     }
 
     public close() {
         this?.socket?.disconnect();
+        Socketio.instance = undefined;
     }
 }
 
-export default Socketio;
+export { Socketio }

@@ -1,18 +1,17 @@
 import { app, BrowserWindow, ipcMain, nativeImage } from 'electron';
 import * as path from 'path';
-import * as fs from 'fs/promises';
-import Socketio from './Node_Socket/index.ts';
-import { Socket } from 'socket.io-client';
+import { Socketio } from './Node_Socket/index.ts';
 // import { channelRegister } from './IPC/socket.ts';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
 }
+let mainWindow: BrowserWindow | undefined;
 
 const createWindow = () => {
     // Create the browser window.
     const icon = nativeImage.createFromPath('../assets/icon.png');
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         minHeight: 600,
@@ -74,5 +73,14 @@ app.on('ready', () => {
     ipcMain.handle('ping', () => 'pong');
     ipcMain.handle('socket:create', (event, name, _id, avatar) => { Socketio.getInstance(name, _id, avatar) });
     ipcMain.handle('socket:getUserMap', (event, name, _id, avatar) => console.log(createSocket(name, _id, avatar)));
-    ipcMain.on('socket:close', () => Socketio.getInstance().close());
+    ipcMain.handle('socket:privateMessage', () => { });
+    ipcMain.handle('socket:groupMessage', () => { });
+    ipcMain.on('socket:close', () => Socketio.getInstance()?.close());
 });
+
+// 20, Aug
+// TODO
+// 1: finish node-side message api
+// 2: add friends
+// 3: implement the local message store
+export { mainWindow }

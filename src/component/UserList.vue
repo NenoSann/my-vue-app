@@ -10,7 +10,7 @@
                             :src="user[1]?.avatar === 'default' ? '../../assets/icon.png' : user[1]?.avatar"
                             :alt="user[0]">
                     </div>
-                    {{ user[0] }}
+                    {{ user[1].username }}
                 </a>
             </li>
         </ul>
