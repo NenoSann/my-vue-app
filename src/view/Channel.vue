@@ -2,19 +2,9 @@
     <div class="channel-main">
         <div ref="messageRef" class="messages h-3/4 w-full pb-4 px-2 overflow-auto ">
             <TransitionGroup name="list">
-                <div class="daisy-chat"
-                    :class="{ 'to-user': message.type === 'to', 'from-user': message.type === 'from' }"
-                    v-for="message in messages" :key="message.content">
-                    <div class="daisy-chat-image daisy-avatar">
-                        <div class="w-10 rounded-full">
-                            <img alt="You" src="../../assets/icon.png" />
-                        </div>
-                    </div>
-                    <div class="daisy-chat-header">
-                        {{ message.type === 'from' ? user.name : SocketTarget.name }}
-                    </div>
-                    <div class="daisy-chat-bubble">{{ message.content }}</div>
-                </div>
+                <ChatBubble :type="msg.type" :content="msg.content" :date="msg.date"
+                    :name="msg.type === 'from' ? user.name : ''" v-for="(msg, index) in messages" :key="index">
+                </ChatBubble>
             </TransitionGroup>
         </div>
         <textarea :disabled="!SocketTarget?.isActive"
@@ -26,7 +16,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed, onUpdated, nextTick } from 'vue';
+import ChatBubble from '../component/ChatBubble.vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { User, Socket_Users, Socket_Target, Socket_Message, Socket_Info } from '../Pinia';
 import type { Window } from '../Interface/preload';
 const input = ref<string>('');
@@ -51,6 +42,7 @@ const messageHeader = computed(() => {
 })
 
 const sendMessage = async function () {
+    console.log('send message to: ', messageHeader.value.to);
     window.socket.sendPrivateMessage(messageHeader.value.to, {
         content: {
             text: input.value

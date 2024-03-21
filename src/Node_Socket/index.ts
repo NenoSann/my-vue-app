@@ -49,12 +49,12 @@ class Socketio {
         });
 
         this.socket.on('private_message', (data: PrivateMessage) => {
-            console.log('got private message! ', data);
             if (!this.message.has(data.senderid)) {
                 this.message.set(data.senderid, []);
             }
             this.message.get(data.senderid)?.push(data);
             mainWindow?.webContents.send('privateMessage', data);
+            console.log('got private message from server');
         });
     }
 

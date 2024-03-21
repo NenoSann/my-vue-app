@@ -4,7 +4,7 @@
             <li class="list-item" :class="{ 'has-unread': getUnreadMessage(user[0]) !== null }"
                 :data-unread="getUnreadMessage(user[0])" v-for="(user, index) in userlist" :key="user[0]"
                 @click="handleLiSelect(user)" @keypress.enter="handleLiSelect(user)">
-                <a :tabindex="index">
+                <a :tabindex="index" :class="{ 'daisy-active': user[1].userid === SocketTarget.userid }">
                     <div class="daisy-avatar daisy-online w-6">
                         <img class="rounded-full"
                             :src="user[1]?.avatar === 'default' ? '../../assets/icon.png' : user[1]?.avatar"
@@ -66,5 +66,9 @@ const handleLiSelect = (user: [string, { avatar: string, socketid: string, usern
 
 .list-item.has-unread::after {
     opacity: 1;
+}
+
+.list-item .selected {
+    @apply bg-slate-300;
 }
 </style>

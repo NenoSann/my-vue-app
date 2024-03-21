@@ -77,6 +77,11 @@ const Socket_Message = defineStore('Socket_Message', {
                     content: string,
                     date: Date
                 }[],
+                user: {
+                    avatar: string,
+                    name: string,
+                    userid: string
+                },
                 total: number
             }>()
         }
