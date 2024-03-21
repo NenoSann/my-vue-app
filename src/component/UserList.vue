@@ -2,9 +2,9 @@
     <div>
         <ul class=" daisy-menu bg-base-200 w-full">
             <li class="list-item" :class="{ 'has-unread': getUnreadMessage(user[0]) !== null }"
-                :data-unread="getUnreadMessage(user[0])" v-for="user in userlist" :key="user[0]"
+                :data-unread="getUnreadMessage(user[0])" v-for="(user, index) in userlist" :key="user[0]"
                 @click="handleLiSelect(user)" @keypress.enter="handleLiSelect(user)">
-                <a tabindex="0">
+                <a :tabindex="index">
                     <div class="daisy-avatar daisy-online w-6">
                         <img class="rounded-full"
                             :src="user[1]?.avatar === 'default' ? '../../assets/icon.png' : user[1]?.avatar"

@@ -36,10 +36,10 @@ class Socketio {
             mainWindow?.webContents.send('usermap', this.usermap);
         });
 
-        this.socket.on('user_connected', (data: SocketUserInfo) => {
+        this.socket.on('user_connected', (data: any) => {
             console.log('user connected!', data);
             this.usermap.set(data.userid, data);
-            mainWindow?.webContents.send('userConnected', data);
+            mainWindow?.webContents.send('userConnected', data.userInfo);
         });
 
         this.socket.on('user_disconnect', (userid: string) => {

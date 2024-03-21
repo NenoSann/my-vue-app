@@ -26,10 +26,12 @@ window.socket.onUserMap((map) => {
 
 window.socket.onUserConnected((newUser) => {
     // store new user into usermap
+    console.log('debug: got new user: ', newUser);
     Socket_Users().usermap.set(newUser.userid, newUser);
 })
 
 window.socket.onUserDisconnected((userid) => {
+    console.log('debug: user disconnect.', userid);
     Socket_Users().usermap.delete(userid);
 })
 
