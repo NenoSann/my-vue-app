@@ -36,6 +36,7 @@ window.socket.onUserDisconnected((userid) => {
 })
 
 window.socket.onPrivateMessage((msg) => {
+    console.log('debug: got message from node: \n', msg);
     const message = Socket_Message().messages;
     if (!message.has(msg.senderid)) {
         message.set(msg.senderid, { data: [], total: 0 });

@@ -27,21 +27,36 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, onUpdated, nextTick } from 'vue';
-import { User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
+import { User, Socket_Users, Socket_Target, Socket_Message, Socket_Info } from '../Pinia';
+import type { Window } from '../Interface/preload';
 const input = ref<string>('');
 const messageRef = ref<HTMLElement>();
-const SocketTarget = computed(() => {
-    return Socket_Target().$state;
-})
+const SocketTarget = Socket_Target();
 const SocketUsers = Socket_Users();
+const SocketInfo = Socket_Info();
 const SocketMessage = Socket_Message();
 const user = User();
 const messages = computed(() => {
-    return SocketMessage.messages.get(SocketTarget.value.userid)?.data;
+    return SocketMessage.messages.get(SocketTarget.userid)?.data;
+})
+const messageHeader = computed(() => {
+    return {
+        from: SocketInfo.Socket_ID,
+        receiverid: SocketTarget.userid,
+        senderid: user._id,
+        sendername: user.name,
+        senderavatar: user.avatar,
+        to: SocketTarget.socketid
+    }
 })
 
 const sendMessage = async function () {
-
+    window.socket.sendPrivateMessage(messageHeader.value.to, {
+        content: {
+            text: input.value
+        },
+        ...messageHeader.value
+    })
 }
 
 

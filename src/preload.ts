@@ -32,7 +32,7 @@ contextBridge.exposeInMainWorld('socket', {
     },
     getUserMap: () => ipcRenderer.invoke('socket:getUserMap'),
     close: () => ipcRenderer.send('socket:close'),
-
+    sendPrivateMessage: (...args) => ipcRenderer.invoke('socket:privateMessage', ...args),
     // received
     onConnect: (callback: Function) => ipcRenderer.on('connect', (_event, val) => callback(val)),
     onUserConnected: (callback: Function) => ipcRenderer.on('userConnected', (_event, val) => {
@@ -42,5 +42,5 @@ contextBridge.exposeInMainWorld('socket', {
     onUserDisconnected: (callback: Function) => ipcRenderer.on('userDiconnected', (_event, val) => callback(val)),
     onClose: (callback: Function) => ipcRenderer.on('close', (_event, val) => callback(val)),
     onUserMap: (callback: Function) => ipcRenderer.on('usermap', (_event, usermap) => callback(usermap)),
-    onPrivateMessage: (callback: Function) => ipcRenderer.on('privateMessage', (_event, message: PrivateMessage) => callback(message))
+    onPrivateMessage: (callback: Function) => ipcRenderer.on('privateMessage', (_event, from: string, message: PrivateMessage) => callback(from, message))
 })

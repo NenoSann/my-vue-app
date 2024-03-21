@@ -10,7 +10,7 @@
                             :src="user[1]?.avatar === 'default' ? '../../assets/icon.png' : user[1]?.avatar"
                             :alt="user[0]">
                     </div>
-                    {{ user[1].username }}
+                    {{ user[1].userid === _id ? `${user[1].username}(自己)` : `${user[1].username}` }}
                 </a>
             </li>
         </ul>
@@ -24,6 +24,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter();
 const SocketUsers = Socket_Users();
 const user = User();
+const _id = user._id;
 const SocketTarget = Socket_Target();
 const SocketMessage = Socket_Message();
 const userlist = computed(() => {
@@ -31,7 +32,7 @@ const userlist = computed(() => {
 })
 const getUnreadMessage = function (userid: string): string | null {
     // if the id is user itself
-    if (user._id === userid || !SocketMessage.messages.has(userid)) {
+    if (_id === userid || !SocketMessage.messages.has(userid)) {
         return null;
     } else if (SocketMessage.messages.get(userid)!.total >= 99) {
         return '99+';

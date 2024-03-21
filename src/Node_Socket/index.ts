@@ -1,7 +1,7 @@
 const { io, Socket } = require("socket.io-client");
 // import { io, Socket } from 'socket.io-client';
 import { mainWindow } from "../main.ts";
-import type { SocketUserInfo, PrivateMessage } from "../Interface/user";
+import type { SocketUserInfo, PrivateMessage, MessageContent } from "../Interface/user";
 import { EventEmitter } from "events";
 type EventCallback = (args: any[]) => void;
 const SocketURL = 'http://43.163.234.220:8081';
@@ -59,8 +59,8 @@ class Socketio {
     }
 
     public static getInstance(): Socketio;
-    public static getInstance(name: string, _id: string, avatar: string): Socketio;
-    public static getInstance(name?: string, _id?: string, avatar?: string): Socketio {
+    public static getInstance(name: string, _id: string, avatar: string): Socketio | undefined;
+    public static getInstance(name?: string, _id?: string, avatar?: string): Socketio | undefined {
         if (!Socketio.instance) {
             if (name && _id && avatar) {
                 Socketio.instance = new Socketio(SocketURL, name, _id, avatar);
@@ -80,7 +80,15 @@ class Socketio {
     public getUserMap() {
         return this.usermap;
     }
-
+    public sendPrivateMessage(to: string, content: PrivateMessage): Promise<Boolean> {
+        // send the content to target recerver
+        return new Promise<Boolean>((resolve, reject) => {
+            this?.socket.emit('private_message', {
+                to,
+                ...content
+            }, () => resolve(true));
+        })
+    }
     public unsubscribe(event: string, callback: EventCallback): void {
         Socketio.eventEmitter.off(event, callback);
     }

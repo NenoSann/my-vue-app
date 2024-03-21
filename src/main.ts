@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, nativeImage } from 'electron';
 import * as path from 'path';
 import { Socketio } from './Node_Socket/index.ts';
+import { PrivateMessage } from './Interface/user.ts';
 // import { channelRegister } from './IPC/socket.ts';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -73,7 +74,13 @@ app.on('ready', () => {
     ipcMain.handle('ping', () => 'pong');
     ipcMain.handle('socket:create', (event, name, _id, avatar) => { Socketio.getInstance(name, _id, avatar) });
     ipcMain.handle('socket:getUserMap', (event, name, _id, avatar) => console.log(createSocket(name, _id, avatar)));
-    ipcMain.handle('socket:privateMessage', () => { });
+    ipcMain.handle('socket:privateMessage', async (_event, to: string, content: PrivateMessage) => {
+        return new Promise<Boolean>((resolve, reject) => {
+            Socketio.getInstance().sendPrivateMessage(to, content).then(() => {
+                resolve(true);
+            });
+        })
+    });
     ipcMain.handle('socket:groupMessage', () => { });
     ipcMain.on('socket:close', () => Socketio.getInstance()?.close());
 });

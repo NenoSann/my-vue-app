@@ -48,7 +48,8 @@ const Socket_Users = defineStore('Socket_Users', {
             usermap: new Map<string, {
                 avatar: string,
                 username: string,
-                socketid: string
+                socketid: string,
+                userid: string
             }>()
         }
     }
