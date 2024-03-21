@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col w-60 h-full  px-2 select-none">
+    <div class="flex flex-col w-60 h-full border-r-[1px] border-neutral-600  select-none">
         <ul class="daisy-menu w-full bg-base-200 gap-[2px]">
             <li><a tabindex="1">
                     <svg width="32px" height="32px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"
@@ -14,7 +14,8 @@
                     </svg>
                     好友</a></li>
             <li><a tabindex="2">
-                    <svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+                        xmlns="http://www.w3.org/2000/svg">
                         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                         <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                         <g id="SVGRepo_iconCarrier">

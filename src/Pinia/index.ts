@@ -1,5 +1,6 @@
 import { createPinia, defineStore } from "pinia";
 import { login } from "../API/user";
+import type { MessageContent } from '../Interface/user';
 interface user {
     _id: string,
     name: string,
@@ -65,6 +66,11 @@ const Socket_Target = defineStore('Socket_Target', {
             name: '',
             userid: ''
         }
+    },
+    actions: {
+        updateSocketId() {
+            this.socketid = Socket_Users().usermap.get(this.userid)?.socketid;
+        }
     }
 })
 
@@ -74,7 +80,7 @@ const Socket_Message = defineStore('Socket_Message', {
             messages: new Map<string, {
                 data: {
                     type: 'from' | 'to',
-                    content: string,
+                    content: MessageContent,
                     date: Date
                 }[],
                 user: {
@@ -85,6 +91,32 @@ const Socket_Message = defineStore('Socket_Message', {
                 total: number
             }>()
         }
+    },
+    actions: {
+        storeLocally(id: string, content: MessageContent) {
+            console.log(this.$state.messages);
+            if (this.$state.messages.size === 0) {
+                this.$state.messages.set(id, {
+                    data: [{
+                        type: 'to',
+                        content,
+                        date: new Date()
+                    }],
+                    user: {
+                        avatar: Socket_Users().usermap.get(id)?.avatar,
+                        name: Socket_Users().usermap.get(id)?.username,
+                        userid: Socket_Users().usermap.get(id)?.userid
+                    },
+                    total: 1
+                })
+            }
+            this.$state.messages.get(id).data.push({
+                type: 'to',
+                content,
+                date: new Date()
+            })
+        },
+
     }
 })
 export { pinia, User, Socket_Info, Socket_Users, Socket_Target, Socket_Message }

@@ -8,10 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import SideBar from '../component/SideBar.vue';
 import UserHome from '../component/UserHome.vue';
-import { useRoute } from 'vue-router';
 </script>
 
 <style scoped>

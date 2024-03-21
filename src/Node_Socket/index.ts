@@ -25,7 +25,7 @@ class Socketio {
         this.message = new Map();
         this.friends = [];
         Socketio.eventEmitter = new EventEmitter();
-        this.socket.on('connect', () => {
+        this.socket.on('connect', (data: any) => {
             console.log('nodejs socket client connected');
             mainWindow?.webContents.send('connect', this.socket.id);
         })

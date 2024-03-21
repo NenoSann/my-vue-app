@@ -1,6 +1,10 @@
 <template>
     <div class="channel-main">
-        <div ref="messageRef" class="messages h-3/4 w-full pb-4 px-2 overflow-auto ">
+        <div class="channel-header">
+            {{ SocketTarget.name }}
+        </div>
+        <div ref="messageRef"
+            class="bg-base-200 h-3/4 w-full border-b-[1px] border-b-neutral-700 pb-4 px-2 overflow-auto ">
             <TransitionGroup name="list">
                 <ChatBubble :type="msg.type" :content="msg.content" :date="msg.date"
                     :name="msg.type === 'from' ? user.name : ''" v-for="(msg, index) in messages" :key="index">
@@ -8,7 +12,7 @@
             </TransitionGroup>
         </div>
         <textarea :disabled="!SocketTarget?.isActive"
-            class="relative daisy-textarea h-1/4 resize-none w-full rounded-none" v-model="input"
+            class="relative bg-base-200 daisy-textarea h-1/4 resize-none w-full rounded-none" v-model="input"
             @keyup.ctrl.enter="sendMessage"></textarea>
         <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4 " @click="sendMessage">SEND
         </div>
@@ -48,6 +52,9 @@ const sendMessage = async function () {
             text: input.value
         },
         ...messageHeader.value
+    });
+    SocketMessage.storeLocally(SocketTarget.userid, {
+        text: input.value
     })
 }
 
@@ -63,11 +70,18 @@ onBeforeUnmount(() => {
 <style scoped>
 .channel-main {
     /* test background */
-    @apply bg-slate-200 p-2 relative;
+    @apply bg-slate-200 relative;
     @apply grow;
     @apply overflow-hidden;
 }
 
+.channel-header {
+    @apply flex items-center;
+    @apply px-2 h-12;
+    @apply bg-base-200;
+    @apply border-b-[1px] border-neutral-700;
+    @apply text-lg;
+}
 
 ::-webkit-scrollbar {
     height: 10px !important;
@@ -89,8 +103,7 @@ onBeforeUnmount(() => {
 }
 
 .list-move,
-.list-enter-active,
-.list-leave-active {
+.list-enter-active {
     transition: all 0.5s ease;
 }
 
@@ -100,7 +113,7 @@ onBeforeUnmount(() => {
     /* transform: translateX(30px); */
 }
 
-.list-leave-active {
+/* .list-leave-active {
     position: absolute;
-}
+} */
 </style>

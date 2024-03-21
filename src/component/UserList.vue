@@ -45,7 +45,7 @@ const handleLiSelect = (user: [string, { avatar: string, socketid: string, usern
     SocketTarget.type = 'user';
     SocketTarget.avatar = user[1].avatar;
     SocketTarget.name = user[1].username;
-    SocketTarget.socketid = user[1].socketid;
+    SocketTarget.socketid = SocketUsers.usermap.get(user[0])?.socketid as string;
     SocketTarget.userid = user[0];
     const fullpath = '/channels/@me'
     router.replace(fullpath + '/' + user[0]);

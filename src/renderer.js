@@ -6,12 +6,14 @@ import devtools from '@vue/devtools';
 import { createApp, watch } from 'vue';
 import App from './App.vue';
 import { router } from './router'
-import { pinia, Socket_Info, Socket_Users, Socket_Message } from './Pinia/index'
+import { pinia, Socket_Info, Socket_Users, Socket_Message, Socket_Target } from './Pinia/index'
 const app = createApp(App);
 app.use(router);
 app.use(pinia);
 app.mount('#app');
 
+
+const socketTarget = Socket_Target();
 // electron event listening
 window.socket.onConnect((socketid) => {
     // store current socketid in node main
@@ -22,17 +24,20 @@ window.socket.onConnect((socketid) => {
 window.socket.onUserMap((map) => {
     Socket_Users().usermap = map;
     console.log('debug: got usermap: \n', map);
+    socketTarget.updateSocketId();
 })
 
 window.socket.onUserConnected((newUser) => {
     // store new user into usermap
     console.log('debug: got new user: ', newUser);
     Socket_Users().usermap.set(newUser.userid, newUser);
+    socketTarget.updateSocketId();
 })
 
 window.socket.onUserDisconnected((userid) => {
     console.log('debug: user disconnect.', userid);
     Socket_Users().usermap.delete(userid);
+    socketTarget.updateSocketId();
 })
 
 window.socket.onPrivateMessage((msg) => {
