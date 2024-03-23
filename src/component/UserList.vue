@@ -1,18 +1,9 @@
 <template>
     <div>
-        <ul class=" daisy-menu bg-base-200 w-full">
-            <li class="list-item" :class="{ 'has-unread': getUnreadMessage(user[0]) !== null }"
-                :data-unread="getUnreadMessage(user[0])" v-for="(user, index) in userlist" :key="user[0]"
-                @click="handleLiSelect(user)" @keypress.enter="handleLiSelect(user)">
-                <a :tabindex="index" :class="{ 'daisy-active': user[1].userid === SocketTarget.userid }">
-                    <div class="daisy-avatar daisy-online w-6">
-                        <img class="rounded-full"
-                            :src="user[1]?.avatar === 'default' ? '../../assets/icon.png' : user[1]?.avatar"
-                            :alt="user[0]">
-                    </div>
-                    {{ user[1].userid === _id ? `${user[1].username}(自己)` : `${user[1].username}` }}
-                </a>
-            </li>
+        <ul class="daisy-menu bg-base-200 w-full h-full p-0 [&_li>*]:rounded-none">
+            <UserItem v-for="(user, index) in userlist" :userid="user[0]" :name="user[1].username"
+                :avatar="user[1].avatar" :index="index" :callback="handleLiSelect" :unread="getUnreadMessage(user[0])">
+            </UserItem>
         </ul>
     </div>
 </template>
@@ -20,7 +11,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
+import UserItem from './UserItem.vue';
 const router = useRouter();
 const SocketUsers = Socket_Users();
 const user = User();
@@ -30,23 +22,23 @@ const SocketMessage = Socket_Message();
 const userlist = computed(() => {
     return SocketUsers.usermap;
 })
-const getUnreadMessage = function (userid: string): string | null {
+const getUnreadMessage = function (userid: string): string {
     // if the id is user itself
     if (_id === userid || !SocketMessage.messages.has(userid)) {
-        return null;
+        return '';
     } else if (SocketMessage.messages.get(userid)!.total >= 99) {
         return '99+';
     } else {
         return SocketMessage.messages.get(userid)?.total.toString() as string;
     }
 }
-const handleLiSelect = (user: [string, { avatar: string, socketid: string, username: string }]) => {
+function handleLiSelect(avatar: string, username: string, userid: string) {
     SocketTarget.isActive = true;
     SocketTarget.type = 'user';
-    SocketTarget.avatar = user[1].avatar;
-    SocketTarget.name = user[1].username;
-    SocketTarget.socketid = SocketUsers.usermap.get(user[0])?.socketid as string;
-    SocketTarget.userid = user[0];
+    SocketTarget.avatar = avatar;
+    SocketTarget.name = username
+    SocketTarget.socketid = SocketUsers.usermap.get(userid)?.socketid as string;
+    SocketTarget.userid = userid
     const fullpath = '/channels/@me'
     router.replace(fullpath + '/' + user[0]);
 }

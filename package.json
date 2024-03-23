@@ -25,6 +25,8 @@
     "@electron-forge/maker-zip": "^7.0.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.0.0",
     "@electron-forge/plugin-vite": "^7.0.0",
+    "@vicons/fa": "^0.12.0",
+    "@vicons/utils": "^0.1.4",
     "@vitejs/plugin-vue": "^4.5.0",
     "@vue/devtools": "^6.5.1",
     "autoprefixer": "^10.4.16",

@@ -3,11 +3,8 @@
         :class="{ 'daisy-chat-end': props.type === 'to', 'daisy-chat-start': props.type === 'from' }">
         <div class="daisy-chat-image daisy-avatar">
             <div class="w-10 rounded-full">
-                <img alt="You" src="../../assets/icon.png" />
+                <img alt="You" :src="props.avatar" />
             </div>
-        </div>
-        <div class="daisy-chat-header">
-            {{ name }}
         </div>
         <div class="daisy-chat-bubble">{{ content.text }}</div>
     </div>
@@ -19,6 +16,6 @@ const props = defineProps<{
     type: "to" | "from";
     content: MessageContent;
     date: Date;
-    name: string
+    avatar: string;
 }>();
 </script>

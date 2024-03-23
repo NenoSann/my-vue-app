@@ -6,15 +6,16 @@
         <div ref="messageRef"
             class="bg-base-200 h-3/4 w-full border-b-[1px] border-b-neutral-700 pb-4 px-2 overflow-auto ">
             <TransitionGroup name="list">
-                <ChatBubble :type="msg.type" :content="msg.content" :date="msg.date"
-                    :name="msg.type === 'from' ? user.name : ''" v-for="(msg, index) in messages" :key="index">
+                <ChatBubble :type="msg.type" :avatar="type === 'to' ? user.avatar : userAvatar" :content="msg.content"
+                    :date="msg.date" v-for="(msg, index) in  messages " :key="index">
                 </ChatBubble>
             </TransitionGroup>
         </div>
         <textarea :disabled="!SocketTarget?.isActive"
             class="relative bg-base-200 daisy-textarea h-1/4 resize-none w-full rounded-none" v-model="input"
             @keyup.ctrl.enter="sendMessage"></textarea>
-        <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4 " @click="sendMessage">SEND
+        <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4 " @click="sendMessage">
+            SEND
         </div>
     </div>
 </template>
@@ -27,13 +28,13 @@ import type { Window } from '../Interface/preload';
 const input = ref<string>('');
 const messageRef = ref<HTMLElement>();
 const SocketTarget = Socket_Target();
-const SocketUsers = Socket_Users();
 const SocketInfo = Socket_Info();
 const SocketMessage = Socket_Message();
 const user = User();
 const messages = computed(() => {
     return SocketMessage.messages.get(SocketTarget.userid)?.data;
 })
+const userAvatar = computed(() => SocketMessage.messages.get(SocketTarget.userid)?.user.avatar);
 const messageHeader = computed(() => {
     return {
         from: SocketInfo.Socket_ID,

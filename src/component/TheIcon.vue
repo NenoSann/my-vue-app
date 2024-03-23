@@ -1,6 +1,7 @@
 <template>
     <div class="icon-main daisy-avatar w-full transition-all hover:transition-[border-radius] overflow-hidden">
-        <img src="../../assets/default_avatar.webp" alt="">
+        <img v-if="props.img_url" :src="props.img_url" alt="">
+        <slot></slot>
     </div>
 </template>
 

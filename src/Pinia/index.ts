@@ -97,11 +97,7 @@ const Socket_Message = defineStore('Socket_Message', {
             console.log(this.$state.messages);
             if (this.$state.messages.size === 0) {
                 this.$state.messages.set(id, {
-                    data: [{
-                        type: 'to',
-                        content,
-                        date: new Date()
-                    }],
+                    data: [],
                     user: {
                         avatar: Socket_Users().usermap.get(id)?.avatar,
                         name: Socket_Users().usermap.get(id)?.username,

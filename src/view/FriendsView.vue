@@ -39,15 +39,18 @@
             </ul>
         </div>
         <div class="flex h-full w-full justify-center items-center no-online-bg">
-            <div class=" select-none">
-                <!-- <img src="../../assets/No_online.svg"> -->
-            </div>
+
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { Ref, ref, onMounted } from 'vue';
+import { IFriend } from '../Interface/Response';
+import { User } from '../Pinia';
+import { queryFriends } from '../API/user/index'
+const user = User();
+const friendsList: Ref<Array<IFriend>> = ref([]);
 const userlist = ref<{
     id: string,
     type: number,
@@ -65,6 +68,14 @@ const componentState = ref<'online' | 'all' | 'pending' | 'blocked'>('online')
 const handleComponentChange = function (state: 'online' | 'all' | 'pending' | 'blocked') {
     componentState.value = state;
 }
+
+onMounted(async () => {
+    try {
+        friendsList.value = (await queryFriends(user._id, 20, 0)).items;
+    } catch {
+
+    }
+})
 </script>
 
 <style scoped>
