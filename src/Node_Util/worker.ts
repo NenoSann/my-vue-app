@@ -15,31 +15,35 @@
 // const stream = require('node:stream/promises');
 // const readline = require('readline');
 // const path = require('node:path');
-import { parentPort } from 'node:worker_threads';
+import { parentPort, isMainThread } from 'node:worker_threads';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as stream from 'node:stream/promises';
 import * as readline from 'readline';
-import type { PrivateMessage, MessageContent } from './src/Interface/user';
+import type { PrivateMessage, MessageContent } from '../Interface/user';
 const cwd = process.cwd();
 const NEW_LINE_CHARACTERS = ["\n"];
 const _path = path.join(cwd, 'message');
-
-
+console.log('worker thread active!!!');
+console.log('Is main thread? ', isMainThread);
 const map = new Map<string, {
     rStream: fs.ReadStream,
     wStream: fs.WriteStream,
+    // rStream: any,
+    // wStream: any,
 }>();
 
 
-parentPort?.once('message', (data) => {
+parentPort?.on('message', (data) => {
+    console.log('got message from main thread: ', data);
     const operateType = data.type;
-    const content = data.data;
+    const content = data.content;
     switch (operateType) {
         case 'read':
             readMessage(content.userId, data.limit);
             break;
         case 'write':
+            console.log('worker.ts got message: \n', data);
             writeMessage(content.userId, content.content);
             break;
         case 'init':
@@ -55,15 +59,17 @@ parentPort?.once('message', (data) => {
  * @param userID id use to open target chat file 
  */
 async function createStream(userID: string) {
+    console.log('debug: createStream')
     if (!map.has(userID)) {
         const userPath = path.join(_path, userID);
         if (!fs.existsSync(userPath)) {
-            createUserFile(userPath);
+            await createUserFile(userPath);
         }
         try {
             const rStream = fs.createReadStream(userPath);
             const wStream = fs.createWriteStream(userPath);
             map.set(userID, { rStream, wStream });
+            console.log('debug: create stream');
         } catch (error) {
             handleFsError(error);
         }
@@ -76,10 +82,14 @@ async function writeMessage(userID: string, content: any) {
             createStream(userID);
         }
         const { wStream } = map.get(userID) as {
+            // rStream: fs.ReadStream,
+            // wStream: fs.WriteStream,
             rStream: fs.ReadStream,
             wStream: fs.WriteStream,
         };
+        console.log('write content: ', content);
         wStream.write(JSON.stringify(content));
+        wStream.write('\n');
     } catch (error) {
         handleFsError(error);
     }
@@ -96,17 +106,27 @@ async function readMessage(userID: string, limit: number = 1) {
 }
 
 /**
- * @description use to create user's caht history
+ * @description use to create user's chat history
  * @param name  --the file name
  */
 async function createUserFile(name: string) {
     return new Promise<boolean>((resolve, reject) => {
-        fs.open(name, 'w', (err, _file) => {
+        const directoryPath = path.dirname(name);
+
+        fs.mkdir(directoryPath, { recursive: true }, (err) => {
             if (err) {
                 reject(err);
-            } else { resolve(true) }
-        })
-    })
+            } else {
+                fs.open(name, 'w', (err, _file) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(true);
+                    }
+                });
+            }
+        });
+    });
 }
 
 /**
@@ -204,3 +224,5 @@ async function readPreviousChar(
         );
     });
 }
+
+module.exports

@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, nativeImage } from 'electron';
-import { Worker } from 'node:worker_threads'
 import * as path from 'path';
 import { Socketio } from './Node_Util/index.ts';
+import { WorkerController } from './Node_Util/WorkerController.ts';
 import { PrivateMessage } from './Interface/user.ts';
 // import { channelRegister } from './IPC/socket.ts';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.

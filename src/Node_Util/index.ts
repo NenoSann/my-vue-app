@@ -2,8 +2,7 @@ const { io, Socket } = require("socket.io-client");
 // import { io, Socket } from 'socket.io-client';
 import { mainWindow } from "../main.ts";
 import type { SocketUserInfo, PrivateMessage, MessageContent } from "../Interface/user.ts";
-import { EventEmitter } from "events";
-type EventCallback = (args: any[]) => void;
+import { WorkerController } from './WorkerController';
 const SocketURL = 'http://43.163.234.220:8081';
 class Socketio {
     private static instance: Socketio | undefined;
@@ -11,8 +10,7 @@ class Socketio {
     private usermap: Map<string, SocketUserInfo>;
     private message: Map<string, Array<PrivateMessage>>;
     private friends: Array<SocketUserInfo>;
-    private static eventEmitter: EventEmitter;
-
+    private workerController: WorkerController;
     private constructor(url: string, name: string, _id: string, avatar: string) {
         this.socket = io(url, {
             auth: {
@@ -21,10 +19,11 @@ class Socketio {
                 avatar
             },
         });
+
         this.usermap = new Map();
         this.message = new Map();
         this.friends = [];
-        Socketio.eventEmitter = new EventEmitter();
+        this.workerController = new WorkerController();
         this.socket.on('connect', (data: any) => {
             console.log('nodejs socket client connected');
             mainWindow?.webContents.send('connect', this.socket.id);
@@ -54,6 +53,7 @@ class Socketio {
             }
             this.message.get(data.senderid)?.push(data);
             mainWindow?.webContents.send('privateMessage', data);
+            this.workerController.saveMessage(data.senderid, { content: data.content, date: new Date() });
             console.log('got private message from server');
         });
     }
@@ -73,9 +73,6 @@ class Socketio {
         return this.socket;
     }
 
-    public subscribe(event: string, callback: EventCallback): void {
-        Socketio.eventEmitter.on(event, callback);
-    }
 
     public getUserMap() {
         return this.usermap;
@@ -86,11 +83,14 @@ class Socketio {
             this?.socket.emit('private_message', {
                 to,
                 ...content
-            }, () => resolve(true));
+            }, () => {
+                this.workerController.saveMessage(content.receiverid, {
+                    content: content.content,
+                    date: new Date()
+                });
+                resolve(true);
+            });
         })
-    }
-    public unsubscribe(event: string, callback: EventCallback): void {
-        Socketio.eventEmitter.off(event, callback);
     }
 
     public close() {
