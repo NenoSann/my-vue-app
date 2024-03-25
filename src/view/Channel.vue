@@ -6,7 +6,8 @@
         <div ref="messageRef"
             class="bg-base-200 h-3/4 w-full border-b-[1px] border-b-neutral-700 pb-4 px-2 overflow-auto ">
             <TransitionGroup name="list">
-                <ChatBubble :type="msg.type" :avatar="type === 'to' ? user.avatar : userAvatar" :content="msg.content"
+                <ChatBubble :type="msg.type" :time="formateDate(msg.date)"
+                    :avatar="msg.type === 'to' ? user.avatar : userAvatar as string" :content="msg.content"
                     :date="msg.date" v-for="(msg, index) in  messages " :key="index">
                 </ChatBubble>
             </TransitionGroup>
@@ -23,7 +24,7 @@
 <script setup lang="ts">
 import ChatBubble from '../component/ChatBubble.vue';
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
-import { User, Socket_Users, Socket_Target, Socket_Message, Socket_Info } from '../Pinia';
+import { User, Socket_Target, Socket_Message, Socket_Info } from '../Pinia';
 import type { Window } from '../Interface/preload';
 const input = ref<string>('');
 const messageRef = ref<HTMLElement>();
@@ -47,18 +48,27 @@ const messageHeader = computed(() => {
 })
 
 const sendMessage = async function () {
-    console.log('send message to: ', messageHeader.value.to);
     window.socket.sendPrivateMessage(messageHeader.value.to, {
         content: {
             text: input.value
         },
         ...messageHeader.value
-    });
+    })
     SocketMessage.storeLocally(SocketTarget.userid, {
         text: input.value
-    })
+    });
+    input.value = '';
+
 }
 
+function formateDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
 
 onMounted(() => {
 })
@@ -113,8 +123,4 @@ onBeforeUnmount(() => {
     opacity: 0;
     /* transform: translateX(30px); */
 }
-
-/* .list-leave-active {
-    position: absolute;
-} */
 </style>

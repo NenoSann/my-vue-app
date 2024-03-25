@@ -17,4 +17,3 @@ export type MessageContent = {
     text: string,
     image?: Array<string>
 }
-

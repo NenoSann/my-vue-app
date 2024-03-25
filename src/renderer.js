@@ -44,7 +44,13 @@ window.socket.onPrivateMessage((msg) => {
     console.log('debug: got message from node: \n', msg);
     const message = Socket_Message().messages;
     if (!message.has(msg.senderid)) {
-        message.set(msg.senderid, { data: [], total: 0 });
+        message.set(msg.senderid, {
+            data: [], user: {
+                avatar: msg.senderavatar,
+                name: msg.sendername,
+                userid: msg.senderid
+            }, total: 0
+        });
     }
     const target = message.get(msg.senderid);
     target.data.push({

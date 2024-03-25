@@ -1,7 +1,7 @@
 const { io, Socket } = require("socket.io-client");
 // import { io, Socket } from 'socket.io-client';
 import { mainWindow } from "../main.ts";
-import type { SocketUserInfo, PrivateMessage, MessageContent } from "../Interface/user";
+import type { SocketUserInfo, PrivateMessage, MessageContent } from "../Interface/user.ts";
 import { EventEmitter } from "events";
 type EventCallback = (args: any[]) => void;
 const SocketURL = 'http://43.163.234.220:8081';

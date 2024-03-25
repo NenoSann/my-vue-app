@@ -6,6 +6,9 @@
                 <img alt="You" :src="props.avatar" />
             </div>
         </div>
+        <div class="daisy-chat-header">
+            <time class=" text-xs opacity-50">{{ time }}</time>
+        </div>
         <div class="daisy-chat-bubble">{{ content.text }}</div>
     </div>
 </template>
@@ -17,5 +20,6 @@ const props = defineProps<{
     content: MessageContent;
     date: Date;
     avatar: string;
+    time: string
 }>();
 </script>
