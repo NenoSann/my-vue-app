@@ -1,6 +1,6 @@
 <template>
-    <li class="list-item" :data-unread="props.unread"
-        @click="() => { if (props.callback) { props.callback(avatar, name, userid) } }" @keypress.enter="">
+    <li class="list-item" @click="() => { if (props.callback) { props.callback(avatar, name, userid) } }"
+        @keypress.enter="">
         <a :tabindex="props.index">
             <div class="daisy-avatar daisy-online w-12">
                 <img class="rounded-full" :src="props.avatar">
@@ -9,11 +9,14 @@
                 <p id="username">{{ name }}</p>
                 <p id="lastest-message">{{ "Test message 🐱🐱🐱" }}</p>
             </div>
+            <span v-if="props.unread !== ''" class="daisy-badge daisy-badge-primary">{{ props.unread }}</span>
         </a>
     </li>
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
+import { Socket_Message } from '../Pinia';
 const props = defineProps<{
     userid: string,
     avatar: string,
@@ -21,8 +24,11 @@ const props = defineProps<{
     index: number,
     callback: (avatar: string, username: string, userid: string) => void,
     unread: string,
-
 }>();
+
+onMounted(() => {
+    Socket_Message().clearUnread(props.userid);
+})
 </script>
 
 <style scoped>

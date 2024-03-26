@@ -49,7 +49,7 @@ window.socket.onPrivateMessage((msg) => {
                 avatar: msg.senderavatar,
                 name: msg.sendername,
                 userid: msg.senderid
-            }, total: 0
+            }, total: 0, unread: 0
         });
     }
     const target = message.get(msg.senderid);
@@ -59,4 +59,9 @@ window.socket.onPrivateMessage((msg) => {
         date: new Date()
     })
     target.total = target.data.length;
+    console.log('socketTargetid: ', socketTarget.userid);
+    console.log('msg sender id: ', msg.senderid);
+    if (socketTarget.userid !== msg.senderid) {
+        target.unread += 1;
+    }
 })

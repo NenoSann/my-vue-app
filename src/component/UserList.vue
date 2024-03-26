@@ -2,7 +2,7 @@
     <div>
         <ul class="daisy-menu bg-base-200 w-full h-full p-0 [&_li>*]:rounded-none">
             <UserItem v-for="(user, index) in userlist" :userid="user[0]" :name="user[1].username"
-                :avatar="user[1].avatar" :index="index" :callback="handleLiSelect" :unread="getUnreadMessage(user[0])">
+                :avatar="user[1].avatar" :index="index" :callback="handleLiSelect" :unread="getUnread(user[0])">
             </UserItem>
         </ul>
     </div>
@@ -22,16 +22,15 @@ const SocketMessage = Socket_Message();
 const userlist = computed(() => {
     return SocketUsers.usermap;
 })
-const getUnreadMessage = function (userid: string): string {
-    // if the id is user itself
-    if (_id === userid || !SocketMessage.messages.has(userid)) {
+
+function getUnread(targetUserId: string) {
+    const unread = SocketMessage.messages.get(targetUserId)?.unread;
+    if (!unread) {
         return '';
-    } else if (SocketMessage.messages.get(userid)!.total >= 99) {
-        return '99+';
-    } else {
-        return SocketMessage.messages.get(userid)?.total.toString() as string;
     }
+    return unread.toString();
 }
+
 function handleLiSelect(avatar: string, username: string, userid: string) {
     SocketTarget.isActive = true;
     SocketTarget.type = 'user';

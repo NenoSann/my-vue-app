@@ -88,7 +88,8 @@ const Socket_Message = defineStore('Socket_Message', {
                     name: string,
                     userid: string
                 },
-                total: number
+                total: number,
+                unread: number
             }>()
         }
     },
@@ -103,7 +104,8 @@ const Socket_Message = defineStore('Socket_Message', {
                         name: Socket_Users().usermap.get(id)?.username,
                         userid: Socket_Users().usermap.get(id)?.userid
                     },
-                    total: 1
+                    total: 1,
+                    unread: 0
                 })
             }
             this.$state.messages.get(id).data.push({
@@ -112,7 +114,11 @@ const Socket_Message = defineStore('Socket_Message', {
                 date: new Date()
             })
         },
-
+        clearUnread(id: string) {
+            if (this.$state.message?.has(id)) {
+                this.$state.messages.get(id).unread = 0;
+            }
+        }
     }
 })
 export { pinia, User, Socket_Info, Socket_Users, Socket_Target, Socket_Message }
