@@ -3,6 +3,8 @@ const { io, Socket } = require("socket.io-client");
 import { mainWindow } from "../main.ts";
 import type { SocketUserInfo, PrivateMessage, MessageContent } from "../Interface/user.ts";
 import { WorkerController } from './WorkerController';
+import { NotificationController } from "../Electron/index.ts";
+import { nativeImage } from "electron";
 const SocketURL = 'http://43.163.234.220:8081';
 class Socketio {
     private static instance: Socketio | undefined;
@@ -52,6 +54,7 @@ class Socketio {
                 this.message.set(data.senderid, []);
             }
             this.message.get(data.senderid)?.push(data);
+            NotificationController.sendNotification(data.content.text, data.sendername, data.senderavatar);
             mainWindow?.webContents.send('privateMessage', data);
             this.workerController.saveMessage(data.senderid, { content: data.content, date: new Date() });
             console.log('got private message from server');

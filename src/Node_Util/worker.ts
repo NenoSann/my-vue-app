@@ -59,7 +59,6 @@ parentPort?.on('message', (data) => {
  * @param userID id use to open target chat file 
  */
 async function createStream(userID: string) {
-    console.log('debug: createStream')
     if (!map.has(userID)) {
         const userPath = path.join(_path, userID);
         if (!fs.existsSync(userPath)) {
@@ -69,7 +68,6 @@ async function createStream(userID: string) {
             const rStream = fs.createReadStream(userPath);
             const wStream = fs.createWriteStream(userPath);
             map.set(userID, { rStream, wStream });
-            console.log('debug: create stream');
         } catch (error) {
             handleFsError(error);
         }

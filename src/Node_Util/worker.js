@@ -90,7 +90,6 @@ function createStream(userID) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    console.log('debug: createStream');
                     if (!!map.has(userID)) return [3 /*break*/, 3];
                     userPath = path.join(_path, userID);
                     if (!!fs.existsSync(userPath)) return [3 /*break*/, 2];
@@ -103,7 +102,6 @@ function createStream(userID) {
                         rStream = fs.createReadStream(userPath);
                         wStream = fs.createWriteStream(userPath);
                         map.set(userID, { rStream: rStream, wStream: wStream });
-                        console.log('debug: create stream');
                     }
                     catch (error) {
                         handleFsError(error);

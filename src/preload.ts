@@ -36,7 +36,6 @@ contextBridge.exposeInMainWorld('socket', {
     // received
     onConnect: (callback: Function) => ipcRenderer.on('connect', (_event, val) => callback(val)),
     onUserConnected: (callback: Function) => ipcRenderer.on('userConnected', (_event, val) => {
-        console.log('debug: send data to ipcRenderer, \n',);
         callback(val);
     }),
     onUserDisconnected: (callback: Function) => ipcRenderer.on('userDiconnected', (_event, val) => callback(val)),
