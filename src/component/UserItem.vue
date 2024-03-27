@@ -2,7 +2,7 @@
     <li class="list-item" @click="() => { if (props.callback) { props.callback(avatar, name, userid) } }"
         @keypress.enter="">
         <a :tabindex="props.index">
-            <div class="daisy-avatar daisy-online w-12">
+            <div class="daisy-avatar w-12" :class="{ 'daisy-online': props.online, 'daisy-offline': !props.online }">
                 <img class="rounded-full" :src="props.avatar">
             </div>
             <div class="flex flex-col">
@@ -24,6 +24,7 @@ const props = defineProps<{
     index: number,
     callback: (avatar: string, username: string, userid: string) => void,
     unread: string,
+    online: boolean
 }>();
 
 onMounted(() => {
@@ -42,6 +43,10 @@ onMounted(() => {
 
 .list-item>a {
     @apply h-full;
+}
+
+.daisy-offline {
+    @apply opacity-50;
 }
 
 .list-item::after {

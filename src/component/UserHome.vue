@@ -3,7 +3,9 @@
         <UserMenu></UserMenu>
         <!-- <Channel></Channel> -->
         <!-- <FriendsView></FriendsView> -->
-        <component :is="component_name"></component>
+        <div class="grow h-full">
+            <component :is="component_name"></component>
+        </div>
     </div>
 </template>
 

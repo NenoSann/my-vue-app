@@ -1,8 +1,8 @@
 <template>
     <div>
         <ul class="daisy-menu bg-base-200 w-full h-full p-0 [&_li>*]:rounded-none">
-            <UserItem v-for="(user, index) in userlist" :userid="user[0]" :name="user[1].username"
-                :avatar="user[1].avatar" :index="index" :callback="handleLiSelect" :unread="getUnread(user[0])">
+            <UserItem v-for="(user, index) in userlist" :userid="user.userid" :name="user.name" :avatar="user.avatar"
+                :index="index" :callback="handleLiSelect" :online="user.online" :unread="getUnread(user.userid)">
             </UserItem>
         </ul>
     </div>
@@ -20,7 +20,8 @@ const _id = user._id;
 const SocketTarget = Socket_Target();
 const SocketMessage = Socket_Message();
 const userlist = computed(() => {
-    return SocketUsers.usermap;
+    // return SocketUsers.usermap;
+    return user.friends;
 })
 
 function getUnread(targetUserId: string) {

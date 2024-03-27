@@ -4,7 +4,7 @@
             <TheIcon @click="router.push('/login')" :img_url="User().avatar"></TheIcon>
         </div>
         <div class="sidebar-icon friends">
-            <Icon size="36" color="#66ccff">
+            <Icon size="36" class=" fill-primary">
                 <Comments />
             </Icon>
         </div>
@@ -33,10 +33,17 @@ const router = useRouter();
     @apply bg-neutral;
 }
 
+
+
 .sidebar-icon {
     @apply flex justify-center items-center;
     @apply w-full h-[48px] rounded-xl p-1;
     @apply hover:bg-neutral-300 hover:bg-opacity-10 transition-all hover:isolate;
+}
+
+/* change the xicon fill */
+:deep(.sidebar-icon > span > svg > path) {
+    @apply fill-primary;
 }
 
 .sidebar-icon>svg {

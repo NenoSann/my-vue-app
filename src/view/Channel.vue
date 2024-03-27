@@ -13,10 +13,10 @@
             </TransitionGroup>
         </div>
         <textarea :disabled="!SocketTarget?.isActive"
-            class="relative bg-base-200 daisy-textarea h-1/4 resize-none w-full rounded-none" v-model="input"
-            @keyup.ctrl.enter="sendMessage"></textarea>
-        <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4 " @click="sendMessage">
-            SEND
+            class="relative bg-base-200 daisy-textarea focus:outline-none h-1/4 resize-none w-full rounded-none"
+            v-model="input" @keyup.ctrl.enter="sendMessage"></textarea>
+        <div class="daisy-btn  daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4 " @click="sendMessage">
+            发送
         </div>
     </div>
 </template>
@@ -82,7 +82,7 @@ onBeforeUnmount(() => {
 .channel-main {
     /* test background */
     @apply bg-slate-200 relative;
-    @apply grow;
+    @apply grow h-full;
     @apply overflow-hidden;
 }
 

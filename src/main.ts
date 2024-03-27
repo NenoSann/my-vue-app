@@ -2,7 +2,6 @@ import { app, BrowserWindow, ipcMain, nativeImage, Menu, Tray, Screen, screen } 
 import * as path from 'path';
 import { Socketio } from './Node_Util/index.ts';
 import { PrivateMessage } from './Interface/user.ts';
-// import { channelRegister } from './IPC/socket.ts';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -54,13 +53,12 @@ const createTray = () => {
     const contextMenu = Menu.buildFromTemplate([
         { label: '好友', type: 'normal' },
         { label: '打开面板', type: 'normal', click: () => mainWindow?.show() },
+        { type: 'separator' },
         {
             label: '退出', type: 'normal', click: () => app.quit()
         }
     ]);
-    tray.on('right-click', () => {
-        tray.popUpContextMenu(contextMenu);
-    });
+    tray.setContextMenu(contextMenu);
 }
 
 // This method will be called when Electron has finished

@@ -1,12 +1,19 @@
 import { createPinia, defineStore } from "pinia";
 import { login } from "../API/user";
 import type { MessageContent } from '../Interface/user';
+
+interface IFriend {
+    name: string,
+    userid: string,
+    avatar: string,
+    online: boolean
+}
 interface user {
     _id: string,
     name: string,
     email: string,
     avatar: string,
-    friends: string[],
+    friends: Array<IFriend>,
     groups: string[],
     __v: number
 }
@@ -24,8 +31,8 @@ const User = defineStore('User', {
             try {
                 const user = await login(email, password);
                 console.log('user: ', user);
-                this.data = user.user;
-                localStorage.setItem('user', JSON.stringify(user.user));
+                this.data = user.user.data;
+                localStorage.setItem('user', JSON.stringify(user.user.data));
                 return user.user;
             } catch (error) {
                 console.log('login fail');
