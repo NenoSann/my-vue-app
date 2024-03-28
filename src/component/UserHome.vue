@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import UserMenu from '../component/HomeMenu.vue'
+import UserMenu from './SideBar2.vue'
 import Channel from '../view/Channel.vue'
 import FriendsView from '../view/FriendsView.vue';
 

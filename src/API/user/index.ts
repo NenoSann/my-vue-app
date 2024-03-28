@@ -33,4 +33,6 @@ async function queryFriends(urlOrUserId: string, limit?: number, offset?: number
         }
     })
 }
+
+
 export { login, queryFriends }

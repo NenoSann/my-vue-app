@@ -7,7 +7,7 @@ if (require('electron-squirrel-startup')) {
     app.quit();
 }
 let mainWindow: BrowserWindow | undefined;
-const icon = nativeImage.createFromPath('D:\\Web\\ElectronVueApp\\assets\\icon.png');
+const icon = nativeImage.createFromPath('D:\\Web\\ElectronVueApp\\assets\\oie_icon.png');
 let tray: Tray;
 const createWindow = () => {
     // Create the browser window.

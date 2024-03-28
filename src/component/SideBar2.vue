@@ -1,12 +1,14 @@
 <template>
     <div class="flex flex-col w-80 h-full border-r-[1px] border-neutral-600  select-none">
         <UserList></UserList>
+        <FriendsAndGroup></FriendsAndGroup>
     </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import UserList from './UserList.vue';
+import FriendsAndGroup from './FriendsAndGroup.vue';
 const router = useRouter();
 </script>
 
