@@ -3,13 +3,13 @@
         <div class="me border-b-[1px]">
             <TheIcon @click="router.push('/login')" :img_url="User().avatar"></TheIcon>
         </div>
-        <div class="sidebar-icon friends">
+        <div class="sidebar-icon friends" @click="() => { sidebar.sidebar = eSideBar.Friends }">
             <Icon size="36" class=" fill-primary">
                 <Comments />
             </Icon>
         </div>
-        <div class="sidebar-icon">
-            <Icon size="32" color="#66ccff">
+        <div class="sidebar-icon groups" @click="() => { sidebar.sidebar = eSideBar.Groups }">
+            <Icon size="32">
                 <AddressBook />
             </Icon>
         </div>
@@ -17,11 +17,13 @@
 </template>
 
 <script setup lang="ts">
-import TheIcon from './TheIcon.vue';
+import { SideBar, TheIcon } from './index';
 import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 import { Comments, AddressBook } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
-import { User } from '../Pinia';
+import { User, ComponentState, eSideBar } from '../Pinia';
+const sidebar = ComponentState();
 const router = useRouter();
 </script>
 

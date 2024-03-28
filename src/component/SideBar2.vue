@@ -1,15 +1,27 @@
 <template>
     <div class="flex flex-col w-80 h-full border-r-[1px] border-neutral-600  select-none">
-        <UserList></UserList>
-        <FriendsAndGroup></FriendsAndGroup>
+        <!-- <UserList></UserList>
+        <FriendsAndGroup></FriendsAndGroup> -->
+        <component :is="component"></component>
     </div>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import UserList from './UserList.vue';
-import FriendsAndGroup from './FriendsAndGroup.vue';
-const router = useRouter();
+import { onMounted, computed } from 'vue';
+import { ComponentState, eContent, eSideBar } from '../Pinia';
+import { UserList, FriendsAndGroup } from '.';
+const state = ComponentState();
+const component = computed(() => {
+    switch (state.sidebar) {
+        case eSideBar.Friends:
+            return UserList;
+        case eSideBar.Groups:
+            return FriendsAndGroup;
+        default:
+            break;
+    }
+})
+
 </script>
 
 <style scoped>

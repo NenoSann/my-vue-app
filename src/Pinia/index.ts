@@ -1,5 +1,6 @@
 import { createPinia, defineStore } from "pinia";
 import { login } from "../API/user";
+import { Component } from 'vue';
 import type { MessageContent } from '../Interface/user';
 
 interface IFriend {
@@ -17,6 +18,16 @@ interface user {
     groups: string[],
     __v: number
 }
+
+enum eSideBar {
+    Friends = 'Friend',
+    Groups = 'Group'
+}
+
+enum eContent {
+    Channel = 'Channel'
+}
+
 const pinia = createPinia();
 const User = defineStore('User', {
     state: () => {
@@ -128,4 +139,13 @@ const Socket_Message = defineStore('Socket_Message', {
         }
     }
 })
-export { pinia, User, Socket_Info, Socket_Users, Socket_Target, Socket_Message }
+
+const ComponentState = defineStore('ComponentState', {
+    state: () => {
+        return {
+            sidebar: eSideBar.Friends as eSideBar | null,
+            content: eContent.Channel as eContent | null
+        }
+    }
+})
+export { pinia, User, Socket_Info, Socket_Users, Socket_Target, Socket_Message, ComponentState, eSideBar, eContent }
