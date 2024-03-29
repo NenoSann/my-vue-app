@@ -50,6 +50,9 @@ const createWindow = () => {
 
 const createTray = () => {
     tray = new Tray(icon);
+    tray.on('click', () => {
+        mainWindow?.show();
+    })
     const contextMenu = Menu.buildFromTemplate([
         { label: '好友', type: 'normal' },
         { label: '打开面板', type: 'normal', click: () => mainWindow?.show() },

@@ -6,7 +6,7 @@ import devtools from '@vue/devtools';
 import { createApp, watch } from 'vue';
 import App from './App.vue';
 import { router } from './router'
-import { pinia, Socket_Info, Socket_Users, Socket_Message, Socket_Target } from './Pinia/index'
+import { pinia, Socket_Info, Socket_Users, Socket_Message, Socket_Target, User } from './Pinia/index'
 const app = createApp(App);
 app.use(router);
 app.use(pinia);
@@ -27,7 +27,14 @@ window.socket.onUserMap((map) => {
 
 window.socket.onUserConnected((newUser) => {
     // store new user into usermap
+    const user = User();
     Socket_Users().usermap.set(newUser.userid, newUser);
+    const connectedUser = user.friends.get(newUser.userid);
+    // if user's friend connected, then make it online
+    if (connectedUser) {
+        connectedUser.online = true;
+        user.friends.set(newUser.userid, connectedUser);
+    }
     socketTarget.updateSocketId();
 })
 

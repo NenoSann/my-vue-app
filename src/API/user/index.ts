@@ -1,7 +1,13 @@
 import { ItemsResponse, IFriend } from '../../Interface/Response';
 import axios from "axios";
+import { IUser } from '../../Interface/user'
 const login = async function (email: string, password: string) {
-    return new Promise<any | Error>((resolve, reject) => {
+    return new Promise<{
+        status: string,
+        user: {
+            data: IUser
+        }
+    }>((resolve, reject) => {
         axios.post('/api/login', {
             email,
             password

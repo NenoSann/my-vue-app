@@ -1,6 +1,5 @@
 import { createPinia, defineStore } from "pinia";
 import { login } from "../API/user";
-import { Component } from 'vue';
 import type { MessageContent } from '../Interface/user';
 
 interface IFriend {
@@ -9,12 +8,12 @@ interface IFriend {
     avatar: string,
     online: boolean
 }
-interface user {
+interface IUser {
     _id: string,
     name: string,
     email: string,
     avatar: string,
-    friends: Array<IFriend>,
+    friends: Map<string, IFriend> | Array<IFriend>,
     groups: string[],
     __v: number
 }
@@ -32,19 +31,32 @@ const pinia = createPinia();
 const User = defineStore('User', {
     state: () => {
         if (localStorage.getItem('user')) {
-            return JSON.parse(localStorage.getItem('user') as string) as user;
+            const user = JSON.parse(localStorage.getItem('user') as string) as IUser;
+            const friends = new Map<string, IFriend>;
+            (user.friends as Array<IFriend>).forEach((friend) => {
+                friends.set(friend.userid, friend);
+            })
+            user.friends = friends;
+            return user;
         } else {
-            return {} as unknown as user;
+            return {} as unknown as IUser;
         }
     },
     actions: {
         async login(email: string, password: string) {
             try {
-                const user = await login(email, password);
+                const user = (await login(email, password)).user.data;
+                const friends = new Map<string, IFriend>();
+                user.friends.forEach((friend) => {
+                    friends.set(friend.userid, friend);
+                })
                 console.log('user: ', user);
-                this.data = user.user.data;
-                localStorage.setItem('user', JSON.stringify(user.user.data));
-                return user.user;
+                this.data = {
+                    ...user,
+                    friends
+                };
+                localStorage.setItem('user', JSON.stringify(user));
+                return user;
             } catch (error) {
                 console.log('login fail');
                 console.error(error);

@@ -1,8 +1,9 @@
 <template>
     <div>
         <ul class="daisy-menu bg-base-200 w-full h-full p-0 [&_li>*]:rounded-none">
-            <UserItem v-for="(user, index) in userlist" :userid="user.userid" :name="user.name" :avatar="user.avatar"
-                :index="index" :callback="handleLiSelect" :online="user.online" :unread="getUnread(user.userid)">
+            <UserItem v-for="(user, index) in userlist" :userid="user[1].userid" :name="user[1].name"
+                :avatar="user[1].avatar" :index="index" :callback="handleLiSelect" :online="user[1].online"
+                :unread="getUnread(user[1].userid)">
             </UserItem>
         </ul>
     </div>
@@ -13,6 +14,7 @@ import { computed } from 'vue';
 import { User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
 import { useRouter } from 'vue-router';
 import UserItem from './UserItem.vue';
+import { IFriend } from '../Interface/Response';
 const router = useRouter();
 const SocketUsers = Socket_Users();
 const user = User();
