@@ -9,6 +9,7 @@ export class NotificationController {
         // if the mainWindow is showing, then now show the notification
         console.log('debug: notification: ', notificationBody, notificationTitle, iconUrl);
         if (!mainWindow?.isVisible()) {
+            console.log('sending notification...');
             let userAvatar: NativeImage | null | undefined = null;
             if (this.avatarMap.has(iconUrl)) {
                 userAvatar = this.avatarMap.get(iconUrl);

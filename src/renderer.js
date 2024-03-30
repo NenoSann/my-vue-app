@@ -21,7 +21,16 @@ window.socket.onConnect((socketid) => {
 })
 
 window.socket.onUserMap((map) => {
+    const user = User();
     Socket_Users().usermap = map;
+    map.forEach((socketUser) => {
+        // user is a map item, user[0] is userid and user[1] is socket user info
+        if (user.friends.has(socketUser)) {
+            const targetUser = user.friends.get(socketUser);
+            targetUser.online = true;
+            user.friends.set(targetUser);
+        }
+    })
     socketTarget.updateSocketId();
 })
 
@@ -40,6 +49,13 @@ window.socket.onUserConnected((newUser) => {
 
 window.socket.onUserDisconnected((userid) => {
     Socket_Users().usermap.delete(userid);
+    const user = User();
+    const connectedUser = user.friends.get(userid);
+    // if user's friend connected, then make it online
+    if (connectedUser) {
+        connectedUser.online = false;
+        user.friends.set(userid, connectedUser);
+    }
     socketTarget.updateSocketId();
 })
 

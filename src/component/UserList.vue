@@ -14,7 +14,6 @@ import { computed } from 'vue';
 import { User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
 import { useRouter } from 'vue-router';
 import UserItem from './UserItem.vue';
-import { IFriend } from '../Interface/Response';
 const router = useRouter();
 const SocketUsers = Socket_Users();
 const user = User();

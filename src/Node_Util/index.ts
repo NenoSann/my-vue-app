@@ -1,7 +1,7 @@
 const { io, Socket } = require("socket.io-client");
 // import { io, Socket } from 'socket.io-client';
 import { mainWindow } from "../main.ts";
-import type { SocketUserInfo, PrivateMessage, MessageContent } from "../Interface/user.ts";
+import type { SocketUserInfo, PrivateMessage } from "../Interface/user.ts";
 import { WorkerController } from './WorkerController';
 import { NotificationController } from "../Electron/index.ts";
 import { nativeImage } from "electron";

@@ -100,7 +100,7 @@ function createStream(userID) {
                 case 2:
                     try {
                         rStream = fs.createReadStream(userPath);
-                        wStream = fs.createWriteStream(userPath);
+                        wStream = fs.createWriteStream(userPath, { flags: 'a' });
                         map.set(userID, { rStream: rStream, wStream: wStream });
                     }
                     catch (error) {

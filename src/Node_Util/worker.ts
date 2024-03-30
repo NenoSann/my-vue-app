@@ -66,7 +66,7 @@ async function createStream(userID: string) {
         }
         try {
             const rStream = fs.createReadStream(userPath);
-            const wStream = fs.createWriteStream(userPath);
+            const wStream = fs.createWriteStream(userPath, { flags: 'a' });
             map.set(userID, { rStream, wStream });
         } catch (error) {
             handleFsError(error);

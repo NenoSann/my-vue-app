@@ -86,6 +86,7 @@ app.on('before-quit', () => {
     //@ts-ignore
     // the 'quitting' is self defined property
     app.quitting = true;
+    Socketio.getInstance().close();
 })
 
 app.on('activate', () => {
