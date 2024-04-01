@@ -35,7 +35,7 @@ function getUnread(targetUserId: string) {
 
 function handleLiSelect(avatar: string, username: string, userid: string) {
     SocketTarget.isActive = true;
-    SocketTarget.type = 'user';
+    SocketTarget.type = 'User';
     SocketTarget.avatar = avatar;
     SocketTarget.name = username
     SocketTarget.socketid = SocketUsers.usermap.get(userid)?.socketid as string;

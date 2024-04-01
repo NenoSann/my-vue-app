@@ -30,6 +30,13 @@ export type PrivateMessage = {
     senderavatar: string
 }
 
+export type GroupMessage = {
+    content: MessageContent,
+    senderid: string,
+    sendername: string,
+    senderavatar: string
+}
+
 export type MessageContent = {
     text: string,
     image?: Array<string>

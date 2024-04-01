@@ -1,5 +1,5 @@
 import { SocketUserInfo } from './user'
-import type { PrivateMessage } from './user';
+import type { GroupMessage, PrivateMessage } from './user';
 declare global {
     interface Window extends Window {
         storeUserInfo: {
@@ -11,6 +11,7 @@ declare global {
             close: () => Promise<Boolean>;
             getUserMap: () => Promise<Map<string, SocketUserInfo>>;
             sendPrivateMessage: (to: string, content: PrivateMessage) => Promise<Boolean>;
+            sendGroupMessage: (to: string, content: GroupMessage) => Promise<Boolean>;
             onConnect: (callback: (val: any) => void) => void;
             onUserConnected: (callback: (val: any) => void) => void;
             onUserDisconnected: (callback: (val: any) => void) => void;

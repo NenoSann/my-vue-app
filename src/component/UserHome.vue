@@ -4,7 +4,7 @@
         <!-- <Channel></Channel> -->
         <!-- <FriendsView></FriendsView> -->
         <div class="grow h-full">
-            <component :is="component_name"></component>
+            <component :is="Channel"></component>
         </div>
     </div>
 </template>

@@ -48,12 +48,21 @@ const messageHeader = computed(() => {
 })
 
 const sendMessage = async function () {
-    window.socket.sendPrivateMessage(messageHeader.value.to, {
-        content: {
-            text: input.value
-        },
-        ...messageHeader.value
-    })
+    if (SocketTarget.type === 'User') {
+        window.socket.sendPrivateMessage(messageHeader.value.to, {
+            content: {
+                text: input.value
+            },
+            ...messageHeader.value
+        })
+    } else if (SocketTarget.type === 'Group') {
+        window.socket.sendGroupMessage(messageHeader.value.to, {
+            content: {
+                text: input.value
+            },
+            ...messageHeader.value
+        })
+    }
     SocketMessage.storeLocally(SocketTarget.userid, {
         text: input.value
     });

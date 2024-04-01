@@ -1,10 +1,9 @@
 const { io, Socket } = require("socket.io-client");
 // import { io, Socket } from 'socket.io-client';
 import { mainWindow } from "../main.ts";
-import type { SocketUserInfo, PrivateMessage } from "../Interface/user.ts";
+import type { SocketUserInfo, PrivateMessage, MessageContent, GroupMessage } from "../Interface/user.ts";
 import { WorkerController } from './WorkerController';
 import { NotificationController } from "../Electron/index.ts";
-import { nativeImage } from "electron";
 const SocketURL = 'http://43.163.234.220:8081';
 class Socketio {
     private static instance: Socketio | undefined;
@@ -59,6 +58,10 @@ class Socketio {
             this.workerController.saveMessage(data.senderid, { content: data.content, date: new Date() });
             console.log('got private message from server');
         });
+
+        this.socket.on('group_message', (data: GroupMessage) => {
+            console.log('got groupMessage from socket');
+        })
     }
 
     public static getInstance(): Socketio;
@@ -95,7 +98,20 @@ class Socketio {
             });
         })
     }
-
+    public sendGroupMessage(to: string, content: GroupMessage): Promise<Boolean> {
+        return new Promise<Boolean>((resolve, reject) => {
+            this?.socket.emit('group_message', {
+                to,
+                ...content
+            }, () => {
+                this.workerController.saveMessage(to, {
+                    content: content.content,
+                    date: new Date()
+                });
+                resolve(true);
+            });
+        })
+    }
     public close() {
         this?.socket?.disconnect();
         Socketio.instance = undefined;

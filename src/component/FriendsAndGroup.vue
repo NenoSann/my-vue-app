@@ -17,18 +17,23 @@
 
         <div class="daisy-divider my-1"></div>
 
-        <div class="px-4">
+        <div class="px-4 mb-2">
             <ul class="list">
-                <li class="list-item"><a class="list-item-a">好友</a></li>
-                <li class="list-item"><a class="list-item-a">群聊</a></li>
+                <li class="list-item"><a class="list-item-a" @click="component = UserList">好友</a></li>
+                <li class="list-item"><a class="list-item-a" @click="component = GroupList">群聊</a></li>
             </ul>
         </div>
+        <component :is="component"></component>
     </div>
 </template>
 
 <script setup lang="ts">
 import { Add } from '@vicons/carbon';
 import { Icon } from '@vicons/utils';
+import { UserList, GroupList } from './index';
+import { ref, Ref, shallowRef } from 'vue';
+const component = shallowRef(UserList);
+
 </script>
 
 <style scoped>

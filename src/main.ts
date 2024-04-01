@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, nativeImage, Menu, Tray, Screen, screen } from 'electron';
 import * as path from 'path';
 import { Socketio } from './Node_Util/index.ts';
-import { PrivateMessage } from './Interface/user.ts';
+import { GroupMessage, PrivateMessage } from './Interface/user.ts';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -118,7 +118,14 @@ app.on('ready', () => {
             });
         })
     });
-    ipcMain.handle('socket:groupMessage', () => { });
+    ipcMain.handle('socket:groupMessage', (_event, to: string, content: GroupMessage) => {
+        console.log('got group message from renderer');
+        return new Promise<Boolean>((resolve, reject) => {
+            Socketio.getInstance().sendGroupMessage(to, content).then(() => {
+                resolve(true);
+            })
+        })
+    });
     ipcMain.on('socket:close', () => Socketio.getInstance()?.close());
 });
 export { mainWindow }

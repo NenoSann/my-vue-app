@@ -8,13 +8,18 @@ interface IFriend {
     avatar: string,
     online: boolean
 }
+interface GroupResponse {
+    groupName: string,
+    groupAvatar: string,
+    _id: string
+}
 interface IUser {
     _id: string,
     name: string,
     email: string,
     avatar: string,
     friends: Map<string, IFriend> | Array<IFriend>,
-    groups: string[],
+    groups: Array<GroupResponse>,
     __v: number
 }
 
@@ -90,7 +95,7 @@ const Socket_Target = defineStore('Socket_Target', {
     state: () => {
         return {
             isActive: false,
-            type: '',
+            type: '' as 'User' | 'Group',
             socketid: '',
             avatar: '',
             name: '',

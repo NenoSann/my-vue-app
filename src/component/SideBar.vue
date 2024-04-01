@@ -19,7 +19,6 @@
 <script setup lang="ts">
 import { SideBar, TheIcon } from './index';
 import { useRouter } from 'vue-router';
-import { onMounted } from 'vue';
 import { Comments, AddressBook } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
 import { User, ComponentState, eSideBar } from '../Pinia';

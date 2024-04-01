@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld('socket', {
     getUserMap: () => ipcRenderer.invoke('socket:getUserMap'),
     close: () => ipcRenderer.send('socket:close'),
     sendPrivateMessage: (...args) => ipcRenderer.invoke('socket:privateMessage', ...args),
+    sendGroupMessage: (...args) => ipcRenderer.invoke('socket:groupMessage', ...args),
     // received
     onConnect: (callback: Function) => ipcRenderer.on('connect', (_event, val) => callback(val)),
     onUserConnected: (callback: Function) => ipcRenderer.on('userConnected', (_event, val) => {
