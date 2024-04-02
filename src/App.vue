@@ -26,9 +26,14 @@ watch(userLoginInfo, (newInfo) => {
         const user = User();
         window.socket.close();
         window.socket.createSocket(newInfo.name, newInfo._id, newInfo.avatar);
-        window.socket.joinGroup(user.groups.map((group) => {
-            return group._id;
-        }))
+        window.socket.joinGroup(
+            user.groups.map((group) => {
+                return group._id;
+            }),
+            user._id,
+            user.name,
+            user.avatar
+        )
     }
 }, { immediate: true })
 
@@ -44,6 +49,5 @@ onMounted(() => {
 <style scoped>
 #app {
     @apply flex flex-row;
-    @apply h-screen w-screen;
-}
+    @apply h-screen w-screen;}
 </style>

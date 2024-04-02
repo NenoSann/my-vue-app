@@ -151,7 +151,7 @@ const Socket_Message = defineStore('Socket_Message', {
                     unread: 0
                 })
             }
-            this.$state.messages.get(id).data.push({
+            this.$state.messages.get(id)?.data?.push({
                 type: 'to',
                 content,
                 date: new Date()
