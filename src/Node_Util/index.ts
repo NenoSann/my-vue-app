@@ -59,7 +59,7 @@ class Socketio {
             console.log('got private message from server');
         });
 
-        this.socket.on('group_message', (data: GroupMessage) => {
+        this.socket.on('user_group_message', (data: GroupMessage) => {
             console.log('got groupMessage from socket');
         })
     }
@@ -100,6 +100,10 @@ class Socketio {
     }
     public sendGroupMessage(to: string, content: GroupMessage): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
+            console.log('sending group message to server: \n', {
+                to,
+                content
+            })
             this?.socket.emit('group_message', {
                 to,
                 ...content
@@ -111,6 +115,9 @@ class Socketio {
                 resolve(true);
             });
         })
+    }
+    public joinGroup(groupIds: Array<string>) {
+        this.socket.emit('join_group', groupIds);
     }
     public close() {
         this?.socket?.disconnect();

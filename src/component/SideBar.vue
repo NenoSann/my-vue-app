@@ -1,7 +1,7 @@
 <template>
     <div class="side-bar flex flex-col gap-1 p-2">
         <div class="me border-b-[1px]">
-            <TheIcon @click="router.push('/login')" :img_url="User().avatar"></TheIcon>
+            <TheIcon @click="router.push('/login')" :img_url="imageURL"></TheIcon>
         </div>
         <div class="sidebar-icon friends" @click="() => { sidebar.sidebar = eSideBar.Friends }">
             <Icon size="36" class=" fill-primary">
@@ -22,8 +22,14 @@ import { useRouter } from 'vue-router';
 import { Comments, AddressBook } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
 import { User, ComponentState, eSideBar } from '../Pinia';
+import { ref, watch, computed } from 'vue';
+const user = User();
 const sidebar = ComponentState();
 const router = useRouter();
+const imageURL = computed(() => {
+    return user?.avatar;
+});
+
 </script>
 
 <style scoped>

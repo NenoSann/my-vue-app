@@ -126,6 +126,11 @@ app.on('ready', () => {
             })
         })
     });
+    ipcMain.handle('socket:joinGroup', (_event, groupIds: Array<string>) => {
+        console.debug('got socketEvent: joinGroup \n');
+        console.debug('groupIds: \n', groupIds);
+        Socketio.getInstance().joinGroup(groupIds)
+    })
     ipcMain.on('socket:close', () => Socketio.getInstance()?.close());
 });
 export { mainWindow }

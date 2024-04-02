@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('socket', {
             console.error(error);
         }
     },
+    joinGroup: (groupIds: Array<string>) => ipcRenderer.invoke('socket:joinGroup', groupIds),
     getUserMap: () => ipcRenderer.invoke('socket:getUserMap'),
     close: () => ipcRenderer.send('socket:close'),
     sendPrivateMessage: (...args) => ipcRenderer.invoke('socket:privateMessage', ...args),

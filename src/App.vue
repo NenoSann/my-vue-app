@@ -12,11 +12,6 @@ import { User } from './Pinia';
 import { Window } from './Interface/preload'
 const userLoginInfo = computed(() => {
     const user = User();
-    console.log('computed Userinfo changed: \n', {
-        name: user.name,
-        _id: user._id,
-        avatar: user.avatar
-    })
     if (user?._id) {
         return {
             name: user.name,
@@ -28,8 +23,12 @@ const userLoginInfo = computed(() => {
 
 watch(userLoginInfo, (newInfo) => {
     if (newInfo?.name && newInfo.avatar && newInfo._id) {
+        const user = User();
         window.socket.close();
         window.socket.createSocket(newInfo.name, newInfo._id, newInfo.avatar);
+        window.socket.joinGroup(user.groups.map((group) => {
+            return group._id;
+        }))
     }
 }, { immediate: true })
 

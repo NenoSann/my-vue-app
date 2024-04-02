@@ -7,6 +7,7 @@ declare global {
         };
         socket: {
             createSocket: (name: string, _id: string, avatar: string) => Promise<Boolean>;
+            joinGroup: (groupIds: Array<string>) => void;
             connect: () => Promise<Boolean>;
             close: () => Promise<Boolean>;
             getUserMap: () => Promise<Map<string, SocketUserInfo>>;

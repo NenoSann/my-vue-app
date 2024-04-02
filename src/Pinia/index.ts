@@ -44,7 +44,15 @@ const User = defineStore('User', {
             user.friends = friends;
             return user;
         } else {
-            return {} as unknown as IUser;
+            return {
+                _id: '',
+                name: '',
+                email: '',
+                avatar: '',
+                friends: null,
+                groups: null,
+                __v: 0
+            } as unknown as IUser;
         }
     },
     actions: {
@@ -55,11 +63,11 @@ const User = defineStore('User', {
                 user.friends.forEach((friend) => {
                     friends.set(friend.userid, friend);
                 })
-                console.log('user: ', user);
-                this.data = {
+                Object.assign(this.$state, {
                     ...user,
                     friends
-                };
+                })
+                console.log('user: ', user);
                 localStorage.setItem('user', JSON.stringify(user));
                 return user;
             } catch (error) {
