@@ -122,6 +122,7 @@ app.on('ready', () => {
         console.log('got group message from renderer');
         return new Promise<Boolean>((resolve, reject) => {
             Socketio.getInstance().sendGroupMessage(to, content).then(() => {
+                console.log('main.ts resolve');
                 resolve(true);
             })
         })

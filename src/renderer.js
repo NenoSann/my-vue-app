@@ -31,7 +31,9 @@ window.socket.onUserMap((map) => {
             user.friends.set(targetUser);
         }
     })
-    socketTarget.updateSocketId();
+    if (Socket_Target().type === 'User') {
+        socketTarget.updateSocketId();
+    }
 })
 
 window.socket.onUserConnected((newUser) => {
@@ -44,7 +46,9 @@ window.socket.onUserConnected((newUser) => {
         connectedUser.online = true;
         user.friends.set(newUser.userid, connectedUser);
     }
-    socketTarget.updateSocketId();
+    if (Socket_Target().type === 'User') {
+        socketTarget.updateSocketId();
+    }
 })
 
 window.socket.onUserDisconnected((userid) => {
@@ -56,7 +60,9 @@ window.socket.onUserDisconnected((userid) => {
         connectedUser.online = false;
         user.friends.set(userid, connectedUser);
     }
-    socketTarget.updateSocketId();
+    if (Socket_Target().type === 'User') {
+        socketTarget.updateSocketId();
+    }
 })
 
 window.socket.onUserGroupMessage((data) => {

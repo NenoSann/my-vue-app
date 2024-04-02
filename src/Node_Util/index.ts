@@ -112,17 +112,22 @@ class Socketio {
                 to,
                 ...content
             }, () => {
+                resolve(true);
+                console.log('socket promise resolve');
                 this.workerController.saveMessage(to, {
                     content: content.content,
                     date: new Date()
                 });
-                resolve(true);
             });
         })
     }
 
     public joinGroup(groupIds: Array<string>) {
-        this.socket.emit('join_group', groupIds);
+        return new Promise<Boolean>((resolve, reject) => {
+            this.socket.emit('join_group', groupIds, () => {
+                resolve(true);
+            });
+        })
     }
 
     public close() {

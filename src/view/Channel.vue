@@ -51,13 +51,21 @@ const messageHeader = computed(() => ({
 const sendMessage = async () => {
     const content = { text: input.value };
     const header = { ...messageHeader.value, content };
+    const textInput = input.value;
 
     if (SocketTarget.type === 'User') {
-        window.socket.sendPrivateMessage(header.to, header);
+        window.socket.sendPrivateMessage(header.to, header).then(() => {
+            SocketMessage.storeLocally(SocketTarget.userid, {
+                text: textInput
+            });
+        });
     } else if (SocketTarget.type === 'Group') {
-        window.socket.sendGroupMessage(header.to, header);
+        window.socket.sendGroupMessage(header.to, header).then(() => {
+            SocketMessage.storeLocalGroup(SocketTarget.userid, {
+                text: textInput
+            })
+        });
     }
-
     input.value = '';
 };
 
