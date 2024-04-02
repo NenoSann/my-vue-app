@@ -7,6 +7,9 @@
             </div>
         </div>
         <div class="daisy-chat-header">
+            <span v-if="props.name">{{ props.name }}</span>
+        </div>
+        <div class="daisy-chat-footer">
             <time class=" text-xs opacity-50">{{ time }}</time>
         </div>
         <div class="daisy-chat-bubble">{{ content.text }}</div>
@@ -20,6 +23,7 @@ const props = defineProps<{
     content: MessageContent;
     date: Date;
     avatar: string;
-    time: string
+    time: string;
+    name?: string;
 }>();
 </script>

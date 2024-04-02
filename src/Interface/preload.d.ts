@@ -18,6 +18,7 @@ declare global {
             onUserDisconnected: (callback: (val: any) => void) => void;
             onClose: (callback: (val: any) => void) => void;
             onPrivateMessage: (callback: (val: any) => void) => void;
+            onUserGroupMessage: (callback: (val: any) => void) => void;
         }
     }
 }

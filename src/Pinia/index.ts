@@ -121,16 +121,16 @@ const Socket_Message = defineStore('Socket_Message', {
     state: () => {
         return {
             messages: new Map<string, {
-                data: {
+                data: Array<{
                     type: 'from' | 'to',
                     content: MessageContent,
                     date: Date
-                }[],
-                user: {
+                }>,
+                user: Array<{
                     avatar: string,
                     name: string,
                     userid: string
-                },
+                }>,
                 total: number,
                 unread: number
             }>()

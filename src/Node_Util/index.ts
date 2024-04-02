@@ -60,11 +60,8 @@ class Socketio {
         });
 
         this.socket.on('user_group_message', (data: GroupMessage) => {
-            console.log('got groupMessage from socket');
-        })
-        this.socket.onAny((eventName, ...args) => {
-            console.log(`got event ${eventName}`);
-            console.log(`arguments: ${JSON.parse(JSON.stringify(args))}`);
+            console.log('got user group message');
+            mainWindow?.webContents.send('userGroupMessage', data);
         })
         this.socket.on('user_join_group', (data) => {
             console.log(`A user join the room ${data.userName}`);
@@ -123,9 +120,11 @@ class Socketio {
             });
         })
     }
+
     public joinGroup(groupIds: Array<string>) {
         this.socket.emit('join_group', groupIds);
     }
+
     public close() {
         this?.socket?.disconnect();
         Socketio.instance = undefined;

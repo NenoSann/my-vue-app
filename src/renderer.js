@@ -59,15 +59,48 @@ window.socket.onUserDisconnected((userid) => {
     socketTarget.updateSocketId();
 })
 
+window.socket.onUserGroupMessage((data) => {
+    console.log('got group message from server', data);
+    const { content, from, senderid, senderavatar, sendername } = data;
+    const SocketMessage = Socket_Message().messages;
+    const SocketTarget = Socket_Target();
+    const info = {
+        data: {
+            type: 'from',
+            content,
+            date: new Date()
+        },
+        user: {
+            name: sendername,
+            avatar: senderavatar,
+            userid: senderid
+        },
+    }
+    if (!SocketMessage.has(from)) {
+        SocketMessage.set(from, {
+            data: [],
+            user: [],
+            total: 0,
+            unread: 0
+        })
+    }
+    const target = SocketMessage.get(from);
+    target.data.push(info.data);
+    target.user.push(info.user);
+    target.total++;
+    SocketTarget.userid !== from ? target.unread++ : undefined;
+    SocketMessage.set(from, target);
+})
+
 window.socket.onPrivateMessage((msg) => {
     const message = Socket_Message().messages;
     if (!message.has(msg.senderid)) {
         message.set(msg.senderid, {
-            data: [], user: {
+            data: [], user: [{
                 avatar: msg.senderavatar,
                 name: msg.sendername,
                 userid: msg.senderid
-            }, total: 0, unread: 0
+            }], total: 0, unread: 0
         });
     }
     const target = message.get(msg.senderid);
