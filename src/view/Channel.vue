@@ -3,9 +3,9 @@
         <div class="channel-header">{{ SocketTarget.name }}</div>
         <div class="bg-base-200 h-3/4 w-full border-b-[1px] border-b-neutral-700 pb-4 px-2 overflow-auto">
             <TransitionGroup name="list">
-                <ChatBubble :type="msg.type" :time="formatDate(msg.date)" :avatar="users![index].avatar"
+                <ChatBubble :type="msg.type" :time="formatDate(msg.date)" :avatar="users![index]?.avatar"
                     :content="msg.content" :date="msg.date"
-                    :name="SocketTarget.type === 'Group' ? users![index].name : undefined"
+                    :name="SocketTarget.type === 'Group' ? users![index]?.name : undefined"
                     v-for="(msg, index) in messages" :key="index"></ChatBubble>
             </TransitionGroup>
         </div>
@@ -58,7 +58,6 @@ const sendMessage = async () => {
         window.socket.sendGroupMessage(header.to, header);
     }
 
-    SocketMessage.storeLocally(SocketTarget.userid, content);
     input.value = '';
 };
 
