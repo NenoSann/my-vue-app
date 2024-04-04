@@ -27,14 +27,16 @@ export type PrivateMessage = {
     receiverid: string,
     senderid: string,
     sendername: string,
-    senderavatar: string
+    senderavatar: string,
+    date: Date
 }
 
 export type GroupMessage = {
     content: MessageContent,
     senderid: string,
     sendername: string,
-    senderavatar: string
+    senderavatar: string,
+    date: Date
 }
 
 export type MessageContent = {

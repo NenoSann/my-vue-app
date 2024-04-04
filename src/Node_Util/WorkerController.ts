@@ -5,6 +5,11 @@ export class WorkerController {
     worker: Worker;
     constructor() {
         this.worker = new Worker('./src/Node_Util/worker.js');
+        this.worker.on('message', (data) => {
+            if (data.type === 'read') {
+                this._logMessages(data.content);
+            }
+        })
     }
 
     public saveMessage(userId: string, content: {
@@ -18,5 +23,19 @@ export class WorkerController {
                 content
             }
         })
+    }
+
+    public readMessages(userId: string, limit: number) {
+        this.worker.postMessage({
+            type: 'read',
+            content: {
+                userId,
+                limit
+            }
+        })
+    }
+
+    private _logMessages(content: Array<string>) {
+        console.log('got read messages: \n', content);
     }
 }

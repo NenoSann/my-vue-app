@@ -24,8 +24,6 @@ import type { PrivateMessage, MessageContent } from '../Interface/user';
 const cwd = process.cwd();
 const NEW_LINE_CHARACTERS = ["\n"];
 const _path = path.join(cwd, 'message');
-console.log('worker thread active!!!');
-console.log('Is main thread? ', isMainThread);
 const map = new Map<string, {
     rStream: fs.ReadStream,
     wStream: fs.WriteStream,
@@ -40,7 +38,11 @@ parentPort?.on('message', (data) => {
     const content = data.content;
     switch (operateType) {
         case 'read':
-            readMessage(content.userId, data.limit);
+            const messages = readMessage(content.userId, data.limit);
+            parentPort?.postMessage({
+                type: 'read',
+                content: messages
+            })
             break;
         case 'write':
             console.log('worker.ts got message: \n', data);
@@ -80,8 +82,6 @@ async function writeMessage(userID: string, content: any) {
             createStream(userID);
         }
         const { wStream } = map.get(userID) as {
-            // rStream: fs.ReadStream,
-            // wStream: fs.WriteStream,
             rStream: fs.ReadStream,
             wStream: fs.WriteStream,
         };
@@ -93,10 +93,14 @@ async function writeMessage(userID: string, content: any) {
     }
 }
 
-async function readMessage(userID: string, limit: number = 1) {
+function readMessage(userID: string, limit: number = 1) {
     try {
         // const nLines = await readLastLines(path.join(_path, userID), limit);
-        const nLines = await readLastLines('./test', limit);
+        const userPath = path.join(_path, userID);
+        let nLines: Array<string> = [];
+        readLastNLines(userPath, limit).then((res) => {
+            nLines = res;
+        });
         return nLines;
     } catch (error) {
         handleFsError(error);
@@ -135,11 +139,17 @@ function handleFsError(error) {
     parentPort?.emit('messageerror', error);
 }
 
-
+async function readLastNLines(inputFilePath: string, lineCounts: number): Promise<Array<string>> {
+    const promiseArr: Array<Promise<string>> = [];
+    for (let i = 0; i < lineCounts; i++) {
+        promiseArr.push(readLastLines(inputFilePath));
+    }
+    return Promise.all(promiseArr)
+}
 
 async function readLastLines(
     inputFilePath: string,
-    maxLineCount: number,
+    maxLineCount: number = 200,
     encoding: BufferEncoding = "utf8"
 ): Promise<string> {
     // 检查文件是否存在
