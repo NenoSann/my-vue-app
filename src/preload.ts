@@ -20,8 +20,14 @@ contextBridge.exposeInMainWorld('storeUserInfo', {
     }
 });
 
+
+/**
+ *  In this section we expose apis that let webpage access node environment,
+ *  after adding new functions we need to add declaration in preload.d.ts to 
+ *  make typescript work
+ */
 contextBridge.exposeInMainWorld('socket', {
-    // send
+    // From webpage to main thread
     createSocket: (...args) => {
         try {
             ipcRenderer.invoke('socket:create', ...args);
@@ -39,7 +45,14 @@ contextBridge.exposeInMainWorld('socket', {
             ipcRenderer.invoke('socket:groupMessage', ...args).then(() => resolve(true)).catch(() => reject());
         })
     },
-    // received
+    queryMessages: (userId: string, limit: number, offset: number) => {
+        return new Promise((resolve, reject) => {
+            ipcRenderer.invoke('socket:queryMessages', userId, limit, offset).then((res) =>
+                resolve(res)
+            ).catch(() => reject());
+        })
+    },
+    // From main thread to webpage
     onConnect: (callback: Function) => ipcRenderer.on('connect', (_event, val) => callback(val)),
     onUserConnected: (callback: Function) => ipcRenderer.on('userConnected', (_event, val) => {
         callback(val);

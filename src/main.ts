@@ -132,6 +132,11 @@ app.on('ready', () => {
         console.debug('groupIds: \n', groupIds);
         Socketio.getInstance().joinGroup(groupIds)
     })
+    ipcMain.handle('socket:queryMessages', (_event, userId: string, limit: number, offset: number) => {
+        return new Promise((resolve, reject) => {
+            Socketio.getInstance().queryMessages(userId, limit, offset);
+        })
+    })
     ipcMain.on('socket:close', () => Socketio.getInstance()?.close());
 });
 export { mainWindow }

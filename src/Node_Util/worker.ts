@@ -38,11 +38,12 @@ parentPort?.on('message', (data) => {
     const content = data.content;
     switch (operateType) {
         case 'read':
-            const messages = readMessage(content.userId, data.limit);
-            parentPort?.postMessage({
-                type: 'read',
-                content: messages
-            })
+            readMessage(content.userId, data.limit).then((res) => {
+                parentPort?.postMessage({
+                    type: 'read',
+                    content: res
+                })
+            });
             break;
         case 'write':
             console.log('worker.ts got message: \n', data);
@@ -93,14 +94,11 @@ async function writeMessage(userID: string, content: any) {
     }
 }
 
-function readMessage(userID: string, limit: number = 1) {
+async function readMessage(userID: string, limit: number = 1) {
     try {
-        // const nLines = await readLastLines(path.join(_path, userID), limit);
         const userPath = path.join(_path, userID);
-        let nLines: Array<string> = [];
-        readLastNLines(userPath, limit).then((res) => {
-            nLines = res;
-        });
+        console.log('user path: ', userPath);
+        const nLines = await readLastNLines(userPath, limit);
         return nLines;
     } catch (error) {
         handleFsError(error);
@@ -205,7 +203,6 @@ async function readLastLines(
 
     // 关闭文件句柄
     fs.closeSync(file);
-
     return lines;
 }
 

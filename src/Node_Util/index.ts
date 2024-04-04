@@ -25,6 +25,8 @@ class Socketio {
         this.message = new Map();
         this.friends = [];
         this.workerController = new WorkerController();
+
+        // binding socket event here
         this.socket.on('connect', (data: any) => {
             console.log('nodejs socket client connected');
             mainWindow?.webContents.send('connect', this.socket.id);
@@ -102,7 +104,7 @@ class Socketio {
             });
         })
     }
-    public sendGroupMessage(to: string, content: GroupMessage): Promise<Boolean> {
+    public async sendGroupMessage(to: string, content: GroupMessage): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
             console.log('sending group message to server: \n', {
                 to,
@@ -122,7 +124,12 @@ class Socketio {
         })
     }
 
-    public joinGroup(groupIds: Array<string>) {
+    public async queryMessages(userId: string, limit: number, offset: number) {
+        const res = await this.workerController.readMessages(userId, limit);
+        return res;
+    }
+
+    public async joinGroup(groupIds: Array<string>) {
         return new Promise<Boolean>((resolve, reject) => {
             this.socket.emit('join_group', groupIds, () => {
                 resolve(true);
