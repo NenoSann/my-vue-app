@@ -24,11 +24,12 @@ window.socket.onUserMap((map) => {
     const user = User();
     Socket_Users().usermap = map;
     map.forEach((socketUser) => {
+        const userid = socketUser.userid;
         // user is a map item, user[0] is userid and user[1] is socket user info
-        if (user.friends.has(socketUser)) {
-            const targetUser = user.friends.get(socketUser);
+        if (user.friends.has(userid)) {
+            const targetUser = user.friends.get(userid);
             targetUser.online = true;
-            user.friends.set(targetUser);
+            user.friends.set(userid, targetUser);
         }
     })
     if (Socket_Target().type === 'User') {
