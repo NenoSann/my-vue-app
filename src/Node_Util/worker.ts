@@ -17,6 +17,7 @@
 // const path = require('node:path');
 import { parentPort, isMainThread } from 'node:worker_threads';
 import * as fs from 'node:fs';
+import * as fsP from 'node:fs/promises';
 import * as path from 'node:path';
 import * as stream from 'node:stream/promises';
 import * as readline from 'readline';
@@ -97,8 +98,7 @@ async function writeMessage(userID: string, content: any) {
 async function readMessage(userID: string, limit: number = 1) {
     try {
         const userPath = path.join(_path, userID);
-        console.log('user path: ', userPath);
-        const nLines = await readLastNLines(userPath, limit);
+        const nLines = await readLines(userPath, limit);
         return nLines;
     } catch (error) {
         handleFsError(error);
@@ -137,12 +137,13 @@ function handleFsError(error) {
     parentPort?.emit('messageerror', error);
 }
 
-async function readLastNLines(inputFilePath: string, lineCounts: number): Promise<Array<string>> {
-    const promiseArr: Array<Promise<string>> = [];
-    for (let i = 0; i < lineCounts; i++) {
-        promiseArr.push(readLastLines(inputFilePath));
+async function readLines(inputFilePath: string, lineCounts: number): Promise<Array<string>> {
+    const file = fsP.open(inputFilePath);
+    const res: Array<string> = [];
+    for await (const line of (await file).readLines()) {
+        res.push(line);
     }
-    return Promise.all(promiseArr)
+    return res;
 }
 
 async function readLastLines(

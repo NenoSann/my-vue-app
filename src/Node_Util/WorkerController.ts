@@ -5,11 +5,6 @@ export class WorkerController {
     worker: Worker;
     constructor() {
         this.worker = new Worker('./src/Node_Util/worker.js');
-        this.worker.on('message', (data) => {
-            if (data.type === 'read') {
-                this._logMessages(data.content);
-            }
-        })
     }
 
     public saveMessage(userId: string, content: {
@@ -29,13 +24,18 @@ export class WorkerController {
         return new Promise((resolve, reject) => {
             // create a once event listener
             // and close the listener after worker post
-            const messageHandler = (data: any) => {
+            const messageHandler = (data: {
+                type: 'read' | 'write' | 'error',
+                content: Array<string>
+            }) => {
                 if (data.type === 'read') {
-                    console.log('got read messages: \n', data);
-                    resolve(data.content);
+                    const res = data.content.map((json) => {
+                        return JSON.parse(json);
+                    })
+                    resolve(res);
                     this.worker.off('message', messageHandler);
                 } else if (data.type === 'error') {
-                    reject(new Error(data.content));
+                    reject(new Error('error at readMessages'));
                     this.worker.off('message', messageHandler);
                 }
             };

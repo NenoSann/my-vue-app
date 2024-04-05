@@ -133,8 +133,13 @@ app.on('ready', () => {
         Socketio.getInstance().joinGroup(groupIds)
     })
     ipcMain.handle('socket:queryMessages', (_event, userId: string, limit: number, offset: number) => {
-        return new Promise((resolve, reject) => {
-            Socketio.getInstance().queryMessages(userId, limit, offset);
+        return new Promise(async (resolve, reject) => {
+            try {
+                const res = await Socketio.getInstance().queryMessages(userId, limit, offset);
+                resolve(res);
+            } catch {
+                reject();
+            }
         })
     })
     ipcMain.on('socket:close', () => Socketio.getInstance()?.close());
