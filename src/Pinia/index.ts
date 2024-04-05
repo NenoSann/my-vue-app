@@ -156,6 +156,13 @@ const Socket_Message = defineStore('Socket_Message', {
                 content,
                 date: new Date()
             })
+            const target = this.$state.messages.get(id);
+            const user = User();
+            target.user?.push({
+                avatar: user.avatar,
+                name: user.name,
+                userid: user._id
+            })
         },
         storeLocalGroup(id: string, content: MessageContent) {
             if (this.$state.messages.size === 0) {
