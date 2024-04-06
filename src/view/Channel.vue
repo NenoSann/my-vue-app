@@ -3,8 +3,8 @@
         <div class="channel-header">{{ SocketTarget.name }}</div>
         <div class="bg-base-200 h-3/4 w-full border-b-[1px] border-b-neutral-700 pb-4 px-2 overflow-auto">
             <TransitionGroup name="list">
-                <ChatBubble :type="msg.type" :time="formatDate(msg.date)" :avatar="users![index]?.avatar"
-                    :content="msg.content" :date="msg.date"
+                <ChatBubble :type="msg.type" :time="formatDate(msg.date)"
+                    :avatar="users?.get(msg.sendBy)?.avatar as string" :content="msg.content" :date="msg.date"
                     :name="SocketTarget.type === 'Group' ? users![index]?.name : undefined"
                     v-for="(msg, index) in messages" :key="index"></ChatBubble>
             </TransitionGroup>
@@ -34,11 +34,7 @@ const messages = computed(() => {
     return SocketMessage.messages.get(SocketTarget.userid)?.data
 })
 const users = computed(() => SocketMessage.messages.get(SocketTarget.userid)?.user)
-const userAvatar = computed(() => {
-    if (SocketTarget.type === 'User') {
-        return SocketMessage.messages.get(SocketTarget.userid)?.user[0].avatar as string
-    }
-});
+
 const messageHeader = computed(() => ({
     from: SocketInfo.Socket_ID,
     receiverid: SocketTarget.userid,
@@ -48,21 +44,39 @@ const messageHeader = computed(() => ({
     to: SocketTarget.socketid
 }));
 
+/**
+ * handle the socket message sending, both private and group
+ * if event is successfully ack, the callback function will add 
+ * the info local pinia
+ */
 const sendMessage = async () => {
     const content = { text: input.value };
     const header = { ...messageHeader.value, content };
-    const textInput = input.value;
 
     if (SocketTarget.type === 'User') {
         window.socket.sendPrivateMessage(header.to, header).then(() => {
             SocketMessage.storeLocally(SocketTarget.userid, {
-                text: textInput
+                type: 'to',
+                content,
+                date: new Date(),
+                sendBy: user._id
+            }, {
+                avatar: user.avatar,
+                name: user.name,
+                userId: user._id
             });
         });
     } else if (SocketTarget.type === 'Group') {
         window.socket.sendGroupMessage(header.to, header).then(() => {
             SocketMessage.storeLocalGroup(SocketTarget.userid, {
-                text: textInput
+                type: 'to',
+                content,
+                date: new Date(),
+                sendBy: user._id,
+            }, {
+                avatar: user.avatar,
+                name: user.name,
+                userId: user._id
             })
         });
     }

@@ -23,6 +23,13 @@ interface IUser {
     __v: number
 }
 
+interface LocalMessageContent {
+    type: 'to' | 'from',
+    content: MessageContent,
+    date: Date,
+    sendBy: string
+}
+
 enum eSideBar {
     Friends = 'Friend',
     Groups = 'Group'
@@ -121,12 +128,8 @@ const Socket_Message = defineStore('Socket_Message', {
     state: () => {
         return {
             messages: new Map<string, {
-                data: Array<{
-                    type: 'from' | 'to',
-                    content: MessageContent,
-                    date: Date
-                }>,
-                user: Array<{
+                data: Array<LocalMessageContent>,
+                user: Map<string, {
                     avatar: string,
                     name: string,
                     userid: string
@@ -137,54 +140,41 @@ const Socket_Message = defineStore('Socket_Message', {
         }
     },
     actions: {
-        storeLocally(id: string, content: MessageContent) {
-            console.log(this.$state.messages);
+        storeLocally(id: string, content: LocalMessageContent, userInfo: {
+            avatar: string,
+            name: string,
+            userId: string
+        }) {
+            // if messages is not defined: 
+            // create a messages instance
             if (this.$state.messages.size === 0) {
                 this.$state.messages.set(id, {
                     data: [],
-                    user: {
-                        avatar: Socket_Users().usermap.get(id)?.avatar,
-                        name: Socket_Users().usermap.get(id)?.username,
-                        userid: Socket_Users().usermap.get(id)?.userid
-                    },
+                    user: new Map(),
                     total: 1,
                     unread: 0
                 })
             }
-            this.$state.messages.get(id)?.data?.push({
-                type: 'to',
-                content,
-                date: new Date()
-            })
+            this.$state.messages.get(id)?.data?.push(content)
             const target = this.$state.messages.get(id);
-            const user = User();
-            target.user?.push({
-                avatar: user.avatar,
-                name: user.name,
-                userid: user._id
-            })
+            target.user?.set(userInfo.userId, userInfo)
         },
-        storeLocalGroup(id: string, content: MessageContent) {
+        storeLocalGroup(id: string, content: LocalMessageContent, userInfo: {
+            avatar: string,
+            name: string,
+            userId: string
+        }) {
             if (this.$state.messages.size === 0) {
                 this.$state.messages.set(id, {
                     data: [],
-                    user: [],
+                    user: new Map(),
                     total: 1,
                     unread: 0
                 })
             }
             const target = this.$state.messages.get(id);
-            const user = User();
-            target.data?.push({
-                type: 'to',
-                content,
-                date: new Date()
-            });
-            target.user?.push({
-                avatar: user.avatar,
-                name: user.name,
-                userid: user._id
-            })
+            target.data?.push(content);
+            target.user?.set(userInfo.userId, userInfo)
         },
         clearUnread(id: string) {
             if (this.$state.message?.has(id)) {
