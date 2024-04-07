@@ -69,8 +69,9 @@ window.socket.onUserDisconnected((userid) => {
 window.socket.onUserGroupMessage((data) => {
     console.log('got group message from server', data);
     const { content, from, senderid, senderavatar, sendername } = data;
-    const SocketMessage = Socket_Message().messages;
+    const SocketMessage = Socket_Message();
     const SocketTarget = Socket_Target();
+    SocketMessage.storeLocalGroup(from)
     const info = {
         data: {
             type: 'from',
@@ -100,26 +101,37 @@ window.socket.onUserGroupMessage((data) => {
 })
 
 window.socket.onPrivateMessage((msg) => {
+    // this event will happened when nodejs socket receive the 
+    // 'Private_Message' event from server, here we will store
+    // the message into pinia's Socket_Message
+    const SocketMessage = Socket_Message();
     const message = Socket_Message().messages;
-    if (!message.has(msg.senderid)) {
-        message.set(msg.senderid, {
-            data: [], user: [{
-                avatar: msg.senderavatar,
-                name: msg.sendername,
-                userid: msg.senderid
-            }], total: 0, unread: 0
-        });
-    }
-    const target = message.get(msg.senderid);
-    target.data.push({
+    SocketMessage.storeLocally(msg.userid, {
+        userId: msg.senderid,
         type: 'from',
         content: msg.content,
         date: new Date()
     })
-    target.total = target.data.length;
-    console.log('socketTargetid: ', socketTarget.userid);
-    console.log('msg sender id: ', msg.senderid);
-    if (socketTarget.userid !== msg.senderid) {
-        target.unread += 1;
-    }
+    // if (!message.has(msg.senderid)) {
+    //     message.set(msg.senderid, {
+    //         data: [], user: new Map(msg.senderid, {
+    //             avatar: msg.senderavatar,
+    //             name: msg.sendername,
+    //             userid: msg.senderid
+    //         }), total: 0, unread: 0
+    //     });
+    // }
+    // const target = message.get(msg.senderid);
+    // target.data.push({
+    //     userId: msg.sernderid,
+    //     type: 'from',
+    //     content: msg.content,
+    //     date: new Date()
+    // })
+    // target.total = target.data.length;
+    // console.log('socketTargetid: ', socketTarget.userid);
+    // console.log('msg sender id: ', msg.senderid);
+    // if (socketTarget.userid !== msg.senderid) {
+    //     target.unread += 1;
+    // }
 })
