@@ -5,7 +5,7 @@
             <TransitionGroup name="list">
                 <ChatBubble :type="msg.type" :time="formatDate(msg.date)"
                     :avatar="users?.get(msg.sendBy)?.avatar as string" :content="msg.content" :date="msg.date"
-                    :name="SocketTarget.type === 'Group' ? users![index]?.name : undefined"
+                    :name="SocketTarget.type === 'Group' ? users?.get(msg.sendBy)?.name : undefined"
                     v-for="(msg, index) in messages" :key="index"></ChatBubble>
             </TransitionGroup>
         </div>
