@@ -63,25 +63,27 @@ parentPort?.on('message', (data) => {
  * @param userID id use to open target chat file 
  */
 async function createStream(userID: string) {
-    if (!map.has(userID)) {
-        const userPath = path.join(_path, userID);
-        if (!fs.existsSync(userPath)) {
-            await createUserFile(userPath);
-        }
+    const userPath = path.join(_path, userID);
+    if (!fs.existsSync(userPath)) {
         try {
-            const rStream = fs.createReadStream(userPath);
-            const wStream = fs.createWriteStream(userPath, { flags: 'a' });
-            map.set(userID, { rStream, wStream });
-        } catch (error) {
-            handleFsError(error);
+            await createUserFile(userPath);
+        } catch (err) {
+            handleFsError(err)
         }
+    }
+    try {
+        const rStream = fs.createReadStream(userPath);
+        const wStream = fs.createWriteStream(userPath, { flags: 'a' });
+        map.set(userID, { rStream, wStream });
+    } catch (error) {
+        handleFsError(error);
     }
 }
 
 async function writeMessage(userID: string, content: any) {
     try {
         if (!map.has(userID)) {
-            createStream(userID);
+            await createStream(userID);
         }
         const { wStream } = map.get(userID) as {
             rStream: fs.ReadStream,
