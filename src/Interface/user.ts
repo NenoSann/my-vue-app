@@ -45,7 +45,8 @@ export type MessageContent = {
 }
 
 export type LocalMessageContent = {
-    userId: string,
+    type: 'from' | 'to'
+    sendBy: string,
     content: {
         text: string,
         image?: Array<string>

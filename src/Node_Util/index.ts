@@ -59,7 +59,7 @@ class Socketio {
             mainWindow?.webContents.send('privateMessage', data);
             this.workerController.saveMessage(data.senderid,
                 {
-                    content: { userId: data.senderid, content: { ...data.content } },
+                    content: { type: 'from', sendBy: data.senderid, content: { ...data.content } },
                     date: new Date()
                 });
             console.log('got private message from server');
@@ -102,7 +102,8 @@ class Socketio {
             }, () => {
                 this.workerController.saveMessage(message.receiverid, {
                     content: {
-                        userId: message.receiverid,
+                        type: 'to',
+                        sendBy: message.receiverid,
                         content: { ...message.content }
                     },
                     date: new Date()
@@ -124,7 +125,7 @@ class Socketio {
                 console.log('socket promise resolve');
                 const { content, senderid: userId, senderavatar: avatar, sendername: userName } = message
                 this.workerController.saveMessage(to, {
-                    content: { userId, content: { ...content } },
+                    content: { type: 'to', sendBy: userId, content: { ...content } },
                     date: new Date()
                 });
                 resolve(true);
