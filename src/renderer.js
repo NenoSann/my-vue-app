@@ -67,37 +67,22 @@ window.socket.onUserDisconnected((userid) => {
 })
 
 window.socket.onUserGroupMessage((data) => {
+    // when vue receive emits that Group message is coming,
+    // we will save the message and sender info to pinia
+    // this message had been store in disk before vue got this emit
     console.log('got group message from server', data);
     const { content, from, senderid, senderavatar, sendername } = data;
     const SocketMessage = Socket_Message();
-    const SocketTarget = Socket_Target();
-    SocketMessage.storeLocalGroup(from)
-    const info = {
-        data: {
-            type: 'from',
-            content,
-            date: new Date()
-        },
-        user: {
-            name: sendername,
-            avatar: senderavatar,
-            userid: senderid
-        },
-    }
-    if (!SocketMessage.has(from)) {
-        SocketMessage.set(from, {
-            data: [],
-            user: [],
-            total: 0,
-            unread: 0
-        })
-    }
-    const target = SocketMessage.get(from);
-    target.data.push(info.data);
-    target.user.push(info.user);
-    target.total++;
-    SocketTarget.userid !== from ? target.unread++ : undefined;
-    SocketMessage.set(from, target);
+    SocketMessage.storeLocalGroup(from, {
+        type: 'from',
+        content,
+        date: new Date(),
+        sendBy: senderid
+    }, {
+        avatar: senderavatar,
+        name: sendername,
+        userId: senderid
+    })
 })
 
 window.socket.onPrivateMessage((msg) => {
@@ -116,26 +101,4 @@ window.socket.onPrivateMessage((msg) => {
         name: msg.sendername,
         userId: msg.senderid
     })
-    // if (!message.has(msg.senderid)) {
-    //     message.set(msg.senderid, {
-    //         data: [], user: new Map(msg.senderid, {
-    //             avatar: msg.senderavatar,
-    //             name: msg.sendername,
-    //             userid: msg.senderid
-    //         }), total: 0, unread: 0
-    //     });
-    // }
-    // const target = message.get(msg.senderid);
-    // target.data.push({
-    //     userId: msg.sernderid,
-    //     type: 'from',
-    //     content: msg.content,
-    //     date: new Date()
-    // })
-    // target.total = target.data.length;
-    // console.log('socketTargetid: ', socketTarget.userid);
-    // console.log('msg sender id: ', msg.senderid);
-    // if (socketTarget.userid !== msg.senderid) {
-    //     target.unread += 1;
-    // }
 })
