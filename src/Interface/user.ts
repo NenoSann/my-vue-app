@@ -43,3 +43,17 @@ export type MessageContent = {
     text: string,
     image?: Array<string>
 }
+
+export type LocalMessageContent = {
+    userId: string,
+    content: {
+        text: string,
+        image?: Array<string>
+    }
+}
+
+export type LocalUserInfo = {
+    userId: string,
+    avatar: string,
+    userName: string,
+}

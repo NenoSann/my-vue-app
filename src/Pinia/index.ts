@@ -147,7 +147,7 @@ const Socket_Message = defineStore('Socket_Message', {
         }) {
             // if messages is not defined: 
             // create a messages instance
-            if (this.$state.messages.size === 0) {
+            if (!this.$state.messages.has(id)) {
                 this.$state.messages.set(id, {
                     data: [],
                     user: new Map(),
@@ -164,7 +164,7 @@ const Socket_Message = defineStore('Socket_Message', {
             name: string,
             userId: string
         }) {
-            if (this.$state.messages.size === 0) {
+            if (!this.$state.messages.has(id)) {
                 this.$state.messages.set(id, {
                     data: [],
                     user: new Map(),

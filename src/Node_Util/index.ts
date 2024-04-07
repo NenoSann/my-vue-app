@@ -57,7 +57,11 @@ class Socketio {
             this.message.get(data.senderid)?.push(data);
             NotificationController.sendNotification(data.content.text, data.sendername, data.senderavatar);
             mainWindow?.webContents.send('privateMessage', data);
-            this.workerController.saveMessage(data.senderid, { content: data.content, date: new Date() });
+            this.workerController.saveMessage(data.senderid,
+                {
+                    content: { userId: data.senderid, content: { ...data.content } },
+                    date: new Date()
+                });
             console.log('got private message from server');
         });
 
@@ -89,37 +93,41 @@ class Socketio {
     public getUserMap() {
         return this.usermap;
     }
-    public sendPrivateMessage(to: string, content: PrivateMessage): Promise<Boolean> {
+    public sendPrivateMessage(to: string, message: PrivateMessage): Promise<Boolean> {
         // send the content to target recerver
         return new Promise<Boolean>((resolve, reject) => {
             this?.socket.emit('private_message', {
                 to,
-                ...content
+                ...message
             }, () => {
-                this.workerController.saveMessage(content.receiverid, {
-                    content: content.content,
+                this.workerController.saveMessage(message.receiverid, {
+                    content: {
+                        userId: message.receiverid,
+                        content: { ...message.content }
+                    },
                     date: new Date()
                 });
                 resolve(true);
             });
         })
     }
-    public async sendGroupMessage(to: string, content: GroupMessage): Promise<Boolean> {
+    public async sendGroupMessage(to: string, message: GroupMessage): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
             console.log('sending group message to server: \n', {
                 to,
-                content
+                message
             })
             this?.socket.emit('group_message', {
                 to,
-                ...content
+                ...message
             }, () => {
-                resolve(true);
                 console.log('socket promise resolve');
+                const { content, senderid: userId, senderavatar: avatar, sendername: userName } = message
                 this.workerController.saveMessage(to, {
-                    content: content.content,
+                    content: { userId, content: { ...content } },
                     date: new Date()
                 });
+                resolve(true);
             });
         })
     }

@@ -1,6 +1,6 @@
 import { Worker } from 'node:worker_threads';
 // const { parentPort, Worker } = require('node:worker_threads');
-import { MessageContent } from '../Interface/user';
+import { LocalMessageContent, MessageContent } from '../Interface/user';
 export class WorkerController {
     worker: Worker;
     constructor() {
@@ -8,7 +8,7 @@ export class WorkerController {
     }
 
     public saveMessage(userId: string, content: {
-        content: MessageContent,
+        content: LocalMessageContent,
         date: Date
     }) {
         this.worker.postMessage({
