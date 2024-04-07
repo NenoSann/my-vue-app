@@ -106,11 +106,15 @@ window.socket.onPrivateMessage((msg) => {
     // the message into pinia's Socket_Message
     const SocketMessage = Socket_Message();
     const message = Socket_Message().messages;
-    SocketMessage.storeLocally(msg.userid, {
-        userId: msg.senderid,
+    SocketMessage.storeLocally(msg.senderid, {
+        sendBy: msg.senderid,
         type: 'from',
         content: msg.content,
         date: new Date()
+    }, {
+        avatar: msg.senderavatar,
+        name: msg.sendername,
+        userId: msg.senderid
     })
     // if (!message.has(msg.senderid)) {
     //     message.set(msg.senderid, {
