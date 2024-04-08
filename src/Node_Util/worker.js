@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -69,6 +80,7 @@ var NEW_LINE_CHARACTERS = ["\n"];
 var _path = path.join(cwd, 'message');
 var map = new Map();
 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.on('message', function (data) {
+    // check the data types in WorkerController.ts
     console.log('got message from main thread: ', data);
     var operateType = data.type;
     var content = data.content;
@@ -77,16 +89,17 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
             readMessage(content.userId, data.limit).then(function (res) {
                 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.postMessage({
                     type: 'read',
-                    content: res
+                    content: {
+                        messages: res === null || res === void 0 ? void 0 : res.messages,
+                        userInfo: res === null || res === void 0 ? void 0 : res.userInfo
+                    }
                 });
             });
             break;
         case 'write':
             console.log('worker.ts got message: \n', data);
-            writeMessage(content.userId, content.content);
+            writeMessage(content.userId, content.content, content.userInfo);
             break;
-        case 'init':
-            createStream(content.userId);
         default:
             break;
     }
@@ -95,62 +108,86 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
  * @description create wStream and rStream for target user, and store in map
  * @param userID id use to open target chat file
  */
-function createStream(userID) {
+function createStream(userID, userInfo) {
     return __awaiter(this, void 0, void 0, function () {
-        var userPath, err_1, rStream, wStream;
+        var streamPath, indexPath, rStream, wStream, indexFilehandle, index, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    userPath = path.join(_path, userID);
-                    if (!!fs.existsSync(userPath)) return [3 /*break*/, 4];
+                    streamPath = path.join(_path, userID);
+                    indexPath = path.join(_path, userID + '.json');
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, createUserFile(userPath)];
+                    _a.trys.push([1, 8, , 9]);
+                    if (!!fs.existsSync(streamPath)) return [3 /*break*/, 3];
+                    return [4 /*yield*/, createUserFile(streamPath)];
                 case 2:
                     _a.sent();
-                    return [3 /*break*/, 4];
+                    _a.label = 3;
                 case 3:
-                    err_1 = _a.sent();
-                    handleFsError(err_1);
-                    return [3 /*break*/, 4];
+                    if (!!fs.existsSync(indexPath)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, createUserFile(indexPath)];
                 case 4:
-                    try {
-                        rStream = fs.createReadStream(userPath);
-                        wStream = fs.createWriteStream(userPath, { flags: 'a' });
-                        map.set(userID, { rStream: rStream, wStream: wStream });
-                    }
-                    catch (error) {
-                        handleFsError(error);
-                    }
-                    return [2 /*return*/];
+                    _a.sent();
+                    _a.label = 5;
+                case 5:
+                    rStream = fs.createReadStream(streamPath);
+                    wStream = fs.createWriteStream(streamPath, { flags: 'a' });
+                    return [4 /*yield*/, fsP.open(indexPath, 'r+')];
+                case 6:
+                    indexFilehandle = _a.sent();
+                    index = __assign(__assign({}, userInfo), { messageCounts: 0 });
+                    return [4 /*yield*/, indexFilehandle.writeFile(JSON.stringify(index))];
+                case 7:
+                    _a.sent();
+                    map.set(userID, {
+                        // we set the default state for the user
+                        rStream: rStream,
+                        wStream: wStream,
+                        indexFilehandle: indexFilehandle,
+                        index: index
+                    });
+                    return [3 /*break*/, 9];
+                case 8:
+                    error_1 = _a.sent();
+                    handleFsError(error_1);
+                    return [3 /*break*/, 9];
+                case 9: return [2 /*return*/];
             }
         });
     });
 }
-function writeMessage(userID, content) {
+function writeMessage(userID, content, userInfo) {
     return __awaiter(this, void 0, void 0, function () {
-        var wStream, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a, wStream, rStream, indexFilehandle, index, updatedIndex, error_2;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    _b.trys.push([0, 4, , 5]);
                     if (!!map.has(userID)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, createStream(userID)];
+                    return [4 /*yield*/, createStream(userID, userInfo)];
                 case 1:
-                    _a.sent();
-                    _a.label = 2;
+                    _b.sent();
+                    _b.label = 2;
                 case 2:
-                    wStream = map.get(userID).wStream;
-                    console.log('write content: ', content);
+                    _a = map.get(userID), wStream = _a.wStream, rStream = _a.rStream, indexFilehandle = _a.indexFilehandle, index = _a.index;
+                    updatedIndex = __assign(__assign({}, index), { messageCounts: index.messageCounts++ });
+                    // store updated user index and message content into file
+                    return [4 /*yield*/, indexFilehandle.writeFile(JSON.stringify(updatedIndex))];
+                case 3:
+                    // store updated user index and message content into file
+                    _b.sent();
                     wStream.write(JSON.stringify(content));
                     wStream.write('\n');
-                    return [3 /*break*/, 4];
-                case 3:
-                    error_1 = _a.sent();
-                    handleFsError(error_1);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    // assign updatedIndex to map
+                    map.set(userID, { rStream: rStream, wStream: wStream, indexFilehandle: indexFilehandle, index: updatedIndex });
+                    console.log('write content: ', content);
+                    return [3 /*break*/, 5];
+                case 4:
+                    error_2 = _b.sent();
+                    handleFsError(error_2);
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
             }
         });
     });
@@ -158,21 +195,37 @@ function writeMessage(userID, content) {
 function readMessage(userID, limit) {
     if (limit === void 0) { limit = 1; }
     return __awaiter(this, void 0, void 0, function () {
-        var userPath, nLines, error_2;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var userPath, indexPath, res, userInfo, _a, _b, _c, _d, _e, error_3;
+        var _f;
+        return __generator(this, function (_g) {
+            switch (_g.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
+                    _g.trys.push([0, 5, , 6]);
                     userPath = path.join(_path, userID);
-                    return [4 /*yield*/, readLines(userPath, limit)];
-                case 1:
-                    nLines = _a.sent();
-                    return [2 /*return*/, nLines];
+                    indexPath = path.join(_path, userID + '.json');
+                    res = {
+                        messages: [],
+                        userInfo: null
+                    };
+                    if (!(fs.existsSync(userPath) && fs.existsSync(indexPath))) return [3 /*break*/, 4];
+                    _b = (_a = JSON).parse;
+                    return [4 /*yield*/, fsP.open(indexPath, 'r')];
+                case 1: return [4 /*yield*/, (_g.sent()).readFile({ encoding: 'utf-8' })];
                 case 2:
-                    error_2 = _a.sent();
-                    handleFsError(error_2);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    userInfo = _b.apply(_a, [_g.sent()]);
+                    _d = (_c = (_f = res.messages).push).apply;
+                    _e = [_f];
+                    return [4 /*yield*/, readLines(userPath, limit)];
+                case 3:
+                    _d.apply(_c, _e.concat([(_g.sent())]));
+                    res.userInfo = userInfo;
+                    _g.label = 4;
+                case 4: return [2 /*return*/, res];
+                case 5:
+                    error_3 = _g.sent();
+                    handleFsError(error_3);
+                    return [3 /*break*/, 6];
+                case 6: return [2 /*return*/];
             }
         });
     });

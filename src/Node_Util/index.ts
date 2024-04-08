@@ -61,6 +61,11 @@ class Socketio {
                 {
                     content: { type: 'from', sendBy: data.senderid, content: { ...data.content } },
                     date: new Date()
+                },
+                {
+                    name: data.sendername,
+                    avatar: data.senderavatar,
+                    userId: data.senderid
                 });
             console.log('got private message from server');
         });
@@ -100,14 +105,21 @@ class Socketio {
                 to,
                 ...message
             }, () => {
+                // We sending message to receiver, so we store the info
+                // of the receiver, not ours
                 this.workerController.saveMessage(message.receiverid, {
                     content: {
                         type: 'to',
-                        sendBy: message.receiverid,
+                        sendBy: message.senderid,
                         content: { ...message.content }
                     },
                     date: new Date()
-                });
+                },
+                    {
+                        name: message.receivername,
+                        avatar: message.receiveravatar,
+                        userId: message.receiverid
+                    });
                 resolve(true);
             });
         })
@@ -127,6 +139,10 @@ class Socketio {
                 this.workerController.saveMessage(to, {
                     content: { type: 'to', sendBy: userId, content: { ...content } },
                     date: new Date()
+                }, {
+                    name: message.sendername,
+                    avatar: message.senderavatar,
+                    userId: message.senderid
                 });
                 resolve(true);
             });

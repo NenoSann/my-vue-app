@@ -1,6 +1,6 @@
 import { Worker } from 'node:worker_threads';
 // const { parentPort, Worker } = require('node:worker_threads');
-import { LocalMessageContent, MessageContent } from '../Interface/user';
+import { LocalMessageContent, LocalUserIndex, LocalUserInfo } from '../Interface/NodeLocalStorage';
 export class WorkerController {
     worker: Worker;
     constructor() {
@@ -10,28 +10,37 @@ export class WorkerController {
     public saveMessage(userId: string, content: {
         content: LocalMessageContent,
         date: Date
-    }) {
+    }, userInfo: LocalUserInfo) {
         this.worker.postMessage({
             type: 'write',
             content: {
                 userId,
-                content
+                content,
+                userInfo
             }
         })
     }
 
-    public readMessages(userId: string, limit: number): Promise<string[]> {
+    public readMessages(userId: string, limit: number): Promise<{
+        messages: string[],
+        userInfo: LocalUserIndex | null | undefined
+    }> {
         return new Promise((resolve, reject) => {
             // create a once event listener
             // and close the listener after worker post
             const messageHandler = (data: {
                 type: 'read' | 'write' | 'error',
-                content: Array<string>
+                content: {
+                    messages: Array<string>,
+                    userInfo: LocalUserIndex | null | undefined
+                }
             }) => {
                 if (data.type === 'read') {
-                    const res = data.content.map((json) => {
+                    let res;
+                    res.messages = data.content.messages.map((json) => {
                         return JSON.parse(json);
                     })
+                    res.userInfo = data.content.userInfo;
                     resolve(res);
                     this.worker.off('message', messageHandler);
                 } else if (data.type === 'error') {

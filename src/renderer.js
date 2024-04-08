@@ -90,7 +90,6 @@ window.socket.onPrivateMessage((msg) => {
     // 'Private_Message' event from server, here we will store
     // the message into pinia's Socket_Message
     const SocketMessage = Socket_Message();
-    const message = Socket_Message().messages;
     SocketMessage.storeLocally(msg.senderid, {
         sendBy: msg.senderid,
         type: 'from',

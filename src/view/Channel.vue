@@ -38,11 +38,21 @@ const users = computed(() => SocketMessage.messages.get(SocketTarget.userid)?.us
 const messageHeader = computed(() => ({
     from: SocketInfo.Socket_ID,
     receiverid: SocketTarget.userid,
+    receiveravatar: SocketTarget.avatar,
+    receivername: SocketTarget.name,
     senderid: user._id,
     sendername: user.name,
     senderavatar: user.avatar,
     to: SocketTarget.socketid
 }));
+
+const userInfo = computed(() => {
+    return {
+        avatar: user.avatar,
+        name: user.name,
+        userId: user._id
+    }
+})
 
 /**
  * handle the socket message sending, both private and group
@@ -60,11 +70,7 @@ const sendMessage = async () => {
                 content,
                 date: new Date(),
                 sendBy: user._id
-            }, {
-                avatar: user.avatar,
-                name: user.name,
-                userId: user._id
-            });
+            }, userInfo.value);
         });
     } else if (SocketTarget.type === 'Group') {
         window.socket.sendGroupMessage(header.to, header).then(() => {
@@ -73,11 +79,7 @@ const sendMessage = async () => {
                 content,
                 date: new Date(),
                 sendBy: user._id,
-            }, {
-                avatar: user.avatar,
-                name: user.name,
-                userId: user._id
-            })
+            }, userInfo.value)
         });
     }
     input.value = '';

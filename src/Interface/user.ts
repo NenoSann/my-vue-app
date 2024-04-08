@@ -25,6 +25,8 @@ export interface IFriend {
 export type PrivateMessage = {
     content: MessageContent,
     receiverid: string,
+    receivername: string,
+    receiveravatar: string,
     senderid: string,
     sendername: string,
     senderavatar: string,
@@ -44,17 +46,4 @@ export type MessageContent = {
     image?: Array<string>
 }
 
-export type LocalMessageContent = {
-    type: 'from' | 'to'
-    sendBy: string,
-    content: {
-        text: string,
-        image?: Array<string>
-    }
-}
 
-export type LocalUserInfo = {
-    userId: string,
-    avatar: string,
-    userName: string,
-}

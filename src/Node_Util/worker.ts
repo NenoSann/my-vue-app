@@ -22,18 +22,20 @@ import * as path from 'node:path';
 import * as stream from 'node:stream/promises';
 import * as readline from 'readline';
 import type { PrivateMessage, MessageContent } from '../Interface/user';
+import { LocalMessageContent, LocalUserIndex, LocalUserInfo } from '../Interface/NodeLocalStorage';
 const cwd = process.cwd();
 const NEW_LINE_CHARACTERS = ["\n"];
 const _path = path.join(cwd, 'message');
 const map = new Map<string, {
     rStream: fs.ReadStream,
     wStream: fs.WriteStream,
-    // rStream: any,
-    // wStream: any,
+    indexFilehandle: fsP.FileHandle
+    index: LocalUserIndex
 }>();
 
 
-parentPort?.on('message', (data) => {
+parentPort?.on('message', (data: any) => {
+    // check the data types in WorkerController.ts
     console.log('got message from main thread: ', data);
     const operateType = data.type;
     const content = data.content;
@@ -42,16 +44,17 @@ parentPort?.on('message', (data) => {
             readMessage(content.userId, data.limit).then((res) => {
                 parentPort?.postMessage({
                     type: 'read',
-                    content: res
+                    content: {
+                        messages: res?.messages,
+                        userInfo: res?.userInfo,
+                    }
                 })
             });
             break;
         case 'write':
             console.log('worker.ts got message: \n', data);
-            writeMessage(content.userId, content.content);
+            writeMessage(content.userId, content.content, content.userInfo as LocalUserInfo);
             break;
-        case 'init':
-            createStream(content.userId);
         default:
             break;
     }
@@ -62,36 +65,61 @@ parentPort?.on('message', (data) => {
  * @description create wStream and rStream for target user, and store in map
  * @param userID id use to open target chat file 
  */
-async function createStream(userID: string) {
-    const userPath = path.join(_path, userID);
-    if (!fs.existsSync(userPath)) {
-        try {
-            await createUserFile(userPath);
-        } catch (err) {
-            handleFsError(err)
-        }
-    }
+async function createStream(userID: string, userInfo: LocalUserInfo) {
+    const streamPath = path.join(_path, userID);
+    const indexPath = path.join(_path, userID + '.json');
+    // check if streamPath and indexPath exist, if not create them
     try {
-        const rStream = fs.createReadStream(userPath);
-        const wStream = fs.createWriteStream(userPath, { flags: 'a' });
-        map.set(userID, { rStream, wStream });
+        if (!fs.existsSync(streamPath)) {
+            await createUserFile(streamPath);
+        }
+        if (!fs.existsSync(indexPath)) {
+            await createUserFile(indexPath);
+        }
+
+        // check what flags mean:
+        // 'a' means for appending, and 'r+' means write and read
+        // https://nodejs.org/api/fs.html#file-system-flags
+        const rStream = fs.createReadStream(streamPath);
+        const wStream = fs.createWriteStream(streamPath, { flags: 'a' });
+        const indexFilehandle = await fsP.open(indexPath, 'r+')
+        const index = { ...userInfo, messageCounts: 0 };
+        await indexFilehandle.writeFile(JSON.stringify(index));
+        map.set(userID, {
+            // we set the default state for the user
+            rStream, wStream,
+            indexFilehandle,
+            index
+        });
     } catch (error) {
         handleFsError(error);
     }
 }
 
-async function writeMessage(userID: string, content: any) {
+async function writeMessage(userID: string, content: any, userInfo: LocalUserInfo) {
     try {
         if (!map.has(userID)) {
-            await createStream(userID);
+            await createStream(userID, userInfo);
         }
-        const { wStream } = map.get(userID) as {
+        // doing type assertion because we had create those variables
+        const { wStream, rStream, indexFilehandle, index } = map.get(userID) as {
             rStream: fs.ReadStream,
             wStream: fs.WriteStream,
-        };
-        console.log('write content: ', content);
+            indexFilehandle: fsP.FileHandle
+            index: LocalUserIndex
+        }
+        // build updatedIndex
+        const updatedIndex = {
+            ...index,
+            messageCounts: index.messageCounts++
+        }
+        // store updated user index and message content into file
+        await indexFilehandle.writeFile(JSON.stringify(updatedIndex))
         wStream.write(JSON.stringify(content));
         wStream.write('\n');
+        // assign updatedIndex to map
+        map.set(userID, { rStream, wStream, indexFilehandle, index: updatedIndex });
+        console.log('write content: ', content);
     } catch (error) {
         handleFsError(error);
     }
@@ -99,9 +127,24 @@ async function writeMessage(userID: string, content: any) {
 
 async function readMessage(userID: string, limit: number = 1) {
     try {
+        // In readMessage we don't want to be complicated
+        // just read and return the info
         const userPath = path.join(_path, userID);
-        const nLines = await readLines(userPath, limit);
-        return nLines;
+        const indexPath = path.join(_path, userID + '.json');
+        const res: {
+            messages: Array<string>,
+            userInfo: LocalUserIndex | null | undefined
+        } = {
+            messages: [],
+            userInfo: null
+        }
+        if (fs.existsSync(userPath) && fs.existsSync(indexPath)) {
+            // asyncly read the index file and parse into object
+            const userInfo = JSON.parse(await (await fsP.open(indexPath, 'r')).readFile({ encoding: 'utf-8' }));
+            res.messages.push(... (await readLines(userPath, limit)));
+            res.userInfo = userInfo
+        }
+        return res;
     } catch (error) {
         handleFsError(error);
     }
@@ -114,7 +157,6 @@ async function readMessage(userID: string, limit: number = 1) {
 async function createUserFile(name: string) {
     return new Promise<boolean>((resolve, reject) => {
         const directoryPath = path.dirname(name);
-
         fs.mkdir(directoryPath, { recursive: true }, (err) => {
             if (err) {
                 reject(err);
