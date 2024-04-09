@@ -15,14 +15,14 @@
 // const stream = require('node:stream/promises');
 // const readline = require('readline');
 // const path = require('node:path');
-import { parentPort, isMainThread } from 'node:worker_threads';
+import { parentPort } from 'node:worker_threads';
 import * as fs from 'node:fs';
 import * as fsP from 'node:fs/promises';
 import * as path from 'node:path';
 import * as stream from 'node:stream/promises';
 import * as readline from 'readline';
 import type { PrivateMessage, MessageContent } from '../Interface/user';
-import { LocalMessageContent, LocalUserIndex, LocalUserInfo } from '../Interface/NodeLocalStorage';
+import { LocalMessageContent, LocalUserIndex, LocalUserInfo, MessageType } from '../Interface/NodeLocalStorage';
 const cwd = process.cwd();
 const NEW_LINE_CHARACTERS = ["\n"];
 const _path = path.join(cwd, 'message');
@@ -37,11 +37,11 @@ const map = new Map<string, {
 parentPort?.on('message', (data: any) => {
     // check the data types in WorkerController.ts
     console.log('got message from main thread: ', data);
-    const operateType = data.type;
-    const content = data.content;
+    const { operateType, type } = data;
+    const { limit, content, userId, userInfo } = data.content;
     switch (operateType) {
         case 'read':
-            readMessage(content.userId, data.limit).then((res) => {
+            readMessage(userId, limit).then((res) => {
                 parentPort?.postMessage({
                     type: 'read',
                     content: {
@@ -53,7 +53,7 @@ parentPort?.on('message', (data: any) => {
             break;
         case 'write':
             console.log('worker.ts got message: \n', data);
-            writeMessage(content.userId, content.content, content.userInfo as LocalUserInfo);
+            writeMessage(userId, type as MessageType, content, userInfo as LocalUserInfo);
             break;
         default:
             break;
@@ -65,7 +65,7 @@ parentPort?.on('message', (data: any) => {
  * @description create wStream and rStream for target user, and store in map
  * @param userID id use to open target chat file 
  */
-async function createStream(userID: string, userInfo: LocalUserInfo) {
+async function createStream(userID: string, userInfo: LocalUserInfo, type: MessageType) {
     const streamPath = path.join(_path, userID);
     const indexFilePath = path.join(_path, userID + '.json');
     let isIndexNewlyCreated: Boolean = false;
@@ -87,7 +87,7 @@ async function createStream(userID: string, userInfo: LocalUserInfo) {
         let index = await readJSON(indexFilePath);
         // if indexFile is newly created we will try to overwrite it
         if (isIndexNewlyCreated) {
-            index = { ...userInfo, messageCounts: 0 };
+            index = { ...userInfo, type, messageCounts: 0 };
             await fsP.truncate(indexFilePath, 0)
             await fsP.writeFile(indexFilePath, JSON.stringify(index));
         } else {
@@ -105,11 +105,12 @@ async function createStream(userID: string, userInfo: LocalUserInfo) {
     }
 }
 
-async function writeMessage(userID: string, content: any, userInfo: LocalUserInfo) {
+async function writeMessage(userID: string, type: MessageType, content: any, userInfo: LocalUserInfo) {
     try {
         if (!map.has(userID)) {
-            await createStream(userID, userInfo);
+            await createStream(userID, userInfo, type);
         }
+        console.log('write message trigger', { userID, type, content, userInfo });
         // doing type assertion because we had create those variables
         const { wStream, rStream, indexFilePath, index } = map.get(userID) as {
             rStream: fs.ReadStream,
@@ -120,6 +121,7 @@ async function writeMessage(userID: string, content: any, userInfo: LocalUserInf
         // build updatedIndex
         const updatedIndex = {
             ...userInfo,
+            type,
             messageCounts: index.messageCounts + 1
         }
         // store updated user index and message content into file

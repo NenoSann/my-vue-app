@@ -3,6 +3,12 @@ export type LocalUserIndex = {
     avatar: string,
     userId: string,
     messageCounts: number,
+    type: MessageType
+}
+
+export enum MessageType {
+    Private = 'private',
+    Group = 'group'
 }
 
 export type LocalUserInfo = {

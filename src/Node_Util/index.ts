@@ -4,6 +4,7 @@ import { mainWindow } from "../main.ts";
 import type { SocketUserInfo, PrivateMessage, MessageContent, GroupMessage } from "../Interface/user.ts";
 import { WorkerController } from './WorkerController';
 import { NotificationController } from "../Electron/index.ts";
+import { MessageType } from "../Interface/NodeLocalStorage.ts";
 const SocketURL = 'http://43.163.234.220:8081';
 class Socketio {
     private static instance: Socketio | undefined;
@@ -57,7 +58,7 @@ class Socketio {
             this.message.get(data.senderid)?.push(data);
             NotificationController.sendNotification(data.content.text, data.sendername, data.senderavatar);
             mainWindow?.webContents.send('privateMessage', data);
-            this.workerController.saveMessage(data.senderid,
+            this.workerController.saveMessage(data.senderid, MessageType.Private,
                 {
                     content: { type: 'from', sendBy: data.senderid, content: { ...data.content } },
                     date: new Date()
@@ -73,6 +74,16 @@ class Socketio {
         this.socket.on('user_group_message', (data: GroupMessage) => {
             console.log('got user group message');
             mainWindow?.webContents.send('userGroupMessage', data);
+            this.workerController.saveMessage(data.from, MessageType.Group,
+                {
+                    content: { type: 'from', sendBy: data.senderid, content: data.content },
+                    date: new Date()
+                },
+                {
+                    name: data.sendername,
+                    avatar: data.senderavatar,
+                    userId: data.senderid
+                });
         })
         this.socket.on('user_join_group', (data) => {
             console.log(`A user join the room ${data.userName}`);
@@ -107,7 +118,7 @@ class Socketio {
             }, () => {
                 // We sending message to receiver, so we store the info
                 // of the receiver, not ours
-                this.workerController.saveMessage(message.receiverid, {
+                this.workerController.saveMessage(message.receiverid, MessageType.Private, {
                     content: {
                         type: 'to',
                         sendBy: message.senderid,
@@ -136,7 +147,7 @@ class Socketio {
             }, () => {
                 console.log('socket promise resolve');
                 const { content, senderid: userId, senderavatar: avatar, sendername: userName } = message
-                this.workerController.saveMessage(to, {
+                this.workerController.saveMessage(to, MessageType.Group, {
                     content: { type: 'to', sendBy: userId, content: { ...content } },
                     date: new Date()
                 }, {
@@ -149,8 +160,8 @@ class Socketio {
         })
     }
 
-    public async queryMessages(userId: string, limit: number, offset: number) {
-        const res = await this.workerController.readMessages(userId, limit);
+    public async queryMessages(userId: string, type: MessageType, limit: number, offset: number) {
+        const res = await this.workerController.readMessages(userId, type, limit);
         return res;
     }
 

@@ -82,11 +82,11 @@ var map = new Map();
 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.on('message', function (data) {
     // check the data types in WorkerController.ts
     console.log('got message from main thread: ', data);
-    var operateType = data.type;
-    var content = data.content;
+    var operateType = data.operateType, type = data.type;
+    var _a = data.content, limit = _a.limit, content = _a.content, userId = _a.userId, userInfo = _a.userInfo;
     switch (operateType) {
         case 'read':
-            readMessage(content.userId, data.limit).then(function (res) {
+            readMessage(userId, limit).then(function (res) {
                 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.postMessage({
                     type: 'read',
                     content: {
@@ -98,7 +98,7 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
             break;
         case 'write':
             console.log('worker.ts got message: \n', data);
-            writeMessage(content.userId, content.content, content.userInfo);
+            writeMessage(userId, type, content, userInfo);
             break;
         default:
             break;
@@ -108,7 +108,7 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
  * @description create wStream and rStream for target user, and store in map
  * @param userID id use to open target chat file
  */
-function createStream(userID, userInfo) {
+function createStream(userID, userInfo, type) {
     return __awaiter(this, void 0, void 0, function () {
         var streamPath, indexFilePath, isIndexNewlyCreated, rStream, wStream, index, error_1;
         return __generator(this, function (_a) {
@@ -139,7 +139,7 @@ function createStream(userID, userInfo) {
                 case 6:
                     index = _a.sent();
                     if (!isIndexNewlyCreated) return [3 /*break*/, 9];
-                    index = __assign(__assign({}, userInfo), { messageCounts: 0 });
+                    index = __assign(__assign({}, userInfo), { type: type, messageCounts: 0 });
                     return [4 /*yield*/, fsP.truncate(indexFilePath, 0)];
                 case 7:
                     _a.sent();
@@ -169,7 +169,7 @@ function createStream(userID, userInfo) {
         });
     });
 }
-function writeMessage(userID, content, userInfo) {
+function writeMessage(userID, type, content, userInfo) {
     return __awaiter(this, void 0, void 0, function () {
         var _a, wStream, rStream, indexFilePath, index, updatedIndex, error_2;
         return __generator(this, function (_b) {
@@ -177,13 +177,14 @@ function writeMessage(userID, content, userInfo) {
                 case 0:
                     _b.trys.push([0, 5, , 6]);
                     if (!!map.has(userID)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, createStream(userID, userInfo)];
+                    return [4 /*yield*/, createStream(userID, userInfo, type)];
                 case 1:
                     _b.sent();
                     _b.label = 2;
                 case 2:
+                    console.log('write message trigger', { userID: userID, type: type, content: content, userInfo: userInfo });
                     _a = map.get(userID), wStream = _a.wStream, rStream = _a.rStream, indexFilePath = _a.indexFilePath, index = _a.index;
-                    updatedIndex = __assign(__assign({}, userInfo), { messageCounts: index.messageCounts + 1 });
+                    updatedIndex = __assign(__assign({}, userInfo), { type: type, messageCounts: index.messageCounts + 1 });
                     // store updated user index and message content into file
                     // flag:'w' means overwrite the file
                     return [4 /*yield*/, fsP.truncate(indexFilePath, 0)];

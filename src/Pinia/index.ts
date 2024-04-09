@@ -88,7 +88,7 @@ const User = defineStore('User', {
 const Socket_Info = defineStore('Socket_Info', {
     state: () => {
         return {
-            Socket_ID: String || null
+            Socket_ID: ''
         }
     },
 })

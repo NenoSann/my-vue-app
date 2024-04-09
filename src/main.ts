@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, nativeImage, Menu, Tray, Screen, screen } 
 import * as path from 'path';
 import { Socketio } from './Node_Util/index.ts';
 import { GroupMessage, PrivateMessage } from './Interface/user.ts';
+import { MessageType } from './Interface/NodeLocalStorage.ts';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -132,10 +133,10 @@ app.on('ready', () => {
         console.debug('groupIds: \n', groupIds);
         Socketio.getInstance().joinGroup(groupIds)
     })
-    ipcMain.handle('socket:queryMessages', (_event, userId: string, limit: number, offset: number) => {
+    ipcMain.handle('socket:queryMessages', (_event, userId: string, type: MessageType, limit: number, offset: number) => {
         return new Promise(async (resolve, reject) => {
             try {
-                const res = await Socketio.getInstance().queryMessages(userId, limit, offset);
+                const res = await Socketio.getInstance().queryMessages(userId, type, limit, offset);
                 resolve(res);
             } catch {
                 reject();

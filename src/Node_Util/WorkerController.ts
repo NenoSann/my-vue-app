@@ -1,18 +1,18 @@
 import { Worker } from 'node:worker_threads';
 // const { parentPort, Worker } = require('node:worker_threads');
-import { LocalMessageContent, LocalUserIndex, LocalUserInfo } from '../Interface/NodeLocalStorage';
+import { LocalMessageContent, LocalUserIndex, LocalUserInfo, MessageType } from '../Interface/NodeLocalStorage';
 export class WorkerController {
     worker: Worker;
     constructor() {
         this.worker = new Worker('./src/Node_Util/worker.js');
     }
-
-    public saveMessage(userId: string, content: {
+    public saveMessage(userId: string, type: MessageType, content: {
         content: LocalMessageContent,
         date: Date
     }, userInfo: LocalUserInfo) {
         this.worker.postMessage({
-            type: 'write',
+            operateType: 'write',
+            type,
             content: {
                 userId,
                 content,
@@ -21,7 +21,7 @@ export class WorkerController {
         })
     }
 
-    public readMessages(userId: string, limit: number): Promise<{
+    public readMessages(userId: string, type: MessageType, limit: number): Promise<{
         messages: string[],
         userInfo: LocalUserIndex | null | undefined
     }> {
@@ -52,7 +52,8 @@ export class WorkerController {
             this.worker.on('message', messageHandler);
 
             this.worker.postMessage({
-                type: 'read',
+                operateType: 'read',
+                type,
                 content: {
                     userId,
                     limit,
