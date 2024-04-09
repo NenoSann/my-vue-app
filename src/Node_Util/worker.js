@@ -110,84 +110,101 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
  */
 function createStream(userID, userInfo) {
     return __awaiter(this, void 0, void 0, function () {
-        var streamPath, indexPath, rStream, wStream, indexFilehandle, index, error_1;
+        var streamPath, indexFilePath, isIndexNewlyCreated, rStream, wStream, index, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     streamPath = path.join(_path, userID);
-                    indexPath = path.join(_path, userID + '.json');
+                    indexFilePath = path.join(_path, userID + '.json');
+                    isIndexNewlyCreated = false;
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 8, , 9]);
+                    _a.trys.push([1, 11, , 12]);
                     if (!!fs.existsSync(streamPath)) return [3 /*break*/, 3];
                     return [4 /*yield*/, createUserFile(streamPath)];
                 case 2:
                     _a.sent();
                     _a.label = 3;
                 case 3:
-                    if (!!fs.existsSync(indexPath)) return [3 /*break*/, 5];
-                    return [4 /*yield*/, createUserFile(indexPath)];
+                    if (!!fs.existsSync(indexFilePath)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, createUserFile(indexFilePath)];
                 case 4:
                     _a.sent();
+                    isIndexNewlyCreated = true;
                     _a.label = 5;
                 case 5:
                     rStream = fs.createReadStream(streamPath);
                     wStream = fs.createWriteStream(streamPath, { flags: 'a' });
-                    return [4 /*yield*/, fsP.open(indexPath, 'r+')];
+                    return [4 /*yield*/, readJSON(indexFilePath)];
                 case 6:
-                    indexFilehandle = _a.sent();
+                    index = _a.sent();
+                    if (!isIndexNewlyCreated) return [3 /*break*/, 9];
                     index = __assign(__assign({}, userInfo), { messageCounts: 0 });
-                    return [4 /*yield*/, indexFilehandle.writeFile(JSON.stringify(index))];
+                    return [4 /*yield*/, fsP.truncate(indexFilePath, 0)];
                 case 7:
                     _a.sent();
+                    return [4 /*yield*/, fsP.writeFile(indexFilePath, JSON.stringify(index))];
+                case 8:
+                    _a.sent();
+                    return [3 /*break*/, 10];
+                case 9:
+                    Object.assign(index, userInfo);
+                    _a.label = 10;
+                case 10:
                     map.set(userID, {
                         // we set the default state for the user
                         rStream: rStream,
                         wStream: wStream,
-                        indexFilehandle: indexFilehandle,
+                        indexFilePath: indexFilePath,
                         index: index
                     });
-                    return [3 /*break*/, 9];
-                case 8:
+                    console.log('first create index: ', index);
+                    return [3 /*break*/, 12];
+                case 11:
                     error_1 = _a.sent();
                     handleFsError(error_1);
-                    return [3 /*break*/, 9];
-                case 9: return [2 /*return*/];
+                    return [3 /*break*/, 12];
+                case 12: return [2 /*return*/];
             }
         });
     });
 }
 function writeMessage(userID, content, userInfo) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, wStream, rStream, indexFilehandle, index, updatedIndex, error_2;
+        var _a, wStream, rStream, indexFilePath, index, updatedIndex, error_2;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _b.trys.push([0, 4, , 5]);
+                    _b.trys.push([0, 5, , 6]);
                     if (!!map.has(userID)) return [3 /*break*/, 2];
                     return [4 /*yield*/, createStream(userID, userInfo)];
                 case 1:
                     _b.sent();
                     _b.label = 2;
                 case 2:
-                    _a = map.get(userID), wStream = _a.wStream, rStream = _a.rStream, indexFilehandle = _a.indexFilehandle, index = _a.index;
-                    updatedIndex = __assign(__assign({}, index), { messageCounts: index.messageCounts++ });
+                    _a = map.get(userID), wStream = _a.wStream, rStream = _a.rStream, indexFilePath = _a.indexFilePath, index = _a.index;
+                    updatedIndex = __assign(__assign({}, userInfo), { messageCounts: index.messageCounts + 1 });
                     // store updated user index and message content into file
-                    return [4 /*yield*/, indexFilehandle.writeFile(JSON.stringify(updatedIndex))];
+                    // flag:'w' means overwrite the file
+                    return [4 /*yield*/, fsP.truncate(indexFilePath, 0)];
                 case 3:
                     // store updated user index and message content into file
+                    // flag:'w' means overwrite the file
+                    _b.sent();
+                    return [4 /*yield*/, fsP.writeFile(indexFilePath, JSON.stringify(updatedIndex))];
+                case 4:
                     _b.sent();
                     wStream.write(JSON.stringify(content));
                     wStream.write('\n');
                     // assign updatedIndex to map
-                    map.set(userID, { rStream: rStream, wStream: wStream, indexFilehandle: indexFilehandle, index: updatedIndex });
-                    console.log('write content: ', content);
-                    return [3 /*break*/, 5];
-                case 4:
+                    map.set(userID, { rStream: rStream, wStream: wStream, indexFilePath: indexFilePath, index: updatedIndex });
+                    console.log('check index: ', updatedIndex);
+                    return [3 /*break*/, 6];
+                case 5:
                     error_2 = _b.sent();
                     handleFsError(error_2);
-                    return [3 /*break*/, 5];
-                case 5: return [2 /*return*/];
+                    return [3 /*break*/, 6];
+                case 6: return [2 /*return*/];
             }
         });
     });
@@ -391,6 +408,26 @@ function readPreviousChar(stat, file, currentCharacterCount, encoding) {
                         }
                     });
                 })];
+        });
+    });
+}
+function readJSON(file) {
+    return __awaiter(this, void 0, void 0, function () {
+        var jsonString, err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, fsP.readFile(file, { encoding: 'utf-8' })];
+                case 1:
+                    jsonString = _a.sent();
+                    return [2 /*return*/, JSON.parse(jsonString)];
+                case 2:
+                    err_1 = _a.sent();
+                    handleFsError(err_1);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
         });
     });
 }

@@ -29,7 +29,7 @@ const _path = path.join(cwd, 'message');
 const map = new Map<string, {
     rStream: fs.ReadStream,
     wStream: fs.WriteStream,
-    indexFilehandle: fsP.FileHandle
+    indexFilePath: fs.PathLike
     index: LocalUserIndex
 }>();
 
@@ -67,30 +67,39 @@ parentPort?.on('message', (data: any) => {
  */
 async function createStream(userID: string, userInfo: LocalUserInfo) {
     const streamPath = path.join(_path, userID);
-    const indexPath = path.join(_path, userID + '.json');
+    const indexFilePath = path.join(_path, userID + '.json');
+    let isIndexNewlyCreated: Boolean = false;
     // check if streamPath and indexPath exist, if not create them
     try {
         if (!fs.existsSync(streamPath)) {
             await createUserFile(streamPath);
         }
-        if (!fs.existsSync(indexPath)) {
-            await createUserFile(indexPath);
+        if (!fs.existsSync(indexFilePath)) {
+            await createUserFile(indexFilePath);
+            isIndexNewlyCreated = true;
         }
 
         // check what flags mean:
-        // 'a' means for appending, and 'r+' means write and read
+        // 'a' means for appending, and 'r+' means write and read,
         // https://nodejs.org/api/fs.html#file-system-flags
         const rStream = fs.createReadStream(streamPath);
         const wStream = fs.createWriteStream(streamPath, { flags: 'a' });
-        const indexFilehandle = await fsP.open(indexPath, 'r+')
-        const index = { ...userInfo, messageCounts: 0 };
-        await indexFilehandle.writeFile(JSON.stringify(index));
+        let index = await readJSON(indexFilePath);
+        // if indexFile is newly created we will try to overwrite it
+        if (isIndexNewlyCreated) {
+            index = { ...userInfo, messageCounts: 0 };
+            await fsP.truncate(indexFilePath, 0)
+            await fsP.writeFile(indexFilePath, JSON.stringify(index));
+        } else {
+            Object.assign(index, userInfo)
+        }
         map.set(userID, {
             // we set the default state for the user
             rStream, wStream,
-            indexFilehandle,
+            indexFilePath,
             index
         });
+        console.log('first create index: ', index);
     } catch (error) {
         handleFsError(error);
     }
@@ -102,24 +111,26 @@ async function writeMessage(userID: string, content: any, userInfo: LocalUserInf
             await createStream(userID, userInfo);
         }
         // doing type assertion because we had create those variables
-        const { wStream, rStream, indexFilehandle, index } = map.get(userID) as {
+        const { wStream, rStream, indexFilePath, index } = map.get(userID) as {
             rStream: fs.ReadStream,
             wStream: fs.WriteStream,
-            indexFilehandle: fsP.FileHandle
+            indexFilePath: fs.PathLike
             index: LocalUserIndex
         }
         // build updatedIndex
         const updatedIndex = {
-            ...index,
-            messageCounts: index.messageCounts++
+            ...userInfo,
+            messageCounts: index.messageCounts + 1
         }
         // store updated user index and message content into file
-        await indexFilehandle.writeFile(JSON.stringify(updatedIndex))
+        // flag:'w' means overwrite the file
+        await fsP.truncate(indexFilePath, 0);
+        await fsP.writeFile(indexFilePath, JSON.stringify(updatedIndex));
         wStream.write(JSON.stringify(content));
         wStream.write('\n');
         // assign updatedIndex to map
-        map.set(userID, { rStream, wStream, indexFilehandle, index: updatedIndex });
-        console.log('write content: ', content);
+        map.set(userID, { rStream, wStream, indexFilePath, index: updatedIndex });
+        console.log('check index: ', updatedIndex);
     } catch (error) {
         handleFsError(error);
     }
@@ -177,7 +188,7 @@ async function createUserFile(name: string) {
  * @description return the error to mainThread throght postMessage
  * @param error catched error in fs function
  */
-function handleFsError(error) {
+function handleFsError(error: any) {
     parentPort?.emit('messageerror', error);
 }
 
@@ -274,5 +285,15 @@ async function readPreviousChar(
         );
     });
 }
+
+async function readJSON(file: fsP.FileHandle | fs.PathLike) {
+    try {
+        const jsonString = await fsP.readFile(file, { encoding: 'utf-8' })
+        return JSON.parse(jsonString);
+    } catch (err) {
+        handleFsError(err);
+    }
+}
+
 
 module.exports
