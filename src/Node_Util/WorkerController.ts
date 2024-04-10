@@ -36,11 +36,9 @@ export class WorkerController {
                 }
             }) => {
                 if (data.type === 'read') {
-                    let res;
-                    res.messages = data.content.messages.map((json) => {
-                        return JSON.parse(json);
-                    })
-                    res.userInfo = data.content.userInfo;
+                    let res: any = {};
+                    const { messages, userInfo } = data.content;
+                    Object.assign(res, { messages, userInfo })
                     resolve(res);
                     this.worker.off('message', messageHandler);
                 } else if (data.type === 'error') {

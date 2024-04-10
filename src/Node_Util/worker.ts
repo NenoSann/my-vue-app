@@ -154,7 +154,10 @@ async function readMessage(userID: string, limit: number = 1) {
         if (fs.existsSync(userPath) && fs.existsSync(indexPath)) {
             // asyncly read the index file and parse into object
             const userInfo = JSON.parse(await (await fsP.open(indexPath, 'r')).readFile({ encoding: 'utf-8' }));
-            res.messages.push(... (await readLines(userPath, limit)));
+            const messages = (await readLines(userPath, limit)).map((jsonString) => {
+                return JSON.parse(jsonString);
+            });
+            res.messages.push(...messages);
             res.userInfo = userInfo
         }
         return res;

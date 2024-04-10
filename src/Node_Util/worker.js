@@ -213,12 +213,12 @@ function writeMessage(userID, type, content, userInfo) {
 function readMessage(userID, limit) {
     if (limit === void 0) { limit = 1; }
     return __awaiter(this, void 0, void 0, function () {
-        var userPath, indexPath, res, userInfo, _a, _b, _c, _d, _e, error_3;
-        var _f;
-        return __generator(this, function (_g) {
-            switch (_g.label) {
+        var userPath, indexPath, res, userInfo, _a, _b, messages, error_3;
+        var _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0:
-                    _g.trys.push([0, 5, , 6]);
+                    _d.trys.push([0, 5, , 6]);
                     userPath = path.join(_path, userID);
                     indexPath = path.join(_path, userID + '.json');
                     res = {
@@ -228,19 +228,20 @@ function readMessage(userID, limit) {
                     if (!(fs.existsSync(userPath) && fs.existsSync(indexPath))) return [3 /*break*/, 4];
                     _b = (_a = JSON).parse;
                     return [4 /*yield*/, fsP.open(indexPath, 'r')];
-                case 1: return [4 /*yield*/, (_g.sent()).readFile({ encoding: 'utf-8' })];
+                case 1: return [4 /*yield*/, (_d.sent()).readFile({ encoding: 'utf-8' })];
                 case 2:
-                    userInfo = _b.apply(_a, [_g.sent()]);
-                    _d = (_c = (_f = res.messages).push).apply;
-                    _e = [_f];
+                    userInfo = _b.apply(_a, [_d.sent()]);
                     return [4 /*yield*/, readLines(userPath, limit)];
                 case 3:
-                    _d.apply(_c, _e.concat([(_g.sent())]));
+                    messages = (_d.sent()).map(function (jsonString) {
+                        return JSON.parse(jsonString);
+                    });
+                    (_c = res.messages).push.apply(_c, messages);
                     res.userInfo = userInfo;
-                    _g.label = 4;
+                    _d.label = 4;
                 case 4: return [2 /*return*/, res];
                 case 5:
-                    error_3 = _g.sent();
+                    error_3 = _d.sent();
                     handleFsError(error_3);
                     return [3 /*break*/, 6];
                 case 6: return [2 /*return*/];
