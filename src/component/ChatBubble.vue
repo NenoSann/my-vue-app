@@ -21,7 +21,6 @@ import type { MessageContent } from '../Interface/user';
 const props = defineProps<{
     type: "to" | "from";
     content: MessageContent;
-    date: Date;
     avatar: string;
     time: string;
     name?: string;

@@ -26,8 +26,14 @@ interface IUser {
 interface LocalMessageContent {
     type: 'to' | 'from',
     content: MessageContent,
-    date: Date,
+    date: Date | string,
     sendBy: string
+}
+
+interface ChatUserInfo {
+    avatar: string,
+    name: string,
+    userId: string
 }
 
 enum eSideBar {
@@ -140,11 +146,7 @@ const Socket_Message = defineStore('Socket_Message', {
         }
     },
     actions: {
-        storeLocally(id: string, content: LocalMessageContent, userInfo: {
-            avatar: string,
-            name: string,
-            userId: string
-        }) {
+        storeLocally(id: string, content: LocalMessageContent | Array<LocalMessageContent>, userInfo: ChatUserInfo | Array<ChatUserInfo>) {
             // if messages is not defined: 
             // create a messages instance
             if (!this.$state.messages.has(id)) {
@@ -155,9 +157,17 @@ const Socket_Message = defineStore('Socket_Message', {
                     unread: 0
                 })
             }
-            this.$state.messages.get(id)?.data?.push(content)
+            if (Array.isArray(content)) {
+                this.$state.messages.get(id)?.data?.push(...content as Array<LocalMessageContent>);
+            } else {
+                this.$state.messages.get(id)?.data?.push(content as LocalMessageContent)
+            }
             const target = this.$state.messages.get(id);
-            target.user?.set(userInfo.userId, userInfo)
+            if (Array.isArray(userInfo)) {
+                userInfo.forEach((info) => target.user?.set(info.userId, info));
+            } else {
+                target.user?.set(userInfo.userId, userInfo)
+            }
         },
         storeLocalGroup(id: string, content: LocalMessageContent, userInfo: {
             avatar: string,
@@ -192,4 +202,4 @@ const ComponentState = defineStore('ComponentState', {
         }
     }
 })
-export { pinia, User, Socket_Info, Socket_Users, Socket_Target, Socket_Message, ComponentState, eSideBar, eContent }
+export { pinia, User, Socket_Info, Socket_Users, Socket_Target, Socket_Message, ComponentState, eSideBar, eContent, ChatUserInfo }

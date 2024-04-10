@@ -22,5 +22,6 @@ export type LocalMessageContent = {
     content: {
         text: string,
         image?: Array<string>
-    }
+    },
+    date: string
 }

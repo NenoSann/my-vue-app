@@ -1,5 +1,6 @@
 import { SocketUserInfo } from './user'
 import type { GroupMessage, PrivateMessage } from './user';
+import type { LocalMessageContent, LocalUserIndex } from './NodeLocalStorage';
 declare global {
     interface Window extends Window {
         storeUserInfo: {
@@ -11,7 +12,10 @@ declare global {
             connect: () => Promise<Boolean>;
             close: () => Promise<Boolean>;
             getUserMap: () => Promise<Map<string, SocketUserInfo>>;
-            queryMessages: (userId: string, type: 'group' | 'private', limit: number, offset: number) => Promise<any>;
+            queryMessages: (userId: string, limit: number, offset: number) => Promise<{
+                messages: Array<LocalMessageContent>,
+                userInfo: LocalUserIndex
+            }>;
             sendPrivateMessage: (to: string, content: PrivateMessage) => Promise<Boolean>;
             sendGroupMessage: (to: string, content: GroupMessage) => Promise<Boolean>;
             onConnect: (callback: (val: any) => void) => void;

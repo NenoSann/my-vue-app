@@ -20,10 +20,12 @@
 
 <script setup lang="ts">
 import ChatBubble from '../component/ChatBubble.vue';
-import { ref, computed } from 'vue';
-import { User, Socket_Target, Socket_Message, Socket_Info } from '../Pinia';
+import { ref, computed, watch } from 'vue';
+import { User, Socket_Target, Socket_Message, Socket_Info, ChatUserInfo } from '../Pinia';
+import { formatDate } from '../util';
 import type { Window } from '../Interface/preload';
 
+// vue state
 const input = ref('');
 const user = User();
 const SocketTarget = Socket_Target();
@@ -85,14 +87,23 @@ const sendMessage = async () => {
     input.value = '';
 };
 
-const formatDate = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
-};
+watch(SocketTarget, async (target) => {
+    const userId = target.userid;
+    if (userId) {
+        if (!SocketMessage.messages.has(userId)) {
+            const res = await window.socket.queryMessages(userId, 2, 0);
+            // we need to change this format in worker.ts
+            const messages = res.messages.map((msg) => {
+                return {
+                    ...msg.content,
+                    date: msg.date,
+                }
+            })
+            SocketMessage.storeLocally(res.userInfo.userId, messages as any, [res.userInfo, userInfo.value]);
+        }
+    }
+}, { immediate: true });
+
 </script>
 
 <style scoped>
