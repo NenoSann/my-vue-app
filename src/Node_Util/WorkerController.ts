@@ -32,7 +32,7 @@ export class WorkerController {
                 type: 'read' | 'write' | 'error',
                 content: {
                     messages: Array<string>,
-                    userInfo: LocalUserIndex | null | undefined
+                    userInfo: Array<LocalUserIndex> | LocalUserIndex | null | undefined
                 }
             }) => {
                 if (data.type === 'read') {

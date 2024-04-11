@@ -21,7 +21,8 @@
 <script setup lang="ts">
 import ChatBubble from '../component/ChatBubble.vue';
 import { ref, computed, watch } from 'vue';
-import { User, Socket_Target, Socket_Message, Socket_Info, ChatUserInfo } from '../Pinia';
+import { User, Socket_Target, Socket_Message, Socket_Info } from '../Pinia';
+import { LocalUserIndex, MessageType } from '../Interface/NodeLocalStorage.ts';
 import { formatDate } from '../util';
 import type { Window } from '../Interface/preload';
 
@@ -65,7 +66,7 @@ const sendMessage = async () => {
     const content = { text: input.value };
     const header = { ...messageHeader.value, content };
 
-    if (SocketTarget.type === 'User') {
+    if (SocketTarget.type === MessageType.Private) {
         window.socket.sendPrivateMessage(header.to, header).then(() => {
             SocketMessage.storeLocally(SocketTarget.userid, {
                 type: 'to',
@@ -74,7 +75,7 @@ const sendMessage = async () => {
                 sendBy: user._id
             }, userInfo.value);
         });
-    } else if (SocketTarget.type === 'Group') {
+    } else if (SocketTarget.type === MessageType.Group) {
         window.socket.sendGroupMessage(header.to, header).then(() => {
             SocketMessage.storeLocalGroup(SocketTarget.userid, {
                 type: 'to',
@@ -91,15 +92,23 @@ watch(SocketTarget, async (target) => {
     const userId = target.userid;
     if (userId) {
         if (!SocketMessage.messages.has(userId)) {
-            const res = await window.socket.queryMessages(userId, 2, 0);
-            // we need to change this format in worker.ts
+            const res = await window.socket.queryMessages(userId, target.type, 2, 0);
+            // we have to rename the userInfo to userinfo or
+            // we will face dublicated names
+            const { userInfo: userinfo } = res;
+            const { users } = userinfo;
+            // TODO: we need to change this format in worker.ts
             const messages = res.messages.map((msg) => {
                 return {
                     ...msg.content,
                     date: msg.date,
                 }
             })
-            SocketMessage.storeLocally(res.userInfo.userId, messages as any, [res.userInfo, userInfo.value]);
+            if (target.type === MessageType.Private) {
+                SocketMessage.storeLocally(users[0].userId, messages as any, [...users, userInfo.value]);
+            } else if (target.type === MessageType.Group) {
+                SocketMessage.storeLocally(target.userid, messages as any, users);
+            }
         }
     }
 }, { immediate: true });

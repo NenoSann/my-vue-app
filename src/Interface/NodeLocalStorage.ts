@@ -1,14 +1,14 @@
 export type LocalUserIndex = {
-    name: string,
-    avatar: string,
-    userId: string,
+    users: Array<LocalUserInfo>,
     messageCounts: number,
     type: MessageType
 }
 
+
+
 export enum MessageType {
-    Private = 'private',
-    Group = 'group'
+    Private = 'Private',
+    Group = 'Group'
 }
 
 export type LocalUserInfo = {
@@ -23,5 +23,5 @@ export type LocalMessageContent = {
         text: string,
         image?: Array<string>
     },
-    date: string
+    date?: string
 }

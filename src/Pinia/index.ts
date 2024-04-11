@@ -1,6 +1,7 @@
 import { createPinia, defineStore } from "pinia";
 import { login } from "../API/user";
 import type { MessageContent } from '../Interface/user';
+import { MessageType } from "../Interface/NodeLocalStorage";
 
 interface IFriend {
     name: string,
@@ -116,7 +117,7 @@ const Socket_Target = defineStore('Socket_Target', {
     state: () => {
         return {
             isActive: false,
-            type: '' as 'User' | 'Group',
+            type: '' as MessageType,
             socketid: '',
             avatar: '',
             name: '',

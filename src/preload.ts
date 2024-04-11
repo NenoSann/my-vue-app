@@ -3,6 +3,7 @@
 import { contextBridge, ipcRenderer } from "electron"
 import type { PrivateMessage } from "./Interface/user";
 import * as path from 'path';
+import { MessageType } from "./Interface/NodeLocalStorage";
 contextBridge.exposeInMainWorld('versions', {
     node: () => process.versions.node,
     chrome: () => process.versions.chrome,
@@ -45,7 +46,7 @@ contextBridge.exposeInMainWorld('socket', {
             ipcRenderer.invoke('socket:groupMessage', ...args).then(() => resolve(true)).catch(() => reject());
         })
     },
-    queryMessages: (userId: string, limit: number, offset: number) => {
+    queryMessages: (userId: string, type: MessageType, limit: number, offset: number) => {
         return new Promise((resolve, reject) => {
             ipcRenderer.invoke('socket:queryMessages', userId, limit, offset).then((res) =>
                 resolve(res)

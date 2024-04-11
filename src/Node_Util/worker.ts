@@ -5,10 +5,11 @@
  *  存储结构:
  *  message:
  *      |   'id1'
+ *      |   'id1.json'
  *      |   'id2'
+ *      |   'id2.json'
  *              ...
  *  因为考虑到简单性以及不会有那么多信息储存, 使用单文件来存储使用者和各个用户之间的信息, 每个信息储存的形式为JSON.stringfy(), 并且隔行用"\n"分隔
- *  在编译的时候请将ESM的import切换为上面的CJS引入
  */
 // const { parentPort } = require('node:worker_threads');
 // const fs = require('node:fs');
@@ -21,8 +22,12 @@ import * as fsP from 'node:fs/promises';
 import * as path from 'node:path';
 import * as stream from 'node:stream/promises';
 import * as readline from 'readline';
-import type { PrivateMessage, MessageContent } from '../Interface/user';
-import { LocalMessageContent, LocalUserIndex, LocalUserInfo, MessageType } from '../Interface/NodeLocalStorage';
+import {
+    LocalMessageContent,
+    LocalUserIndex,
+    LocalUserInfo,
+    MessageType
+} from '../Interface/NodeLocalStorage';
 const cwd = process.cwd();
 const NEW_LINE_CHARACTERS = ["\n"];
 const _path = path.join(cwd, 'message');
@@ -30,7 +35,11 @@ const map = new Map<string, {
     rStream: fs.ReadStream,
     wStream: fs.WriteStream,
     indexFilePath: fs.PathLike
-    index: LocalUserIndex
+    index: {
+        users: Map<string, LocalUserInfo>,
+        messageCounts: number,
+        type: MessageType
+    }
 }>();
 
 
@@ -41,7 +50,7 @@ parentPort?.on('message', (data: any) => {
     const { limit, content, userId, userInfo } = data.content;
     switch (operateType) {
         case 'read':
-            readMessage(userId, limit).then((res) => {
+            readMessage(userId, type, limit).then((res) => {
                 parentPort?.postMessage({
                     type: 'read',
                     content: {
@@ -87,9 +96,11 @@ async function createStream(userID: string, userInfo: LocalUserInfo, type: Messa
         let index = await readJSON(indexFilePath);
         // if indexFile is newly created we will try to overwrite it
         if (isIndexNewlyCreated) {
-            index = { ...userInfo, type, messageCounts: 0 };
+            const users = new Map().set(userInfo.userId, userInfo);
+            const stringfyIndex = { users: [userInfo], type, messageCounts: 0 }
+            index = { users, type, messageCounts: 0 };
             await fsP.truncate(indexFilePath, 0)
-            await fsP.writeFile(indexFilePath, JSON.stringify(index));
+            await fsP.writeFile(indexFilePath, JSON.stringify(stringfyIndex));
         } else {
             Object.assign(index, userInfo)
         }
@@ -116,18 +127,31 @@ async function writeMessage(userID: string, type: MessageType, content: any, use
             rStream: fs.ReadStream,
             wStream: fs.WriteStream,
             indexFilePath: fs.PathLike
-            index: LocalUserIndex
+            index: {
+                users: Map<string, LocalUserInfo>,
+                messageCounts: number,
+                type: MessageType
+            }
         }
+
         // build updatedIndex
+        // we have two index, one for memory
+        // and one for disk
+        index.users.set(userInfo.userId, userInfo);
         const updatedIndex = {
-            ...userInfo,
+            users: index.users,
+            type,
+            messageCounts: index.messageCounts + 1
+        }
+        const stringfyUpdatedIndex = {
+            users: Array.from(index.users.values()),
             type,
             messageCounts: index.messageCounts + 1
         }
         // store updated user index and message content into file
         // flag:'w' means overwrite the file
         await fsP.truncate(indexFilePath, 0);
-        await fsP.writeFile(indexFilePath, JSON.stringify(updatedIndex));
+        await fsP.writeFile(indexFilePath, JSON.stringify(stringfyUpdatedIndex));
         wStream.write(JSON.stringify(content));
         wStream.write('\n');
         // assign updatedIndex to map
@@ -138,7 +162,7 @@ async function writeMessage(userID: string, type: MessageType, content: any, use
     }
 }
 
-async function readMessage(userID: string, limit: number = 1) {
+async function readMessage(userID: string, type: MessageType, limit: number = 1) {
     try {
         // In readMessage we don't want to be complicated
         // just read and return the info
@@ -160,6 +184,7 @@ async function readMessage(userID: string, limit: number = 1) {
             res.messages.push(...messages);
             res.userInfo = userInfo
         }
+        // TODO: compile this typescript file and test the new feature
         return res;
     } catch (error) {
         handleFsError(error);

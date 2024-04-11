@@ -10,6 +10,7 @@
 
 <script setup lang="ts">
 import { UserItem } from '.';
+import { MessageType } from '../Interface/NodeLocalStorage.ts';
 import { User, Socket_Target } from '../Pinia';
 import { computed } from 'vue';
 const SocketTarget = Socket_Target();
@@ -19,7 +20,7 @@ const groupList = computed(() => {
 })
 function handleLiSelect(avatar: string, username: string, userid: string) {
     SocketTarget.isActive = true;
-    SocketTarget.type = 'Group';
+    SocketTarget.type = MessageType.Group;
     SocketTarget.avatar = avatar;
     SocketTarget.name = username
     SocketTarget.socketid = userid;

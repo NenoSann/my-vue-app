@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -61,10 +50,11 @@ exports.__esModule = true;
  *  存储结构:
  *  message:
  *      |   'id1'
+ *      |   'id1.json'
  *      |   'id2'
+ *      |   'id2.json'
  *              ...
  *  因为考虑到简单性以及不会有那么多信息储存, 使用单文件来存储使用者和各个用户之间的信息, 每个信息储存的形式为JSON.stringfy(), 并且隔行用"\n"分隔
- *  在编译的时候请将ESM的import切换为上面的CJS引入
  */
 // const { parentPort } = require('node:worker_threads');
 // const fs = require('node:fs');
@@ -86,7 +76,7 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
     var _a = data.content, limit = _a.limit, content = _a.content, userId = _a.userId, userInfo = _a.userInfo;
     switch (operateType) {
         case 'read':
-            readMessage(userId, limit).then(function (res) {
+            readMessage(userId, type, limit).then(function (res) {
                 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.postMessage({
                     type: 'read',
                     content: {
@@ -110,7 +100,7 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
  */
 function createStream(userID, userInfo, type) {
     return __awaiter(this, void 0, void 0, function () {
-        var streamPath, indexFilePath, isIndexNewlyCreated, rStream, wStream, index, error_1;
+        var streamPath, indexFilePath, isIndexNewlyCreated, rStream, wStream, index, users, stringfyIndex, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -139,11 +129,13 @@ function createStream(userID, userInfo, type) {
                 case 6:
                     index = _a.sent();
                     if (!isIndexNewlyCreated) return [3 /*break*/, 9];
-                    index = __assign(__assign({}, userInfo), { type: type, messageCounts: 0 });
+                    users = new Map().set(userInfo.userId, userInfo);
+                    stringfyIndex = { users: [userInfo], type: type, messageCounts: 0 };
+                    index = { users: users, type: type, messageCounts: 0 };
                     return [4 /*yield*/, fsP.truncate(indexFilePath, 0)];
                 case 7:
                     _a.sent();
-                    return [4 /*yield*/, fsP.writeFile(indexFilePath, JSON.stringify(index))];
+                    return [4 /*yield*/, fsP.writeFile(indexFilePath, JSON.stringify(stringfyIndex))];
                 case 8:
                     _a.sent();
                     return [3 /*break*/, 10];
@@ -171,7 +163,7 @@ function createStream(userID, userInfo, type) {
 }
 function writeMessage(userID, type, content, userInfo) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, wStream, rStream, indexFilePath, index, updatedIndex, error_2;
+        var _a, wStream, rStream, indexFilePath, index, updatedIndex, stringfyUpdatedIndex, error_2;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -184,7 +176,20 @@ function writeMessage(userID, type, content, userInfo) {
                 case 2:
                     console.log('write message trigger', { userID: userID, type: type, content: content, userInfo: userInfo });
                     _a = map.get(userID), wStream = _a.wStream, rStream = _a.rStream, indexFilePath = _a.indexFilePath, index = _a.index;
-                    updatedIndex = __assign(__assign({}, userInfo), { type: type, messageCounts: index.messageCounts + 1 });
+                    // build updatedIndex
+                    // we have two index, one for memory
+                    // and one for disk
+                    index.users.set(userInfo.userId, userInfo);
+                    updatedIndex = {
+                        users: index.users,
+                        type: type,
+                        messageCounts: index.messageCounts + 1
+                    };
+                    stringfyUpdatedIndex = {
+                        users: Array.from(index.users.values()),
+                        type: type,
+                        messageCounts: index.messageCounts + 1
+                    };
                     // store updated user index and message content into file
                     // flag:'w' means overwrite the file
                     return [4 /*yield*/, fsP.truncate(indexFilePath, 0)];
@@ -192,7 +197,7 @@ function writeMessage(userID, type, content, userInfo) {
                     // store updated user index and message content into file
                     // flag:'w' means overwrite the file
                     _b.sent();
-                    return [4 /*yield*/, fsP.writeFile(indexFilePath, JSON.stringify(updatedIndex))];
+                    return [4 /*yield*/, fsP.writeFile(indexFilePath, JSON.stringify(stringfyUpdatedIndex))];
                 case 4:
                     _b.sent();
                     wStream.write(JSON.stringify(content));
@@ -210,7 +215,7 @@ function writeMessage(userID, type, content, userInfo) {
         });
     });
 }
-function readMessage(userID, limit) {
+function readMessage(userID, type, limit) {
     if (limit === void 0) { limit = 1; }
     return __awaiter(this, void 0, void 0, function () {
         var userPath, indexPath, res, userInfo, _a, _b, messages, error_3;
@@ -239,7 +244,9 @@ function readMessage(userID, limit) {
                     (_c = res.messages).push.apply(_c, messages);
                     res.userInfo = userInfo;
                     _d.label = 4;
-                case 4: return [2 /*return*/, res];
+                case 4: 
+                // TODO: compile this typescript file and test the new feature
+                return [2 /*return*/, res];
                 case 5:
                     error_3 = _d.sent();
                     handleFsError(error_3);

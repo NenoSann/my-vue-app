@@ -13,6 +13,7 @@
 import { computed } from 'vue';
 import { User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
 import { useRouter } from 'vue-router';
+import { MessageType } from '../Interface/NodeLocalStorage.ts';
 import UserItem from './UserItem.vue';
 const router = useRouter();
 const SocketUsers = Socket_Users();
@@ -35,7 +36,7 @@ function getUnread(targetUserId: string) {
 
 function handleLiSelect(avatar: string, username: string, userid: string) {
     SocketTarget.isActive = true;
-    SocketTarget.type = 'User';
+    SocketTarget.type = MessageType.Private;
     SocketTarget.avatar = avatar;
     SocketTarget.name = username
     SocketTarget.socketid = SocketUsers.usermap.get(userid)?.socketid as string;
