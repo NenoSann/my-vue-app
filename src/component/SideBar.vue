@@ -13,23 +13,35 @@
                 <AddressBook />
             </Icon>
         </div>
+        <div class="sidebar-icon groups" @click="() => { testQueryUnreadChats('65fc1740c92cb42e7b5bea82') }">
+            <Icon size="32">
+                <Cat />
+            </Icon>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { SideBar, TheIcon } from './index';
 import { useRouter } from 'vue-router';
-import { Comments, AddressBook } from '@vicons/fa';
+import { Comments, AddressBook, Cat } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
 import { User, ComponentState, eSideBar } from '../Pinia';
 import { ref, watch, computed } from 'vue';
+import { queryUnreadChats } from '../API/user';
 const user = User();
 const sidebar = ComponentState();
 const router = useRouter();
 const imageURL = computed(() => {
     return user?.avatar;
 });
-
+const testQueryUnreadChats = async (userId: string) => {
+    try {
+        console.log(await queryUnreadChats(userId));
+    } catch (error) {
+        console.log(error);
+    }
+}
 </script>
 
 <style scoped>

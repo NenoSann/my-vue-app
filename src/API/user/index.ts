@@ -1,7 +1,9 @@
 import { ItemsResponse, IFriend } from '../../Interface/Response';
 import axios from "axios";
 import { IUser } from '../../Interface/user'
-const login = async function (email: string, password: string) {
+const baseURL = (import.meta as any).env.DEV ? '/api' : 'http://43.163.234.220:8081';
+
+export const login = async function (email: string, password: string) {
     return new Promise<{
         status: string,
         user: {
@@ -20,9 +22,9 @@ const login = async function (email: string, password: string) {
     })
 }
 
-function queryFriends(url: string): Promise<ItemsResponse<IFriend>>;
-function queryFriends(userId: string, limit?: number, offset?: number): Promise<ItemsResponse<IFriend>>;
-async function queryFriends(urlOrUserId: string, limit?: number, offset?: number): Promise<ItemsResponse<IFriend>> {
+export function queryFriends(url: string): Promise<ItemsResponse<IFriend>>;
+export function queryFriends(userId: string, limit?: number, offset?: number): Promise<ItemsResponse<IFriend>>;
+export async function queryFriends(urlOrUserId: string, limit?: number, offset?: number): Promise<ItemsResponse<IFriend>> {
     return new Promise((resolve, reject) => {
         if (limit === undefined && offset === undefined) {
             axios.get(urlOrUserId).then((res) => {
@@ -40,5 +42,19 @@ async function queryFriends(urlOrUserId: string, limit?: number, offset?: number
     })
 }
 
-
-export { login, queryFriends }
+export async function queryUnreadChats(userId: string) {
+    return new Promise((resolve, reject) => {
+        if (userId) {
+            axios.get(baseURL + '/queryUnreadChats', {
+                params: {
+                    userId
+                }
+            }).then((response) => {
+                console.log(response);
+                resolve(response.data);
+            }).catch((error) => {
+                reject(error);
+            })
+        }
+    })
+}

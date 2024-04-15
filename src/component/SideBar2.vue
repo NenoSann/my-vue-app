@@ -1,7 +1,5 @@
 <template>
     <div class="flex flex-col w-80 h-full border-r-[1px] border-neutral-600  select-none">
-        <!-- <UserList></UserList>
-        <FriendsAndGroup></FriendsAndGroup> -->
         <component :is="component"></component>
     </div>
 </template>
