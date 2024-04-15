@@ -96,14 +96,20 @@ async function createStream(userID: string, userInfo: LocalUserInfo, type: Messa
         let index = await readJSON(indexFilePath);
         // if indexFile is newly created we will try to overwrite it
         if (isIndexNewlyCreated) {
-            const users = new Map().set(userInfo.userId, userInfo);
-            const stringfyIndex = { users: [userInfo], type, messageCounts: 0 }
+            const users = [userInfo];
+            const stringfyIndex = { users, type, messageCounts: 0 }
             index = { users, type, messageCounts: 0 };
             await fsP.truncate(indexFilePath, 0)
             await fsP.writeFile(indexFilePath, JSON.stringify(stringfyIndex));
         } else {
             Object.assign(index, userInfo)
         }
+        // cast the array to a map
+        const userMap = new Map();
+        for (const user of index.users) {
+            userMap.set(user.userId, user);
+        }
+        index.users = userMap;
         map.set(userID, {
             // we set the default state for the user
             rStream, wStream,
@@ -219,6 +225,7 @@ async function createUserFile(name: string) {
  * @param error catched error in fs function
  */
 function handleFsError(error: any) {
+    console.error('error on worker', error);
     parentPort?.emit('messageerror', error);
 }
 

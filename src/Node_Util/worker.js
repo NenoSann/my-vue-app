@@ -100,49 +100,55 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
  */
 function createStream(userID, userInfo, type) {
     return __awaiter(this, void 0, void 0, function () {
-        var streamPath, indexFilePath, isIndexNewlyCreated, rStream, wStream, index, users, stringfyIndex, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var streamPath, indexFilePath, isIndexNewlyCreated, rStream, wStream, index, users, stringfyIndex, userMap, _i, _a, user, error_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     streamPath = path.join(_path, userID);
                     indexFilePath = path.join(_path, userID + '.json');
                     isIndexNewlyCreated = false;
-                    _a.label = 1;
+                    _b.label = 1;
                 case 1:
-                    _a.trys.push([1, 11, , 12]);
+                    _b.trys.push([1, 11, , 12]);
                     if (!!fs.existsSync(streamPath)) return [3 /*break*/, 3];
                     return [4 /*yield*/, createUserFile(streamPath)];
                 case 2:
-                    _a.sent();
-                    _a.label = 3;
+                    _b.sent();
+                    _b.label = 3;
                 case 3:
                     if (!!fs.existsSync(indexFilePath)) return [3 /*break*/, 5];
                     return [4 /*yield*/, createUserFile(indexFilePath)];
                 case 4:
-                    _a.sent();
+                    _b.sent();
                     isIndexNewlyCreated = true;
-                    _a.label = 5;
+                    _b.label = 5;
                 case 5:
                     rStream = fs.createReadStream(streamPath);
                     wStream = fs.createWriteStream(streamPath, { flags: 'a' });
                     return [4 /*yield*/, readJSON(indexFilePath)];
                 case 6:
-                    index = _a.sent();
+                    index = _b.sent();
                     if (!isIndexNewlyCreated) return [3 /*break*/, 9];
-                    users = new Map().set(userInfo.userId, userInfo);
-                    stringfyIndex = { users: [userInfo], type: type, messageCounts: 0 };
+                    users = [userInfo];
+                    stringfyIndex = { users: users, type: type, messageCounts: 0 };
                     index = { users: users, type: type, messageCounts: 0 };
                     return [4 /*yield*/, fsP.truncate(indexFilePath, 0)];
                 case 7:
-                    _a.sent();
+                    _b.sent();
                     return [4 /*yield*/, fsP.writeFile(indexFilePath, JSON.stringify(stringfyIndex))];
                 case 8:
-                    _a.sent();
+                    _b.sent();
                     return [3 /*break*/, 10];
                 case 9:
                     Object.assign(index, userInfo);
-                    _a.label = 10;
+                    _b.label = 10;
                 case 10:
+                    userMap = new Map();
+                    for (_i = 0, _a = index.users; _i < _a.length; _i++) {
+                        user = _a[_i];
+                        userMap.set(user.userId, user);
+                    }
+                    index.users = userMap;
                     map.set(userID, {
                         // we set the default state for the user
                         rStream: rStream,
@@ -153,7 +159,7 @@ function createStream(userID, userInfo, type) {
                     console.log('first create index: ', index);
                     return [3 /*break*/, 12];
                 case 11:
-                    error_1 = _a.sent();
+                    error_1 = _b.sent();
                     handleFsError(error_1);
                     return [3 /*break*/, 12];
                 case 12: return [2 /*return*/];
@@ -289,6 +295,7 @@ function createUserFile(name) {
  * @param error catched error in fs function
  */
 function handleFsError(error) {
+    console.error('error on worker', error);
     node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.emit('messageerror', error);
 }
 function readLines(inputFilePath, lineCounts) {
