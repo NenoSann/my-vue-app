@@ -112,6 +112,7 @@ class Socketio {
     public sendPrivateMessage(to: string, message: PrivateMessage): Promise<Boolean> {
         // send the content to target recerver
         return new Promise<Boolean>((resolve, reject) => {
+            const { senderid, content, receivername, receiveravatar, receiverid } = message;
             this?.socket.emit('private_message', {
                 to,
                 ...message
@@ -121,16 +122,25 @@ class Socketio {
                 this.workerController.saveMessage(message.receiverid, MessageType.Private, {
                     content: {
                         type: 'to',
-                        sendBy: message.senderid,
-                        content: { ...message.content }
+                        sendBy: senderid,
+                        content: { ...content }
                     },
                     date: new Date()
                 },
                     {
-                        name: message.receivername,
-                        avatar: message.receiveravatar,
-                        userId: message.receiverid
+                        name: receivername,
+                        avatar: receiveravatar,
+                        userId: receiverid
                     });
+                this.workerController.writeMessageList({
+                    name: receivername,
+                    avatar: receiveravatar,
+                    userId: receiverid
+                }, MessageType.Private, {
+                    type: 'to',
+                    sendBy: senderid,
+                    content: { ...content }
+                })
                 resolve(true);
             });
         })

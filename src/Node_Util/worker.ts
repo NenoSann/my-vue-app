@@ -257,6 +257,9 @@ async function readMessageList() {
 
 async function setMessageList(info: LocalUserInfo, type: MessageType, content: LocalMessageContent) {
     try {
+        if (messageListMap.size === 0) {
+            await createMessageList();
+        }
         if (messageListMap.has(info.userId)) {
             const { content: prevContent } = messageListMap.get(info.userId) as LocalMessageList;
             // Check if prevContent has more than 10 elements
