@@ -23,6 +23,7 @@ import * as path from 'node:path';
 import * as stream from 'node:stream/promises';
 import * as readline from 'readline';
 import {
+    LocalMessageList,
     LocalMessageContent,
     LocalUserIndex,
     LocalUserInfo,
@@ -31,7 +32,8 @@ import {
 const cwd = process.cwd();
 const NEW_LINE_CHARACTERS = ["\n"];
 const _path = path.join(cwd, 'message');
-const map = new Map<string, {
+const messageListPath = path.join(_path, 'messageList.json');
+const messageMap = new Map<string, {
     rStream: fs.ReadStream,
     wStream: fs.WriteStream,
     indexFilePath: fs.PathLike
@@ -41,18 +43,18 @@ const map = new Map<string, {
         type: MessageType
     }
 }>();
-
+const messageListMap: Map<string, LocalMessageList> = new Map();
 
 parentPort?.on('message', (data: any) => {
     // check the data types in WorkerController.ts
     console.log('got message from main thread: ', data);
     const { operateType, type } = data;
-    const { limit, content, userId, userInfo } = data.content;
+    const { limit, content, userId, userInfo, info } = data.content;
     switch (operateType) {
-        case 'read':
+        case 'readMessage':
             readMessage(userId, type, limit).then((res) => {
                 parentPort?.postMessage({
-                    type: 'read',
+                    type: 'readMessage',
                     content: {
                         messages: res?.messages,
                         userInfo: res?.userInfo,
@@ -60,9 +62,26 @@ parentPort?.on('message', (data: any) => {
                 })
             });
             break;
-        case 'write':
+        case 'writeMessage':
             console.log('worker.ts got message: \n', data);
             writeMessage(userId, type as MessageType, content, userInfo as LocalUserInfo);
+            break;
+        case 'readMessageList':
+            console.log('worker.ts got readMessageList', data);
+            readMessageList().then((res) => {
+                parentPort?.postMessage({
+                    type: 'readMessageList',
+                    content: res
+                })
+            })
+            break;
+        case 'writeMessageList':
+            console.log('worker.ts got writeMessageList', data);
+            setMessageList(info, type, content).then(() => {
+                parentPort?.postMessage({
+                    type: 'writeMessageList'
+                })
+            });
             break;
         default:
             break;
@@ -71,7 +90,7 @@ parentPort?.on('message', (data: any) => {
 
 
 /**
- * @description create wStream and rStream for target user, and store in map
+ * @description create wStream and rStream for target user, and store in messageMap
  * @param userID id use to open target chat file 
  */
 async function createStream(userID: string, userInfo: LocalUserInfo, type: MessageType) {
@@ -104,13 +123,13 @@ async function createStream(userID: string, userInfo: LocalUserInfo, type: Messa
         } else {
             Object.assign(index, userInfo)
         }
-        // cast the array to a map
+        // cast the array to a messageMap
         const userMap = new Map();
         for (const user of index.users) {
             userMap.set(user.userId, user);
         }
         index.users = userMap;
-        map.set(userID, {
+        messageMap.set(userID, {
             // we set the default state for the user
             rStream, wStream,
             indexFilePath,
@@ -124,12 +143,12 @@ async function createStream(userID: string, userInfo: LocalUserInfo, type: Messa
 
 async function writeMessage(userID: string, type: MessageType, content: any, userInfo: LocalUserInfo) {
     try {
-        if (!map.has(userID)) {
+        if (!messageMap.has(userID)) {
             await createStream(userID, userInfo, type);
         }
         console.log('write message trigger', { userID, type, content, userInfo });
         // doing type assertion because we had create those variables
-        const { wStream, rStream, indexFilePath, index } = map.get(userID) as {
+        const { wStream, rStream, indexFilePath, index } = messageMap.get(userID) as {
             rStream: fs.ReadStream,
             wStream: fs.WriteStream,
             indexFilePath: fs.PathLike
@@ -160,8 +179,8 @@ async function writeMessage(userID: string, type: MessageType, content: any, use
         await fsP.writeFile(indexFilePath, JSON.stringify(stringfyUpdatedIndex));
         wStream.write(JSON.stringify(content));
         wStream.write('\n');
-        // assign updatedIndex to map
-        map.set(userID, { rStream, wStream, indexFilePath, index: updatedIndex });
+        // assign updatedIndex to messageMap
+        messageMap.set(userID, { rStream, wStream, indexFilePath, index: updatedIndex });
         console.log('check index: ', updatedIndex);
     } catch (error) {
         handleFsError(error);
@@ -197,6 +216,70 @@ async function readMessage(userID: string, type: MessageType, limit: number = 1)
     }
 }
 
+/** Creates a message list file if it doesn't already exist.
+* @throws {Error} If there is an error while creating the file.
+*/
+async function createMessageList() {
+    return new Promise<boolean>(async (resolve, reject) => {
+        try {
+            if (!fs.existsSync(messageListPath)) {
+                await createEmptyFile(messageListPath);
+            }
+            // do a type assertion
+            const messageList = await readJSON(messageListPath) as Array<LocalMessageList>;
+            for (const message of messageList) {
+                messageListMap.set(message.info.userId, message);
+            }
+            resolve(true);
+        } catch (error) {
+            handleFsError(error);
+            reject(false);
+        }
+    })
+}
+
+async function readMessageList() {
+    return new Promise<Array<LocalMessageList>>(async (resolve, reject) => {
+        try {
+            // if the map has not been created
+            if (messageListMap.size === 0) {
+                await createMessageList();
+            }
+            // create return result from messageListMap valuse
+            const messageList = Array.from(messageListMap.values());
+            resolve(messageList)
+        } catch (error) {
+            handleFsError(error);
+            reject();
+        }
+    })
+}
+
+async function setMessageList(info: LocalUserInfo, type: MessageType, content: LocalMessageContent) {
+    try {
+        if (messageListMap.has(info.userId)) {
+            const { content: prevContent } = messageListMap.get(info.userId) as LocalMessageList;
+            // Check if prevContent has more than 10 elements
+            if (prevContent.length >= 10) {
+                // Delete the first element using Array.prototype.shift()
+                prevContent.shift();
+            }
+            // Push the new message content to the end of prevContent
+            prevContent.push(content);
+            // Update the messageListMap with the updated prevContent
+            messageListMap.set(info.userId, { content: prevContent, type, info, date: new Date() });
+        } else {
+            // If the user doesn't have a message list, create a new one with the current message
+            const newMessageList: LocalMessageList = { content: [content], type, info, date: new Date() };
+            messageListMap.set(info.userId, newMessageList);
+        }
+        await writeJSON(messageListPath, Array.from(messageListMap.values()));
+    } catch (error) {
+        handleFsError(error);
+    }
+}
+
+
 /**
  * @description use to create user's chat history
  * @param name  --the file name
@@ -204,20 +287,39 @@ async function readMessage(userID: string, type: MessageType, limit: number = 1)
 async function createUserFile(name: string) {
     return new Promise<boolean>((resolve, reject) => {
         const directoryPath = path.dirname(name);
-        fs.mkdir(directoryPath, { recursive: true }, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                fs.open(name, 'w', (err, _file) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(true);
-                    }
-                });
-            }
-        });
+        // fs.mkdir(directoryPath, { recursive: true }, (err) => {
+        //     if (err) {
+        //         reject(err);
+        //     } else {
+        //         fs.open(name, 'w', (err, _file) => {
+        //             if (err) {
+        //                 reject(err);
+        //             } else {
+        //                 resolve(true);
+        //             }
+        //         });
+        //     }
+        // });
+        createEmptyFile(directoryPath).then(() => resolve(true));
     });
+}
+
+/**
+ * @description create a empty file with given path, if that path is exist 
+ *              then it will be truncated.
+ * @param path 
+ */
+async function createEmptyFile(path: string | fs.PathLike) {
+    try {
+        if (fs.existsSync(path)) {
+            await fsP.truncate(path, 0);
+        }
+        (await fsP.open(path, 'w')).close();
+        return true;
+    } catch (error) {
+        handleFsError(error);
+        return false;
+    }
 }
 
 /**
@@ -323,14 +425,29 @@ async function readPreviousChar(
     });
 }
 
+/**
+ * Reads a JSON file and parses its contents into a JavaScript object.
+ * @throws {Error} If there is an error reading or parsing the JSON file.
+ */
 async function readJSON(file: fsP.FileHandle | fs.PathLike) {
     try {
-        const jsonString = await fsP.readFile(file, { encoding: 'utf-8' })
+        const jsonString = await fsP.readFile(file, { encoding: 'utf-8' });
         return JSON.parse(jsonString);
     } catch (err) {
         handleFsError(err);
     }
 }
 
+/**
+ * Writes a JavaScript object to a JSON file.
+ * @throws {Error} If there is an error writing the JSON file.
+ */
+async function writeJSON(file: fsP.FileHandle | fs.PathLike, object: Object) {
+    try {
+        await fsP.writeFile(file, JSON.stringify(object));
+    } catch (error) {
+        handleFsError(error);
+    }
+}
 
 module.exports

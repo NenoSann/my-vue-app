@@ -4,7 +4,7 @@ import { mainWindow } from "../main.ts";
 import type { SocketUserInfo, PrivateMessage, MessageContent, GroupMessage } from "../Interface/user.ts";
 import { WorkerController } from './WorkerController';
 import { NotificationController } from "../Electron/index.ts";
-import { MessageType } from "../Interface/NodeLocalStorage.ts";
+import { MessageType, LocalUserInfo, LocalMessageContent } from "../Interface/NodeLocalStorage.ts";
 const SocketURL = 'http://43.163.234.220:8081';
 class Socketio {
     private static instance: Socketio | undefined;
@@ -163,6 +163,15 @@ class Socketio {
     public async queryMessages(userId: string, type: MessageType, limit: number, offset: number) {
         const res = await this.workerController.readMessages(userId, type, limit);
         return res;
+    }
+
+    public async readMessageList() {
+        const res = await this.workerController.readMessageList();
+        return res;
+    }
+
+    public async writeMessageList(info: LocalUserInfo, type: MessageType, content: LocalMessageContent) {
+        await this.workerController.writeMessageList(info, type, content);
     }
 
     public async joinGroup(groupIds: Array<string>) {

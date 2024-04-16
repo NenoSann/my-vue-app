@@ -3,7 +3,7 @@
 import { contextBridge, ipcRenderer } from "electron"
 import type { PrivateMessage } from "./Interface/user";
 import * as path from 'path';
-import { MessageType } from "./Interface/NodeLocalStorage";
+import { LocalMessageContent, LocalMessageList, LocalUserInfo, MessageType } from "./Interface/NodeLocalStorage";
 contextBridge.exposeInMainWorld('versions', {
     node: () => process.versions.node,
     chrome: () => process.versions.chrome,
@@ -51,6 +51,20 @@ contextBridge.exposeInMainWorld('socket', {
             ipcRenderer.invoke('socket:queryMessages', userId, limit, offset).then((res) =>
                 resolve(res)
             ).catch(() => reject());
+        })
+    },
+    writeMessageList: (info: LocalUserInfo, type: MessageType, content: LocalMessageContent) => {
+        return new Promise<void>((resolve, reject) => {
+            ipcRenderer.invoke('socket:writeMessageList', info, type, content).then(() => {
+                resolve();
+            }).catch(() => reject());
+        })
+    },
+    readMessageList: () => {
+        return new Promise<Array<LocalMessageList>>((resolve, reject) => {
+            ipcRenderer.invoke('socket:readMessageList').then((res: Array<LocalMessageList>) => {
+                resolve(res);
+            }).catch(() => reject());
         })
     },
     // From main thread to webpage

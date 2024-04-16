@@ -13,7 +13,7 @@
                 <AddressBook />
             </Icon>
         </div>
-        <div class="sidebar-icon groups" @click="() => { testQueryUnreadChats('65fc1740c92cb42e7b5bea82') }">
+        <div class="sidebar-icon groups" @click="testReadMessageList">
             <Icon size="32">
                 <Cat />
             </Icon>
@@ -29,6 +29,7 @@ import { Icon } from '@vicons/utils';
 import { User, ComponentState, eSideBar } from '../Pinia';
 import { ref, watch, computed } from 'vue';
 import { queryUnreadChats } from '../API/user';
+import { MessageType } from '../Interface/NodeLocalStorage.ts';
 const user = User();
 const sidebar = ComponentState();
 const router = useRouter();
@@ -41,6 +42,27 @@ const testQueryUnreadChats = async (userId: string) => {
     } catch (error) {
         console.log(error);
     }
+}
+const testWriteMessageList = async () => {
+    window.socket.writeMessageList({
+        name: 'test',
+        avatar: 'testAvatar',
+        userId: 'testId',
+    }, MessageType.Private, {
+        type: 'from',
+        sendBy: 'testID',
+        content: {
+            text: 'testWriteMessageList'
+        },
+        date: new Date().toISOString()
+    })
+}
+
+
+const testReadMessageList = async () => {
+    console.log('foo');
+    const res = await window.socket.readMessageList();
+    console.log(res);
 }
 </script>
 

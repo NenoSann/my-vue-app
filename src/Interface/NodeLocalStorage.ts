@@ -4,8 +4,6 @@ export type LocalUserIndex = {
     type: MessageType
 }
 
-
-
 export enum MessageType {
     Private = 'Private',
     Group = 'Group'
@@ -24,4 +22,12 @@ export type LocalMessageContent = {
         image?: Array<string>
     },
     date?: string
+}
+
+// use a map to store LocalMessageList
+export type LocalMessageList = {
+    type: MessageType,
+    info: LocalUserInfo,
+    content: Array<LocalMessageContent>,
+    date: Date
 }

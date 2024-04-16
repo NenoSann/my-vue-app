@@ -1,6 +1,6 @@
 import { SocketUserInfo } from './user'
 import type { GroupMessage, PrivateMessage } from './user';
-import type { LocalGroupIndex, LocalMessageContent, LocalUserIndex, MessageType } from './NodeLocalStorage';
+import type { LocalGroupIndex, LocalMessageContent, LocalUserIndex, MessageType, LocalMessageList } from './NodeLocalStorage';
 declare global {
     interface Window extends Window {
         storeUserInfo: {
@@ -18,6 +18,8 @@ declare global {
             }>;
             sendPrivateMessage: (to: string, content: PrivateMessage) => Promise<Boolean>;
             sendGroupMessage: (to: string, content: GroupMessage) => Promise<Boolean>;
+            writeMessageList: (info: LocalUserInfo, type: MessageType, content: LocalMessageContent) => Promise<void>;
+            readMessageList: () => Promise<Array<LocalMessageContent>>;
             onConnect: (callback: (val: any) => void) => void;
             onUserConnected: (callback: (val: any) => void) => void;
             onUserDisconnected: (callback: (val: any) => void) => void;
