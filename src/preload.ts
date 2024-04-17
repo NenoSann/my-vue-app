@@ -13,15 +13,6 @@ contextBridge.exposeInMainWorld('versions', {
 })
 
 
-
-contextBridge.exposeInMainWorld('storeUserInfo', {
-    save: async (data: string) => {
-        const result = await ipcRenderer.invoke('testFS', data);
-        console.log(result);
-    }
-});
-
-
 /**
  *  In this section we expose apis that let webpage access node environment,
  *  after adding new functions we need to add declaration in preload.d.ts to 
@@ -77,4 +68,10 @@ contextBridge.exposeInMainWorld('socket', {
     onUserMap: (callback: Function) => ipcRenderer.on('usermap', (_event, usermap) => callback(usermap)),
     onPrivateMessage: (callback: Function) => ipcRenderer.on('privateMessage', (_event, from: string, message: PrivateMessage) => callback(from, message)),
     onUserGroupMessage: (callback: Function) => ipcRenderer.on('userGroupMessage', (_event, data) => callback(data)),
+})
+
+contextBridge.exposeInMainWorld('url', {
+    openURL: (url: string) => {
+        ipcRenderer.invoke('url:openURL', url);
+    }
 })

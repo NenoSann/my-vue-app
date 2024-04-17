@@ -1,2 +1,3 @@
 import { NotificationController } from "./NotificationController";
-export { NotificationController }
+import { WindowsController } from "./WindowsController";
+export { NotificationController, WindowsController }
