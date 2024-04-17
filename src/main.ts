@@ -1,8 +1,9 @@
-import { app, BrowserWindow, ipcMain, nativeImage, Menu, Tray, Screen, screen } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeImage, Menu, Tray, Screen, screen, shell } from 'electron';
 import * as path from 'path';
 import { Socketio } from './Node_Util/index.ts';
 import { GroupMessage, PrivateMessage } from './Interface/user.ts';
 import { MessageType, LocalMessageContent, LocalUserInfo } from './Interface/NodeLocalStorage.ts';
+import { WindowsController } from './Electron/WindowsController.ts';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -51,8 +52,10 @@ const createWindow = () => {
 
 const createTray = () => {
     tray = new Tray(icon);
-    tray.on('click', () => {
-        mainWindow?.show();
+    tray.on('double-click', () => {
+        // mainWindow?.show();
+        const windowsctl = new WindowsController();
+        windowsctl.createWindow();
     })
     const contextMenu = Menu.buildFromTemplate([
         { label: '好友', type: 'normal' },
@@ -164,5 +167,9 @@ app.on('ready', () => {
         })
     })
     ipcMain.on('socket:close', () => Socketio.getInstance()?.close());
+
+    ipcMain.handle('url:openURL', (_event, url: string) => {
+        shell.openExternal(url);
+    })
 });
 export { mainWindow }

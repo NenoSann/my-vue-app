@@ -26,6 +26,9 @@ declare global {
             onClose: (callback: (val: any) => void) => void;
             onPrivateMessage: (callback: (val: any) => void) => void;
             onUserGroupMessage: (callback: (val: any) => void) => void;
+        },
+        url: {
+            openURL: (url: string) => void;
         }
     }
 }
