@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -42,7 +42,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  *  这个模块用来管理electron本地的聊天记录的存储和读取, 它使用一个map来管理一个userID => {wStream,rStream}的关系,
  *  通过判断mainThread通过postMessage中附带的类别和data来进行读取/储存用户发送的内容, 并通过postMessage方法来和mainThread沟通
@@ -68,34 +68,53 @@ var path = require("node:path");
 var cwd = process.cwd();
 var NEW_LINE_CHARACTERS = ["\n"];
 var _path = path.join(cwd, 'message');
-var map = new Map();
+var messageListPath = path.join(_path, 'messageList.json');
+var messageMap = new Map();
+var messageListMap = new Map();
 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.on('message', function (data) {
     // check the data types in WorkerController.ts
     console.log('got message from main thread: ', data);
     var operateType = data.operateType, type = data.type;
-    var _a = data.content, limit = _a.limit, content = _a.content, userId = _a.userId, userInfo = _a.userInfo;
+    var _a = data.content, limit = _a.limit, content = _a.content, userId = _a.userId, userInfo = _a.userInfo, info = _a.info;
     switch (operateType) {
-        case 'read':
+        case 'readMessage':
             readMessage(userId, type, limit).then(function (res) {
                 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.postMessage({
-                    type: 'read',
+                    type: 'readMessage',
                     content: {
                         messages: res === null || res === void 0 ? void 0 : res.messages,
-                        userInfo: res === null || res === void 0 ? void 0 : res.userInfo
+                        userInfo: res === null || res === void 0 ? void 0 : res.userInfo,
                     }
                 });
             });
             break;
-        case 'write':
+        case 'writeMessage':
             console.log('worker.ts got message: \n', data);
             writeMessage(userId, type, content, userInfo);
+            break;
+        case 'readMessageList':
+            console.log('worker.ts got readMessageList', data);
+            readMessageList().then(function (res) {
+                node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.postMessage({
+                    type: 'readMessageList',
+                    content: res
+                });
+            });
+            break;
+        case 'writeMessageList':
+            console.log('worker.ts got writeMessageList', data);
+            setMessageList(info, type, content).then(function () {
+                node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.postMessage({
+                    type: 'writeMessageList'
+                });
+            });
             break;
         default:
             break;
     }
 });
 /**
- * @description create wStream and rStream for target user, and store in map
+ * @description create wStream and rStream for target user, and store in messageMap
  * @param userID id use to open target chat file
  */
 function createStream(userID, userInfo, type) {
@@ -149,7 +168,7 @@ function createStream(userID, userInfo, type) {
                         userMap.set(user.userId, user);
                     }
                     index.users = userMap;
-                    map.set(userID, {
+                    messageMap.set(userID, {
                         // we set the default state for the user
                         rStream: rStream,
                         wStream: wStream,
@@ -174,14 +193,14 @@ function writeMessage(userID, type, content, userInfo) {
             switch (_b.label) {
                 case 0:
                     _b.trys.push([0, 5, , 6]);
-                    if (!!map.has(userID)) return [3 /*break*/, 2];
+                    if (!!messageMap.has(userID)) return [3 /*break*/, 2];
                     return [4 /*yield*/, createStream(userID, userInfo, type)];
                 case 1:
                     _b.sent();
                     _b.label = 2;
                 case 2:
                     console.log('write message trigger', { userID: userID, type: type, content: content, userInfo: userInfo });
-                    _a = map.get(userID), wStream = _a.wStream, rStream = _a.rStream, indexFilePath = _a.indexFilePath, index = _a.index;
+                    _a = messageMap.get(userID), wStream = _a.wStream, rStream = _a.rStream, indexFilePath = _a.indexFilePath, index = _a.index;
                     // build updatedIndex
                     // we have two index, one for memory
                     // and one for disk
@@ -208,8 +227,8 @@ function writeMessage(userID, type, content, userInfo) {
                     _b.sent();
                     wStream.write(JSON.stringify(content));
                     wStream.write('\n');
-                    // assign updatedIndex to map
-                    map.set(userID, { rStream: rStream, wStream: wStream, indexFilePath: indexFilePath, index: updatedIndex });
+                    // assign updatedIndex to messageMap
+                    messageMap.set(userID, { rStream: rStream, wStream: wStream, indexFilePath: indexFilePath, index: updatedIndex });
                     console.log('check index: ', updatedIndex);
                     return [3 /*break*/, 6];
                 case 5:
@@ -262,6 +281,118 @@ function readMessage(userID, type, limit) {
         });
     });
 }
+/** Creates a message list file if it doesn't already exist.
+* @throws {Error} If there is an error while creating the file.
+*/
+function createMessageList() {
+    return __awaiter(this, void 0, void 0, function () {
+        var _this = this;
+        return __generator(this, function (_a) {
+            return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                    var messageList, _i, messageList_1, message, error_4;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 4, , 5]);
+                                if (!!fs.existsSync(messageListPath)) return [3 /*break*/, 2];
+                                return [4 /*yield*/, createEmptyFile(messageListPath)];
+                            case 1:
+                                _a.sent();
+                                _a.label = 2;
+                            case 2: return [4 /*yield*/, readJSON(messageListPath)];
+                            case 3:
+                                messageList = _a.sent();
+                                for (_i = 0, messageList_1 = messageList; _i < messageList_1.length; _i++) {
+                                    message = messageList_1[_i];
+                                    messageListMap.set(message.info.userId, message);
+                                }
+                                resolve(true);
+                                return [3 /*break*/, 5];
+                            case 4:
+                                error_4 = _a.sent();
+                                handleFsError(error_4);
+                                reject(false);
+                                return [3 /*break*/, 5];
+                            case 5: return [2 /*return*/];
+                        }
+                    });
+                }); })];
+        });
+    });
+}
+function readMessageList() {
+    return __awaiter(this, void 0, void 0, function () {
+        var _this = this;
+        return __generator(this, function (_a) {
+            return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                    var messageList, error_5;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 3, , 4]);
+                                if (!(messageListMap.size === 0)) return [3 /*break*/, 2];
+                                return [4 /*yield*/, createMessageList()];
+                            case 1:
+                                _a.sent();
+                                _a.label = 2;
+                            case 2:
+                                messageList = Array.from(messageListMap.values());
+                                resolve(messageList);
+                                return [3 /*break*/, 4];
+                            case 3:
+                                error_5 = _a.sent();
+                                handleFsError(error_5);
+                                reject();
+                                return [3 /*break*/, 4];
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                }); })];
+        });
+    });
+}
+function setMessageList(info, type, content) {
+    return __awaiter(this, void 0, void 0, function () {
+        var prevContent, newMessageList, error_6;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 4, , 5]);
+                    if (!(messageListMap.size === 0)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, createMessageList()];
+                case 1:
+                    _a.sent();
+                    _a.label = 2;
+                case 2:
+                    if (messageListMap.has(info.userId)) {
+                        prevContent = messageListMap.get(info.userId).content;
+                        // Check if prevContent has more than 10 elements
+                        if (prevContent.length >= 10) {
+                            // Delete the first element using Array.prototype.shift()
+                            prevContent.shift();
+                        }
+                        // Push the new message content to the end of prevContent
+                        prevContent.push(content);
+                        // Update the messageListMap with the updated prevContent
+                        messageListMap.set(info.userId, { content: prevContent, type: type, info: info, date: new Date() });
+                    }
+                    else {
+                        newMessageList = { content: [content], type: type, info: info, date: new Date() };
+                        messageListMap.set(info.userId, newMessageList);
+                    }
+                    return [4 /*yield*/, writeJSON(messageListPath, Array.from(messageListMap.values()))];
+                case 3:
+                    _a.sent();
+                    return [3 /*break*/, 5];
+                case 4:
+                    error_6 = _a.sent();
+                    handleFsError(error_6);
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+}
 /**
  * @description use to create user's chat history
  * @param name  --the file name
@@ -271,22 +402,51 @@ function createUserFile(name) {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve, reject) {
                     var directoryPath = path.dirname(name);
-                    fs.mkdir(directoryPath, { recursive: true }, function (err) {
-                        if (err) {
-                            reject(err);
-                        }
-                        else {
-                            fs.open(name, 'w', function (err, _file) {
-                                if (err) {
-                                    reject(err);
-                                }
-                                else {
-                                    resolve(true);
-                                }
-                            });
-                        }
-                    });
+                    // fs.mkdir(directoryPath, { recursive: true }, (err) => {
+                    //     if (err) {
+                    //         reject(err);
+                    //     } else {
+                    //         fs.open(name, 'w', (err, _file) => {
+                    //             if (err) {
+                    //                 reject(err);
+                    //             } else {
+                    //                 resolve(true);
+                    //             }
+                    //         });
+                    //     }
+                    // });
+                    createEmptyFile(directoryPath).then(function () { return resolve(true); });
                 })];
+        });
+    });
+}
+/**
+ * @description create a empty file with given path, if that path is exist
+ *              then it will be truncated.
+ * @param path
+ */
+function createEmptyFile(path) {
+    return __awaiter(this, void 0, void 0, function () {
+        var error_7;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 4, , 5]);
+                    if (!fs.existsSync(path)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, fsP.truncate(path, 0)];
+                case 1:
+                    _a.sent();
+                    _a.label = 2;
+                case 2: return [4 /*yield*/, fsP.open(path, 'w')];
+                case 3:
+                    (_a.sent()).close();
+                    return [2 /*return*/, true];
+                case 4:
+                    error_7 = _a.sent();
+                    handleFsError(error_7);
+                    return [2 /*return*/, false];
+                case 5: return [2 /*return*/];
+            }
         });
     });
 }
@@ -299,40 +459,48 @@ function handleFsError(error) {
     node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.emit('messageerror', error);
 }
 function readLines(inputFilePath, lineCounts) {
-    var e_1, _a;
+    var _a, e_1, _b, _c;
     return __awaiter(this, void 0, void 0, function () {
-        var file, res, _b, _c, line, e_1_1;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        var file, res, _d, _e, _f, line, e_1_1;
+        return __generator(this, function (_g) {
+            switch (_g.label) {
                 case 0:
                     file = fsP.open(inputFilePath);
                     res = [];
-                    _d.label = 1;
+                    _g.label = 1;
                 case 1:
-                    _d.trys.push([1, 7, 8, 13]);
+                    _g.trys.push([1, 7, 8, 13]);
+                    _d = true;
                     return [4 /*yield*/, file];
                 case 2:
-                    _b = __asyncValues.apply(void 0, [(_d.sent()).readLines()]);
-                    _d.label = 3;
-                case 3: return [4 /*yield*/, _b.next()];
+                    _e = __asyncValues.apply(void 0, [(_g.sent()).readLines()]);
+                    _g.label = 3;
+                case 3: return [4 /*yield*/, _e.next()];
                 case 4:
-                    if (!(_c = _d.sent(), !_c.done)) return [3 /*break*/, 6];
-                    line = _c.value;
-                    res.push(line);
-                    _d.label = 5;
+                    if (!(_f = _g.sent(), _a = _f.done, !_a)) return [3 /*break*/, 6];
+                    _c = _f.value;
+                    _d = false;
+                    try {
+                        line = _c;
+                        res.push(line);
+                    }
+                    finally {
+                        _d = true;
+                    }
+                    _g.label = 5;
                 case 5: return [3 /*break*/, 3];
                 case 6: return [3 /*break*/, 13];
                 case 7:
-                    e_1_1 = _d.sent();
+                    e_1_1 = _g.sent();
                     e_1 = { error: e_1_1 };
                     return [3 /*break*/, 13];
                 case 8:
-                    _d.trys.push([8, , 11, 12]);
-                    if (!(_c && !_c.done && (_a = _b["return"]))) return [3 /*break*/, 10];
-                    return [4 /*yield*/, _a.call(_b)];
+                    _g.trys.push([8, , 11, 12]);
+                    if (!(!_d && !_a && (_b = _e.return))) return [3 /*break*/, 10];
+                    return [4 /*yield*/, _b.call(_e)];
                 case 9:
-                    _d.sent();
-                    _d.label = 10;
+                    _g.sent();
+                    _g.label = 10;
                 case 10: return [3 /*break*/, 12];
                 case 11:
                     if (e_1) throw e_1.error;
@@ -427,6 +595,10 @@ function readPreviousChar(stat, file, currentCharacterCount, encoding) {
         });
     });
 }
+/**
+ * Reads a JSON file and parses its contents into a JavaScript object.
+ * @throws {Error} If there is an error reading or parsing the JSON file.
+ */
 function readJSON(file) {
     return __awaiter(this, void 0, void 0, function () {
         var jsonString, err_1;
@@ -441,6 +613,30 @@ function readJSON(file) {
                 case 2:
                     err_1 = _a.sent();
                     handleFsError(err_1);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+/**
+ * Writes a JavaScript object to a JSON file.
+ * @throws {Error} If there is an error writing the JSON file.
+ */
+function writeJSON(file, object) {
+    return __awaiter(this, void 0, void 0, function () {
+        var error_8;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, fsP.writeFile(file, JSON.stringify(object))];
+                case 1:
+                    _a.sent();
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_8 = _a.sent();
+                    handleFsError(error_8);
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }
