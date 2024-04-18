@@ -70,8 +70,16 @@ contextBridge.exposeInMainWorld('socket', {
     onUserGroupMessage: (callback: Function) => ipcRenderer.on('userGroupMessage', (_event, data) => callback(data)),
 })
 
-contextBridge.exposeInMainWorld('url', {
+contextBridge.exposeInMainWorld('urlAPI', {
     openURL: (url: string) => {
         ipcRenderer.invoke('url:openURL', url);
+    }
+})
+
+contextBridge.exposeInMainWorld('fileAPI', {
+    getImage: async () => {
+        return ipcRenderer.invoke('file:getImage').then((res: string[] | string) => {
+            return res;
+        });
     }
 })

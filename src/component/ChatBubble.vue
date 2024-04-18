@@ -38,7 +38,7 @@ onMounted(() => {
             node.addEventListener('click', (event) => {
                 event.preventDefault();
                 const href = (event.target as any).href as string;
-                window.url.openURL(href);
+                window.urlAPI.openURL(href);
             })
         }
     })

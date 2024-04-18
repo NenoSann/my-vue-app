@@ -27,8 +27,11 @@ declare global {
             onPrivateMessage: (callback: (val: any) => void) => void;
             onUserGroupMessage: (callback: (val: any) => void) => void;
         },
-        url: {
+        urlAPI: {
             openURL: (url: string) => void;
+        },
+        fileAPI: {
+            getImage: () => Promise<string[] | string>;
         }
     }
 }

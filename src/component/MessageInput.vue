@@ -11,7 +11,7 @@
                     <FileRegular />
                 </Icon>
             </div>
-            <div class="sidebar-icon">
+            <div class="sidebar-icon" @click="handleImageClick">
                 <Icon size="22">
                     <FileImageRegular />
                 </Icon>
@@ -30,10 +30,12 @@ import { Ref, ref } from 'vue';
 import { GrinTongueRegular, FileRegular, FileImageRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
 import { sendMessage } from '../util';
+import type { Window } from '../Interface/Global'
 const emits = defineEmits(['update:scroll']);
 const props = defineProps<{
     disabled: boolean
 }>()
+const image: Ref<string[]> = ref([]);
 const text = ref('');
 const handleClick = () => {
     const callback = () => {
@@ -41,6 +43,11 @@ const handleClick = () => {
     }
     sendMessage(text.value, callback);
     text.value = '';
+}
+const handleImageClick = async () => {
+    const res = await window.fileAPI.getImage();
+    image.value.push(...res);
+    console.log(res);
 }
 </script>
 

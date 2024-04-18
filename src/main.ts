@@ -1,9 +1,9 @@
-import { app, BrowserWindow, ipcMain, nativeImage, Menu, Tray, Screen, screen, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeImage, Menu, Tray, Screen, screen, shell, dialog } from 'electron';
 import * as path from 'path';
 import { Socketio } from './Node_Util/index.ts';
 import { GroupMessage, PrivateMessage } from './Interface/user.ts';
 import { MessageType, LocalMessageContent, LocalUserInfo } from './Interface/NodeLocalStorage.ts';
-import { WindowsController } from './Electron/WindowsController.ts';
+import { WindowsController, DialogController, BufferController, } from './Electron';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -168,8 +168,20 @@ app.on('ready', () => {
     })
     ipcMain.on('socket:close', () => Socketio.getInstance()?.close());
 
+    // url api handler
     ipcMain.handle('url:openURL', (_event, url: string) => {
         shell.openExternal(url);
+    })
+
+    ipcMain.handle('file:getImage', async (_event) => {
+        try {
+            const imagePath = (await DialogController.openSelectImageDialog(mainWindow)).filePaths;
+            const base64 = await BufferController.readImageFromPath(imagePath, 'Base64');
+            console.log(base64);
+            return base64;
+        } catch (error) {
+            console.error(error);
+        }
     })
 });
 export { mainWindow }
