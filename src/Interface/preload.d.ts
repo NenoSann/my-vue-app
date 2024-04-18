@@ -31,7 +31,11 @@ declare global {
             openURL: (url: string) => void;
         },
         fileAPI: {
+<<<<<<< HEAD
             getImage: () => Promise<string[] | string>;
+=======
+            getImage: () => string[] | string;
+>>>>>>> ac4788f5b391c4104d7ac306ae3e2018b74e2ec0
         }
     }
 }
