@@ -2,7 +2,7 @@
     <div>
         <ul class="daisy-menu bg-base-200 w-full h-full p-0 [&_li>*]:rounded-none">
             <UserItem v-for="(user, index) in userlist" :userid="user[1].userid" :name="user[1].name"
-                :avatar="user[1].avatar" :index="index" :callback="handleLiSelect" :online="user[1].online"
+                :avatar="user[1].avatar" :index="index" :callback="changeSocketTarget" :online="user[1].online"
                 :unread="getUnread(user[1].userid)">
             </UserItem>
         </ul>
@@ -15,6 +15,7 @@ import { User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
 import { useRouter } from 'vue-router';
 import { MessageType } from '../Interface/NodeLocalStorage.ts';
 import UserItem from './UserItem.vue';
+import { changeSocketTarget } from '../util';
 const router = useRouter();
 const SocketUsers = Socket_Users();
 const user = User();
@@ -34,16 +35,6 @@ function getUnread(targetUserId: string) {
     return unread.toString();
 }
 
-function handleLiSelect(avatar: string, username: string, userid: string) {
-    SocketTarget.isActive = true;
-    SocketTarget.type = MessageType.Private;
-    SocketTarget.avatar = avatar;
-    SocketTarget.name = username
-    SocketTarget.socketid = SocketUsers.usermap.get(userid)?.socketid as string;
-    SocketTarget.userid = userid
-    const fullpath = '/channels/@me'
-    router.replace(fullpath + '/' + user[0]);
-}
 </script>
 
 <style scoped>

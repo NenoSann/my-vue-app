@@ -195,6 +195,14 @@ const Socket_Message = defineStore('Socket_Message', {
     }
 })
 
+const MessageList = defineStore('MessageList', {
+    state: () => {
+        return {
+
+        }
+    }
+})
+
 const ComponentState = defineStore('ComponentState', {
     state: () => {
         return {

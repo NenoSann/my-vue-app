@@ -19,7 +19,7 @@ declare global {
             sendPrivateMessage: (to: string, content: PrivateMessage) => Promise<Boolean>;
             sendGroupMessage: (to: string, content: GroupMessage) => Promise<Boolean>;
             writeMessageList: (info: LocalUserInfo, type: MessageType, content: LocalMessageContent) => Promise<void>;
-            readMessageList: () => Promise<Array<LocalMessageContent>>;
+            readMessageList: () => Promise<Array<LocalMessageList>>;
             onConnect: (callback: (val: any) => void) => void;
             onUserConnected: (callback: (val: any) => void) => void;
             onUserDisconnected: (callback: (val: any) => void) => void;

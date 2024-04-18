@@ -1,5 +1,6 @@
 <template>
-    <li class="list-item" @click="() => { if (props.callback) { props.callback(avatar, name, userid) } }"
+    <li class="list-item"
+        @click="() => { if (props.callback) { props.callback(avatar, name, userid, MessageType.Private) } }"
         @keypress.enter="">
         <a :tabindex="props.index">
             <div class="daisy-avatar w-12" :class="{ 'daisy-online': props.online, 'daisy-offline': !props.online }">
@@ -7,9 +8,9 @@
             </div>
             <div class="flex flex-col">
                 <p id="username">{{ name }}</p>
-                <p id="lastest-message">{{ "Test message 🐱🐱🐱" }}</p>
+                <p id="lastest-message">{{ props.description }}</p>
             </div>
-            <span v-if="props.unread !== ''" class="daisy-badge daisy-badge-primary">{{ props.unread }}</span>
+            <span v-if="props.unread" class="daisy-badge daisy-badge-primary">{{ props.unread }}</span>
         </a>
     </li>
 </template>
@@ -17,14 +18,16 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { Socket_Message } from '../Pinia';
+import { MessageType } from '../Interface/NodeLocalStorage.ts';
 const props = defineProps<{
     userid: string,
     avatar: string,
     name: string,
-    index: number,
-    callback: (avatar: string, username: string, userid: string) => void,
-    unread: string,
-    online: boolean
+    index: number | string,
+    callback: (avatar: string, username: string, userid: string, type: MessageType) => void,
+    unread?: string,
+    online?: boolean,
+    description?: string,
 }>();
 
 onMounted(() => {
