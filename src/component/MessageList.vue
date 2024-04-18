@@ -15,7 +15,6 @@ import UserItemSkeleton from './UserItemSkeleton.vue'
 import { UserItem } from '.';
 import { onMounted, ref, Ref } from 'vue';
 import { Socket_Target, Socket_Users } from '../Pinia';
-import { MessageType } from '../Interface/NodeLocalStorage.ts';
 import { LocalMessageList } from '../Interface/NodeLocalStorage';
 import { changeSocketTarget } from '../util';
 const SocketTarget = Socket_Target();

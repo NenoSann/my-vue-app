@@ -8,4 +8,17 @@ import UserList from "./UserList.vue";
 import TheIcon from "./TheIcon.vue";
 import GroupList from './GroupList.vue';
 import MessageList from './MessageList.vue';
-export { Channel, ChatBubble, FriendsAndGroup, SideBar, SideBar2, UserItem, UserList, TheIcon, GroupList, MessageList }
+import MessageInput from './MessageInput.vue'
+export {
+    Channel,
+    ChatBubble,
+    FriendsAndGroup,
+    SideBar,
+    SideBar2,
+    UserItem,
+    UserList,
+    TheIcon,
+    GroupList,
+    MessageList,
+    MessageInput
+}

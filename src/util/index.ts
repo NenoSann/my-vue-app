@@ -1,6 +1,9 @@
 import DOMPurify from 'dompurify';
-import { Socket_Target, Socket_Users } from '../Pinia';
+import { User, Socket_Target, Socket_Message, Socket_Info, Socket_Users } from '../Pinia';
 import { MessageType } from '../Interface/NodeLocalStorage.ts';
+import { computed } from 'vue';
+import type { Window } from '../Interface/preload';
+
 const uriRegex = /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z]+)+)(?:\/\S*)?/g;
 export function formatDate(date: Date | string): string {
     if (typeof date === 'string') {
@@ -33,3 +36,66 @@ export function changeSocketTarget(avatar: string, username: string, userid: str
     SocketTarget.userid = userid
     const fullpath = '/channels/@me'
 }
+
+export function scrollDiv(element: HTMLElement, type: 'top' | 'end', behavior: 'smooth' | 'instant') {
+    const option = {
+        left: 0,
+        top: 0,
+        behavior
+    }
+    if (type === 'end') {
+        option.top = element.scrollHeight;
+    }
+    element.scrollTo(option);
+}
+
+export function sendMessage(text: string, callback: Function) {
+    const user = User();
+    const SocketInfo = Socket_Info();
+    const SocketTarget = Socket_Target();
+    const SocketMessage = Socket_Message();
+    const content = { text }
+    const messageHeader = computed(() => ({
+        from: SocketInfo.Socket_ID,
+        receiverid: SocketTarget.userid,
+        receiveravatar: SocketTarget.avatar,
+        receivername: SocketTarget.name,
+        senderid: user._id,
+        sendername: user.name,
+        senderavatar: user.avatar,
+        to: SocketTarget.socketid
+    }));
+
+    const userInfo = computed(() => {
+        return {
+            avatar: user.avatar,
+            name: user.name,
+            userId: user._id
+        }
+    })
+    const header = { ...messageHeader.value, content };
+
+    if (SocketTarget.type === MessageType.Private) {
+        window.socket.sendPrivateMessage(header.to, header).then(() => {
+            SocketMessage.storeLocally(SocketTarget.userid, {
+                type: 'to',
+                content,
+                date: new Date(),
+                sendBy: user._id
+            }, userInfo.value);
+            callback();
+        }
+        );
+    } else if (SocketTarget.type === MessageType.Group) {
+        window.socket.sendGroupMessage(header.to, header).then(() => {
+            SocketMessage.storeLocalGroup(SocketTarget.userid, {
+                type: 'to',
+                content,
+                date: new Date(),
+                sendBy: user._id,
+            }, userInfo.value);
+            callback();
+        });
+    }
+}
+
