@@ -45,8 +45,8 @@ const handleClick = () => {
     const callback = () => {
         emits('update:scroll')
     }
-    sendMessage(text.value, callback);
-    text.value = '';
+    sendMessage((contentRef.value as HTMLDivElement).textContent as string, callback);
+    (contentRef.value as HTMLDivElement).textContent = '';
 }
 const handleImageClick = async () => {
     const res = await window.fileAPI.getImage();
@@ -55,7 +55,6 @@ const handleImageClick = async () => {
     for (const node of nodes) {
         (contentRef.value as HTMLDivElement).appendChild(node);
     }
-    console.log(res);
 }
 </script>
 
