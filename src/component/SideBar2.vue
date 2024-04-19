@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col w-80 h-full border-r-[1px] border-neutral-600  select-none">
+    <div class="flex flex-col w-80 h-full border-r-[1px] border-neutral-600  select-none shrink-0">
         <component :is="component"></component>
         <!-- <MessageList></MessageList> -->
     </div>

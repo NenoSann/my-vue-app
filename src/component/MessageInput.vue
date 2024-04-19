@@ -17,8 +17,11 @@
                 </Icon>
             </div>
         </div>
-        <textarea spellcheck="false" :disabled="!props.disabled" class="bg-base-200 daisy-textarea "
-            v-model="text"> </textarea>
+        <!-- <textarea spellcheck="false" :disabled="!props.disabled" class="bg-base-200 daisy-textarea "
+            v-model="text"> </textarea> -->
+        <div :contenteditable="!props.disabled" ref="contentRef"
+            class="text-area daisy-textarea h-full overflow-auto focus:outline-none">
+        </div>
         <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4" @click="handleClick">
             发送
         </div>
@@ -29,7 +32,7 @@
 import { Ref, ref } from 'vue';
 import { GrinTongueRegular, FileRegular, FileImageRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
-import { sendMessage } from '../util';
+import { sendMessage, createImgElement } from '../util';
 import type { Window } from '../Interface/Global'
 const emits = defineEmits(['update:scroll']);
 const props = defineProps<{
@@ -37,6 +40,7 @@ const props = defineProps<{
 }>()
 const image: Ref<string[]> = ref([]);
 const text = ref('');
+const contentRef: Ref<HTMLDivElement | undefined> = ref();
 const handleClick = () => {
     const callback = () => {
         emits('update:scroll')
@@ -47,18 +51,24 @@ const handleClick = () => {
 const handleImageClick = async () => {
     const res = await window.fileAPI.getImage();
     image.value.push(...res);
+    const nodes = createImgElement(res, ['div-img']);
+    for (const node of nodes) {
+        (contentRef.value as HTMLDivElement).appendChild(node);
+    }
     console.log(res);
 }
 </script>
 
 <style scoped>
 .btn-section {
+    @apply bg-base-200;
     @apply absolute z-10;
     @apply flex items-center gap-2;
-    @apply h-8 w-full px-4;
+    @apply h-10 w-full px-4;
 }
 
-textarea {
+.text-area {
+    @apply bg-base-200;
     @apply relative;
     @apply pt-8;
     @apply h-full resize-none w-full rounded-none;

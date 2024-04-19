@@ -6,3 +6,20 @@ a.external-url {
   @apply underline;
   @apply hover:no-underline;
 }
+
+.div-img {
+  @apply inline-block;
+  @apply m-2;
+  @apply max-w-xs max-h-32;
+}
+
+::-webkit-scrollbar {
+  height: 10px !important;
+  width: 4px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  width: 4px !important;
+  border-radius: 8px;
+  @apply bg-neutral;
+}

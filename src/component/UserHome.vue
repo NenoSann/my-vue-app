@@ -3,7 +3,7 @@
         <UserMenu></UserMenu>
         <!-- <Channel></Channel> -->
         <!-- <FriendsView></FriendsView> -->
-        <div class="grow h-full">
+        <div class="h-full grow">
             <Channel></Channel>
         </div>
     </div>

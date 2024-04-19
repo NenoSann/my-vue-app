@@ -1,5 +1,5 @@
 <template>
-    <div class="side-bar flex flex-col gap-1 p-2">
+    <div class="side-bar flex flex-col shrink-0 gap-1 p-2">
         <div class="me border-b-[1px]">
             <TheIcon @click="router.push('/login')" :img_url="imageURL"></TheIcon>
         </div>

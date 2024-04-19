@@ -10,7 +10,7 @@
                     v-for="(msg, index) in messages" :key="index"></ChatBubble>
             </TransitionGroup>
         </div>
-        <MessageInput :disabled="SocketTarget.isActive" @update:scroll="scrollListToEnd">
+        <MessageInput :disabled="!SocketTarget.isActive" @update:scroll="scrollListToEnd">
         </MessageInput>
     </div>
 </template>
@@ -91,17 +91,6 @@ watch(SocketTarget, async (target) => {
     @apply bg-base-200;
     @apply border-b-[1px] border-neutral-700;
     @apply text-lg;
-}
-
-::-webkit-scrollbar {
-    height: 10px !important;
-    width: 4px !important;
-}
-
-::-webkit-scrollbar-thumb {
-    width: 4px !important;
-    border-radius: 8px;
-    @apply bg-gray-400;
 }
 
 .from-user {

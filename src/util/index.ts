@@ -49,6 +49,19 @@ export function scrollDiv(element: HTMLElement, type: 'top' | 'end', behavior: '
     element.scrollTo(option);
 }
 
+export function createImgElement(base64: string[], classes?: string[]): HTMLImageElement[] {
+    const nodes: HTMLImageElement[] = [];
+    for (const img of base64) {
+        const node = document.createElement('img');
+        if (classes) {
+            node.classList.add(...classes);
+        }
+        node.src = img;
+        nodes.push(node);
+    }
+    return nodes;
+}
+
 export function sendMessage(text: string, callback: Function) {
     const user = User();
     const SocketInfo = Socket_Info();
