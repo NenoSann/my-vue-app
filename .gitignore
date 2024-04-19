@@ -94,3 +94,6 @@ out/
 # javascript file (use tsc instead)
 main.js
 preload.js
+
+# app message file
+message/

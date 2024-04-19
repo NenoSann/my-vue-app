@@ -112,7 +112,7 @@ async function createStream(userID: string, userInfo: LocalUserInfo, type: Messa
         // https://nodejs.org/api/fs.html#file-system-flags
         const rStream = fs.createReadStream(streamPath);
         const wStream = fs.createWriteStream(streamPath, { flags: 'a' });
-        let index = await readJSON(indexFilePath);
+        let index;
         // if indexFile is newly created we will try to overwrite it
         if (isIndexNewlyCreated) {
             const users = [userInfo];
@@ -121,6 +121,7 @@ async function createStream(userID: string, userInfo: LocalUserInfo, type: Messa
             await fsP.truncate(indexFilePath, 0)
             await fsP.writeFile(indexFilePath, JSON.stringify(stringfyIndex));
         } else {
+            index = await readJSON(indexFilePath);
             Object.assign(index, userInfo)
         }
         // cast the array to a messageMap
@@ -222,11 +223,17 @@ async function readMessage(userID: string, type: MessageType, limit: number = 1)
 async function createMessageList() {
     return new Promise<boolean>(async (resolve, reject) => {
         try {
+            let newlyCreated = false;
+            let messageList: LocalMessageList[] = [];
             if (!fs.existsSync(messageListPath)) {
                 await createEmptyFile(messageListPath);
+                await writeJSON(messageListPath, []);
+                newlyCreated = true;
             }
             // do a type assertion
-            const messageList = await readJSON(messageListPath) as Array<LocalMessageList>;
+            if (!newlyCreated) {
+                messageList = await readJSON(messageListPath) as LocalMessageList[];
+            }
             for (const message of messageList) {
                 messageListMap.set(message.info.userId, message);
             }
@@ -287,23 +294,9 @@ async function setMessageList(info: LocalUserInfo, type: MessageType, content: L
  * @description use to create user's chat history
  * @param name  --the file name
  */
-async function createUserFile(name: string) {
+async function createUserFile(path: string) {
     return new Promise<boolean>((resolve, reject) => {
-        const directoryPath = path.dirname(name);
-        // fs.mkdir(directoryPath, { recursive: true }, (err) => {
-        //     if (err) {
-        //         reject(err);
-        //     } else {
-        //         fs.open(name, 'w', (err, _file) => {
-        //             if (err) {
-        //                 reject(err);
-        //             } else {
-        //                 resolve(true);
-        //             }
-        //         });
-        //     }
-        // });
-        createEmptyFile(directoryPath).then(() => resolve(true));
+        createEmptyFile(path).then(() => resolve(true));
     });
 }
 

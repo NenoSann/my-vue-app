@@ -43,20 +43,6 @@ const testQueryUnreadChats = async (userId: string) => {
         console.log(error);
     }
 }
-const testWriteMessageList = async () => {
-    window.socket.writeMessageList({
-        name: 'test',
-        avatar: 'testAvatar',
-        userId: 'testId',
-    }, MessageType.Private, {
-        type: 'from',
-        sendBy: 'testID',
-        content: {
-            text: 'testWriteMessageList'
-        },
-        date: new Date().toISOString()
-    })
-}
 
 
 const testReadMessageList = async () => {

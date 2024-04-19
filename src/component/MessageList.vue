@@ -17,8 +17,6 @@ import { onMounted, ref, Ref } from 'vue';
 import { Socket_Target, Socket_Users } from '../Pinia';
 import { LocalMessageList } from '../Interface/NodeLocalStorage';
 import { changeSocketTarget } from '../util';
-const SocketTarget = Socket_Target();
-const SocketUsers = Socket_Users();
 const messageList: Ref<Array<LocalMessageList> | undefined> = ref();
 const loading = ref(false);
 onMounted(async () => {
