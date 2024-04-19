@@ -49,10 +49,11 @@ export function scrollDiv(element: HTMLElement, type: 'top' | 'end', behavior: '
     element.scrollTo(option);
 }
 
-export function createImgElement(base64: string[], classes?: string[]): HTMLImageElement[] {
+export function createImgElement(base64: string[], path: string[], classes?: string[]): HTMLImageElement[] {
     const nodes: HTMLImageElement[] = [];
-    for (const img of base64) {
+    for (const [index, img] of base64.entries()) {
         const node = document.createElement('img');
+        node.dataset['path'] = path[index];
         if (classes) {
             node.classList.add(...classes);
         }
@@ -60,6 +61,25 @@ export function createImgElement(base64: string[], classes?: string[]): HTMLImag
         nodes.push(node);
     }
     return nodes;
+}
+
+export function replaceImage(element: HTMLDivElement) {
+    const message: string[] = [];
+    const childNodes = element.childNodes;
+    for (const node of childNodes) {
+        const prototype = Object.getPrototypeOf(node);
+        if (prototype === Text.prototype) {
+            message.push(node.textContent as string);
+        } else if (prototype === HTMLImageElement.prototype) {
+            const path = (node as HTMLImageElement).dataset['path'];
+            if (path) {
+                message.push(path)
+            }
+        } else if (prototype === HTMLDivElement.prototype) {
+            message.push('\n' + (node as HTMLDivElement).textContent);
+        }
+    }
+    return message
 }
 
 export function sendMessage(text: string, callback: Function) {

@@ -7,8 +7,8 @@
                 <img class="rounded-full" :src="props.avatar">
             </div>
             <div class="flex flex-col">
-                <p id="username">{{ name }}</p>
-                <p id="lastest-message">{{ props.description }}</p>
+                <p id="username" class=" h-7">{{ name }}</p>
+                <p id="lastest-message" class="truncate max-w-[70%]">{{ props.description }}</p>
             </div>
             <span v-if="props.unread" class="daisy-badge daisy-badge-primary">{{ props.unread }}</span>
         </a>
@@ -41,7 +41,7 @@ onMounted(() => {
 }
 
 .list-item {
-    @apply h-16;
+    @apply h-16 max-h-16;
 }
 
 .list-item>a {

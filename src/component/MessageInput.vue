@@ -19,7 +19,7 @@
         </div>
         <!-- <textarea spellcheck="false" :disabled="!props.disabled" class="bg-base-200 daisy-textarea "
             v-model="text"> </textarea> -->
-        <div :contenteditable="!props.disabled" ref="contentRef"
+        <div :spellcheck="false" :contenteditable="!props.disabled" ref="contentRef"
             class="text-area daisy-textarea h-full overflow-auto focus:outline-none">
         </div>
         <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4" @click="handleClick">
@@ -32,7 +32,7 @@
 import { Ref, ref } from 'vue';
 import { GrinTongueRegular, FileRegular, FileImageRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
-import { sendMessage, createImgElement } from '../util';
+import { sendMessage, createImgElement, replaceImage } from '../util';
 import type { Window } from '../Interface/Global'
 const emits = defineEmits(['update:scroll']);
 const props = defineProps<{
@@ -45,13 +45,16 @@ const handleClick = () => {
     const callback = () => {
         emits('update:scroll')
     }
-    sendMessage((contentRef.value as HTMLDivElement).textContent as string, callback);
+    // sendMessage((contentRef.value as HTMLDivElement).textContent as string, callback);
+    const res = replaceImage(contentRef.value as HTMLDivElement);
+    console.log(res);
     (contentRef.value as HTMLDivElement).textContent = '';
 }
 const handleImageClick = async () => {
-    const res = await window.fileAPI.getImage();
-    image.value.push(...res);
-    const nodes = createImgElement(res, ['div-img']);
+    const res = await window.fileAPI.getImage('Base64');
+    image.value.push(...(res.base64 as string[]));
+    const nodes = createImgElement(res.base64 as string[], res.imagePath, ['div-img']);
+    console.log(res);
     for (const node of nodes) {
         (contentRef.value as HTMLDivElement).appendChild(node);
     }

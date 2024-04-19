@@ -6,7 +6,7 @@ import devtools from '@vue/devtools';
 import { createApp, watch } from 'vue';
 import App from './App.vue';
 import { router } from './router'
-import { pinia, Socket_Info, Socket_Users, Socket_Message, Socket_Target, User } from './Pinia/index'
+import { pinia, Socket_Info, Socket_Users, Socket_Message, Socket_Target, User } from './Pinia/index';
 const app = createApp(App);
 app.use(router);
 app.use(pinia);

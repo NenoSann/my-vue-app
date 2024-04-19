@@ -1,5 +1,7 @@
 import * as fsP from 'node:fs/promises';
+import jimp from 'jimp';
 import path from 'path'
+const MAX_IMAGE_SIZE = 512 * 1024;
 export class BufferController {
     public static async readImageFromPath(imagePath: Array<string>, returnType: 'Buffer' | 'Base64'): Promise<Array<Buffer> | Array<string>>
     public static async readImageFromPath(imagePath: string, returnType: 'Buffer' | 'Base64'): Promise<Buffer | string>
@@ -12,12 +14,30 @@ export class BufferController {
             const buffers: Buffer[] = [];
             const base64: string[] = [];
             for (const path of imagePath) {
-                buffers.push(await fsP.readFile(path));
+                const buffer = await fsP.readFile(path)
+                if (buffer.byteLength > MAX_IMAGE_SIZE) {
+                    const img = await jimp.read(buffer).then((img) => {
+                        return img.scale(MAX_IMAGE_SIZE / buffer.byteLength)
+                    })
+                    buffers.push(await img.getBufferAsync(img.getMIME()));
+                } else {
+                    buffers.push(buffer);
+                }
             };
             if (returnType === 'Base64') {
-                for (const [index, buffer] of buffers.entries()) {
-                    const mimeType = `image/${path.extname(imagePath[index]).slice(1)}`;
-                    base64.push((this.bufferToBase64(buffer, mimeType)));
+                // using jimp to read gif base64 will cause git not animated
+                for (let [index, buffer] of buffers.entries()) {
+                    const extname = path.extname(imagePath[index]).slice(1);
+                    const mimeType = `image/${extname}`;
+                    if (extname === 'gif') {
+                        base64.push((this.bufferToBase64(buffer, mimeType)))
+                    } else {
+                        await jimp.read(buffer).then((img) => {
+                            img.getBase64Async(img.getMIME()).then((base) => {
+                                base64.push(base);
+                            })
+                        })
+                    }
                 }
                 return base64;
             }

@@ -2,7 +2,9 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 import { contextBridge, ipcRenderer } from "electron"
 import type { PrivateMessage } from "./Interface/user";
-import * as path from 'path';
+const fs = require('fs');
+const path = require('path');
+// import * as path from 'path';
 import { LocalMessageContent, LocalMessageList, LocalUserInfo, MessageType } from "./Interface/NodeLocalStorage";
 contextBridge.exposeInMainWorld('versions', {
     node: () => process.versions.node,
@@ -77,8 +79,8 @@ contextBridge.exposeInMainWorld('urlAPI', {
 })
 
 contextBridge.exposeInMainWorld('fileAPI', {
-    getImage: async () => {
-        return ipcRenderer.invoke('file:getImage').then((res: string[] | string) => {
+    getImage: async (type: 'Buffer' | 'Base64') => {
+        return ipcRenderer.invoke('file:getImage', type).then((res: string[] | string) => {
             return res;
         });
     }

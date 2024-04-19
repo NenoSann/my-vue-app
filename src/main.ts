@@ -173,12 +173,11 @@ app.on('ready', () => {
         shell.openExternal(url);
     })
 
-    ipcMain.handle('file:getImage', async (_event) => {
+    ipcMain.handle('file:getImage', async (_event, type: 'Base64' | 'Buffer') => {
         try {
             const imagePath = (await DialogController.openSelectImageDialog(mainWindow)).filePaths;
-            const base64 = await BufferController.readImageFromPath(imagePath, 'Base64');
-            console.log(base64);
-            return base64;
+            const base64 = await BufferController.readImageFromPath(imagePath, type);
+            return { base64, imagePath };
         } catch (error) {
             console.error(error);
         }
