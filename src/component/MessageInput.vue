@@ -32,7 +32,7 @@
 import { Ref, ref } from 'vue';
 import { GrinTongueRegular, FileRegular, FileImageRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
-import { sendMessage, createImgElement, replaceImage } from '../util';
+import { sendMessage, createImgElement, extractImageSrc, replaceTextNode } from '../util';
 import type { Window } from '../Interface/Global'
 const emits = defineEmits(['update:scroll']);
 const props = defineProps<{
@@ -40,15 +40,14 @@ const props = defineProps<{
 }>()
 const image: Ref<string[]> = ref([]);
 const text = ref('');
-const contentRef: Ref<HTMLDivElement | undefined> = ref();
+const contentRef: Ref<HTMLDivElement> = ref() as Ref<HTMLDivElement>;
 const handleClick = () => {
     const callback = () => {
         emits('update:scroll')
     }
-    // sendMessage((contentRef.value as HTMLDivElement).textContent as string, callback);
-    const res = replaceImage(contentRef.value as HTMLDivElement);
-    console.log(res);
+    sendMessage((contentRef.value as HTMLDivElement).innerHTML as string, callback);
     (contentRef.value as HTMLDivElement).textContent = '';
+    image.value.length = 0;
 }
 const handleImageClick = async () => {
     const res = await window.fileAPI.getImage('Base64');

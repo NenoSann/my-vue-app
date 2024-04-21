@@ -377,7 +377,7 @@ function setMessageList(info, type, content) {
                     if (messageListMap.has(info.userId)) {
                         prevContent = messageListMap.get(info.userId).content;
                         // Check if prevContent has more than 10 elements
-                        if (prevContent.length >= 10) {
+                        if (prevContent.length >= 1) {
                             // Delete the first element using Array.prototype.shift()
                             prevContent.shift();
                         }

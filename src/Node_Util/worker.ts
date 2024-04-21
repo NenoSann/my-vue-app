@@ -270,7 +270,7 @@ async function setMessageList(info: LocalUserInfo, type: MessageType, content: L
         if (messageListMap.has(info.userId)) {
             const { content: prevContent } = messageListMap.get(info.userId) as LocalMessageList;
             // Check if prevContent has more than 10 elements
-            if (prevContent.length >= 10) {
+            if (prevContent.length >= 1) {
                 // Delete the first element using Array.prototype.shift()
                 prevContent.shift();
             }

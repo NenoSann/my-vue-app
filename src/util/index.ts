@@ -82,6 +82,43 @@ export function replaceImage(element: HTMLDivElement) {
     return message
 }
 
+/**
+ * create span element to replace the text element in given HTMLElement,
+ * return the target element 
+ * @param element 
+ * @returns element 
+ */
+export function replaceTextNode(element: HTMLDivElement) {
+    for (const child of element.childNodes) {
+        if (Object.getPrototypeOf(child) === Text.prototype) {
+            const span = document.createElement('span');
+            span.innerText = (child as Text).data;
+            element.replaceChild(span, child);
+        }
+    }
+    return element;
+}
+
+export function extractImageSrc(element: HTMLDivElement) {
+    const srcs: string[] = [];
+    for (const [index, child] of element.childNodes.entries()) {
+        if (Object.getPrototypeOf(child) === HTMLImageElement.prototype) {
+            srcs.push((child as HTMLImageElement).src);
+            (child as HTMLImageElement).removeAttribute('src');
+        }
+    }
+    return {
+        element,
+        srcs
+    }
+}
+
+export function extractTextContent(htmlString: string) {
+    const element = document.createElement('div');
+    element.innerHTML = htmlString;
+    return element.textContent;
+}
+
 export function sendMessage(text: string, callback: Function) {
     const user = User();
     const SocketInfo = Socket_Info();

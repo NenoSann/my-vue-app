@@ -1,7 +1,7 @@
 import * as fsP from 'node:fs/promises';
 import jimp from 'jimp';
 import path from 'path'
-const MAX_IMAGE_SIZE = 512 * 1024;
+const MAX_IMAGE_SIZE = 1024 * 1024;
 export class BufferController {
     public static async readImageFromPath(imagePath: Array<string>, returnType: 'Buffer' | 'Base64'): Promise<Array<Buffer> | Array<string>>
     public static async readImageFromPath(imagePath: string, returnType: 'Buffer' | 'Base64'): Promise<Buffer | string>
@@ -17,9 +17,12 @@ export class BufferController {
                 const buffer = await fsP.readFile(path)
                 if (buffer.byteLength > MAX_IMAGE_SIZE) {
                     const img = await jimp.read(buffer).then((img) => {
+                        console.log(`scale ratio is :${MAX_IMAGE_SIZE / buffer.byteLength}\n`)
                         return img.scale(MAX_IMAGE_SIZE / buffer.byteLength)
                     })
-                    buffers.push(await img.getBufferAsync(img.getMIME()));
+                    const scaledImg = await img.getBufferAsync(img.getMIME());
+                    console.log(`scaledImg is :${scaledImg.byteLength}, ratio:${scaledImg.byteLength / buffer.byteLength}\n`)
+                    buffers.push(scaledImg);
                 } else {
                     buffers.push(buffer);
                 }
@@ -29,15 +32,10 @@ export class BufferController {
                 for (let [index, buffer] of buffers.entries()) {
                     const extname = path.extname(imagePath[index]).slice(1);
                     const mimeType = `image/${extname}`;
-                    if (extname === 'gif') {
-                        base64.push((this.bufferToBase64(buffer, mimeType)))
-                    } else {
-                        await jimp.read(buffer).then((img) => {
-                            img.getBase64Async(img.getMIME()).then((base) => {
-                                base64.push(base);
-                            })
-                        })
-                    }
+                    base64.push(this.bufferToBase64(buffer, mimeType));
+                    console.log(`path is , size: ${buffer.byteLength}, base64 size :${Buffer.from(base64[index]).byteLength},
+                        ratio:${Buffer.from(base64[index]).byteLength / buffer.byteLength}
+                    \n`);
                 }
                 return base64;
             }

@@ -13,7 +13,7 @@
             <time class=" text-xs opacity-50">{{ time }}</time>
         </div>
         <div class="daisy-chat-bubble">
-            <p v-html="replaceWebLinks(props.content.text)" ref="pNodeRef"></p>
+            <p v-html="props.content.text" ref="pNodeRef"></p>
         </div>
     </div>
 </template>

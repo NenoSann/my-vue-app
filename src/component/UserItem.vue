@@ -25,9 +25,9 @@ const props = defineProps<{
     name: string,
     index: number | string,
     callback: (avatar: string, username: string, userid: string, type: MessageType) => void,
-    unread?: string,
-    online?: boolean,
-    description?: string,
+    unread?: string | null,
+    online?: boolean | null,
+    description?: string | null,
 }>();
 
 onMounted(() => {
