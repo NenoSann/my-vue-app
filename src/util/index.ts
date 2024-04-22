@@ -113,6 +113,11 @@ export function extractImageSrc(element: HTMLDivElement) {
     }
 }
 
+export function checkUserInUsermap(userId: string) {
+    const SocketUser = Socket_Users();
+    return SocketUser.usermap.has(userId);
+}
+
 export function extractTextContent(htmlString: string) {
     const element = document.createElement('div');
     element.innerHTML = htmlString;
@@ -144,26 +149,30 @@ export function sendMessage(text: string, callback: Function) {
         }
     })
     const header = { ...messageHeader.value, content };
-
+    const target = SocketTarget.userid;
     if (SocketTarget.type === MessageType.Private) {
+        const index = SocketMessage.storeLocally(target, {
+            type: 'to',
+            content,
+            date: new Date(),
+            sendBy: user._id,
+            sent: false,
+        }, userInfo.value) as number;
         window.socket.sendPrivateMessage(header.to, header).then(() => {
-            SocketMessage.storeLocally(SocketTarget.userid, {
-                type: 'to',
-                content,
-                date: new Date(),
-                sendBy: user._id
-            }, userInfo.value);
+            SocketMessage.messages.get(target)!.data[index].sent = true;
             callback();
         }
         );
     } else if (SocketTarget.type === MessageType.Group) {
+        const index = SocketMessage.storeLocalGroup(target, {
+            type: 'to',
+            content,
+            date: new Date(),
+            sendBy: user._id,
+            sent: false
+        }, userInfo.value);
         window.socket.sendGroupMessage(header.to, header).then(() => {
-            SocketMessage.storeLocalGroup(SocketTarget.userid, {
-                type: 'to',
-                content,
-                date: new Date(),
-                sendBy: user._id,
-            }, userInfo.value);
+            SocketMessage.messages.get(target)!.data[index].sent = true;
             callback();
         });
     }

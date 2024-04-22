@@ -28,6 +28,8 @@ const props = defineProps<{
     unread?: string | null,
     online?: boolean | null,
     description?: string | null,
+    loadable?: boolean,
+    loading?: boolean
 }>();
 
 onMounted(() => {

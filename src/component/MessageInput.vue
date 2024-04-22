@@ -17,8 +17,6 @@
                 </Icon>
             </div>
         </div>
-        <!-- <textarea spellcheck="false" :disabled="!props.disabled" class="bg-base-200 daisy-textarea "
-            v-model="text"> </textarea> -->
         <div :spellcheck="false" :contenteditable="!props.disabled" ref="contentRef"
             class="text-area daisy-textarea h-full overflow-auto focus:outline-none">
         </div>

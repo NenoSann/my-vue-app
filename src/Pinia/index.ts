@@ -28,7 +28,8 @@ interface LocalMessageContent {
     type: 'to' | 'from',
     content: MessageContent,
     date: Date | string,
-    sendBy: string
+    sendBy: string,
+    sent?: boolean
 }
 
 interface ChatUserInfo {
@@ -147,7 +148,7 @@ const Socket_Message = defineStore('Socket_Message', {
         }
     },
     actions: {
-        storeLocally(id: string, content: LocalMessageContent | Array<LocalMessageContent>, userInfo: ChatUserInfo | Array<ChatUserInfo>) {
+        storeLocally(id: string, content: LocalMessageContent | Array<LocalMessageContent>, userInfo: ChatUserInfo | Array<ChatUserInfo>): number | undefined {
             // if messages is not defined: 
             // create a messages instance
             if (!this.$state.messages.has(id)) {
@@ -162,6 +163,7 @@ const Socket_Message = defineStore('Socket_Message', {
                 this.$state.messages.get(id)?.data?.push(...content as Array<LocalMessageContent>);
             } else {
                 this.$state.messages.get(id)?.data?.push(content as LocalMessageContent)
+                return this.$state.messages.get(id)?.data?.length;
             }
             const target = this.$state.messages.get(id);
             if (Array.isArray(userInfo)) {
@@ -174,7 +176,7 @@ const Socket_Message = defineStore('Socket_Message', {
             avatar: string,
             name: string,
             userId: string
-        }) {
+        }): number {
             if (!this.$state.messages.has(id)) {
                 this.$state.messages.set(id, {
                     data: [],
@@ -186,6 +188,7 @@ const Socket_Message = defineStore('Socket_Message', {
             const target = this.$state.messages.get(id);
             target.data?.push(content);
             target.user?.set(userInfo.userId, userInfo)
+            return target.data.length;
         },
         clearUnread(id: string) {
             if (this.$state.message?.has(id)) {

@@ -4,7 +4,8 @@
             <UserItemSkeleton v-if="loading" v-for="i of 10"></UserItemSkeleton>
             <UserItem :description="extractTextContent(getLatestMessage(msg.content).content.text)"
                 :userid="msg.info.userId" :callback="changeSocketTarget" :avatar="msg.info.avatar" :name="msg.info.name"
-                :index="msg.info.userId" v-for="msg of messageList" v-if="!loading">
+                :index="msg.info.userId" :online="checkUserInUsermap(msg.info.userId)" v-for="msg of messageList"
+                v-if="!loading">
             </UserItem>
         </ul>
     </div>
@@ -15,7 +16,7 @@ import UserItemSkeleton from './UserItemSkeleton.vue'
 import { UserItem } from '.';
 import { onMounted, ref, Ref, computed } from 'vue';
 import { LocalMessageList } from '../Interface/NodeLocalStorage';
-import { changeSocketTarget, extractTextContent } from '../util';
+import { changeSocketTarget, extractTextContent, checkUserInUsermap } from '../util';
 const messageList: Ref<Array<LocalMessageList> | undefined> = ref();
 const loading = ref(false);
 onMounted(async () => {
@@ -26,9 +27,7 @@ onMounted(async () => {
     loading.value = false;
     clearTimeout(timeout);
 })
-const description = computed(() => {
-    return extractTextContent(getLatestMessage(messageList.value as any));
-})
+
 const getLatestMessage = (arr: Array<any>) => {
     return arr[arr.length - 1];
 }

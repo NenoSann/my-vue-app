@@ -12,8 +12,10 @@
         <div class="daisy-chat-footer">
             <time class=" text-xs opacity-50">{{ time }}</time>
         </div>
-        <div class="daisy-chat-bubble">
+        <div class="daisy-chat-bubble relative">
             <p v-html="props.content.text" ref="pNodeRef"></p>
+            <span v-if="props.loading"
+                class="daisy-loading daisy-loading-ring daisy-loading-lg absolute absolute-center"></span>
         </div>
     </div>
 </template>
@@ -29,6 +31,7 @@ const props = defineProps<{
     avatar: string;
     time: string;
     name?: string;
+    loading?: boolean
 }>();
 onMounted(() => {
     (pNodeRef.value as unknown as Element).childNodes.forEach((node) => {
@@ -44,3 +47,9 @@ onMounted(() => {
     })
 })
 </script>
+
+<style scope>
+.absolute-center {
+    @apply top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2;
+}
+</style>

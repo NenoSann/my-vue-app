@@ -3,8 +3,8 @@
         <div class="px-4">
             <div class="flex h-8 my-2">
                 <input type="text" placeholder="搜索"
-                    class="grow mr-2 placeholder:text-sm placeholder:font-semibold daisy-input daisy-input-bordered h-full focus:outline-none ">
-                <div class="daisy-btn no-animation icon">
+                    class=" placeholder:text-sm placeholder:font-semibold daisy-input w-52 daisy-input-bordered h-full focus:outline-none ">
+                <div class="daisy-btn ml-auto no-animation icon">
                     <Icon size="2rem">
                         <Add class="icon" />
                     </Icon>
