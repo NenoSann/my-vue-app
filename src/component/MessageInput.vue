@@ -11,10 +11,14 @@
                     <FileRegular />
                 </Icon>
             </div>
-            <div class="sidebar-icon" @click="handleImageClick">
-                <Icon size="22">
-                    <FileImageRegular />
-                </Icon>
+            <div class="sidebar-icon">
+                <label for="image-file" class="w-full h-full flex items-center justify-center">
+                    <Icon size="22">
+                        <FileImageRegular />
+                    </Icon>
+                </label>
+                <input ref="imageInput" style="display: none" type="file" id="image-file" name="image-file"
+                    accept="image/png, image/jpeg, image/gif" multiple @change="handleImageClick">
             </div>
         </div>
         <div :spellcheck="false" :contenteditable="!props.disabled" ref="contentRef"
@@ -30,31 +34,35 @@
 import { Ref, ref } from 'vue';
 import { GrinTongueRegular, FileRegular, FileImageRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
-import { sendMessage, createImgElement, extractImageSrc, replaceTextNode } from '../util';
+import { sendMessage, createImgElement, readFileAsDataURL, appendImgElement } from '../util';
+import { cos } from '../util/Cos&STS';
 import type { Window } from '../Interface/Global'
 const emits = defineEmits(['update:scroll']);
 const props = defineProps<{
     disabled: boolean
 }>()
-const image: Ref<string[]> = ref([]);
-const text = ref('');
+const imageInput: Ref<HTMLInputElement | undefined> = ref();
+const images: string[] = [];
 const contentRef: Ref<HTMLDivElement> = ref() as Ref<HTMLDivElement>;
+
 const handleClick = () => {
     const callback = () => {
         emits('update:scroll')
     }
-    sendMessage((contentRef.value as HTMLDivElement).innerHTML as string, callback);
+    // sendMessage((contentRef.value as HTMLDivElement).innerHTML as string, callback);
+    cos.putImage(imageInput.value?.files as FileList);
     (contentRef.value as HTMLDivElement).textContent = '';
-    image.value.length = 0;
 }
+
 const handleImageClick = async () => {
-    const res = await window.fileAPI.getImage('Base64');
-    image.value.push(...(res.base64 as string[]));
-    const nodes = createImgElement(res.base64 as string[], res.imagePath, ['div-img']);
-    console.log(res);
-    for (const node of nodes) {
-        (contentRef.value as HTMLDivElement).appendChild(node);
+    const files = imageInput.value?.files as FileList;
+    const promiseArr: Promise<string>[] = [];
+    for (const image of files) {
+        promiseArr.push(readFileAsDataURL(image));
     }
+    images.push(...(await Promise.all(promiseArr)));
+    console.log(images);
+    appendImgElement(contentRef.value, images, [], ['div-img']);
 }
 </script>
 
@@ -83,8 +91,17 @@ const handleImageClick = async () => {
     @apply hover:fill-primary;
 }
 
+:deep(.sidebar-icon > label> span > svg) {
+    @apply hover:fill-primary;
+}
+
 /* change the xicon fill */
 :deep(.sidebar-icon > span > svg > path) {
+    @apply fill-inherit;
+    @apply transition-all;
+}
+
+:deep(.sidebar-icon > label >span > svg > path) {
     @apply fill-inherit;
     @apply transition-all;
 }

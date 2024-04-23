@@ -49,6 +49,13 @@ export function scrollDiv(element: HTMLElement, type: 'top' | 'end', behavior: '
     element.scrollTo(option);
 }
 
+export function appendImgElement(element: HTMLDivElement, base64: string[], path: string[], classes?: string[]) {
+    const nodes = createImgElement(base64, path, classes);
+    for (const node of nodes) {
+        element.appendChild(node);
+    }
+}
+
 export function createImgElement(base64: string[], path: string[], classes?: string[]): HTMLImageElement[] {
     const nodes: HTMLImageElement[] = [];
     for (const [index, img] of base64.entries()) {
@@ -124,6 +131,16 @@ export function extractTextContent(htmlString: string) {
     return element.textContent;
 }
 
+export async function readFileAsDataURL(file: File) {
+    return new Promise<string>((resolve) => {
+        const fileReader = new FileReader();
+        fileReader.onload = (result) => {
+            resolve(fileReader.result as string);
+        }
+        fileReader.readAsDataURL(file);
+    })
+}
+
 export function sendMessage(text: string, callback: Function) {
     const user = User();
     const SocketInfo = Socket_Info();
@@ -177,4 +194,3 @@ export function sendMessage(text: string, callback: Function) {
         });
     }
 }
-

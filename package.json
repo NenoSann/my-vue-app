@@ -41,9 +41,11 @@
   },
   "dependencies": {
     "axios": "^1.6.2",
+    "cos-js-sdk-v5": "^1.7.1",
     "dompurify": "^3.1.0",
     "electron-squirrel-startup": "^1.0.0",
     "jimp": "^0.22.12",
+    "js-md5": "^0.8.3",
     "pinia": "^2.1.7",
     "socket.io-client": "^4.7.2",
     "vue-router": "^4.2.5"
