@@ -70,23 +70,22 @@ export function createImgElement(base64: string[], path: string[], classes?: str
     return nodes;
 }
 
-export function replaceImage(element: HTMLDivElement) {
-    const message: string[] = [];
-    const childNodes = element.childNodes;
-    for (const node of childNodes) {
-        const prototype = Object.getPrototypeOf(node);
-        if (prototype === Text.prototype) {
-            message.push(node.textContent as string);
-        } else if (prototype === HTMLImageElement.prototype) {
-            const path = (node as HTMLImageElement).dataset['path'];
-            if (path) {
-                message.push(path)
-            }
-        } else if (prototype === HTMLDivElement.prototype) {
-            message.push('\n' + (node as HTMLDivElement).textContent);
+/**
+ * 
+ * @param element 替换的图片元素的父元素
+ * @param locations 替换的图片的地址
+ */
+export function replaceImage(element: HTMLDivElement, locations: string[]) {
+    if (locations.length === 0) {
+        return;
+    }
+    let index = 0;
+    for (const node of element.childNodes) {
+        if (node instanceof HTMLImageElement) {
+            node.src = locations[index];
+            index++;
         }
     }
-    return message
 }
 
 /**

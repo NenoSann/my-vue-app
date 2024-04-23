@@ -8,7 +8,8 @@ import UserList from "./UserList.vue";
 import TheIcon from "./TheIcon.vue";
 import GroupList from './GroupList.vue';
 import MessageList from './MessageList.vue';
-import MessageInput from './MessageInput.vue'
+import MessageInput from './MessageInput.vue';
+import RadialProgress from './RadialProgress.vue';
 export {
     Channel,
     ChatBubble,
@@ -20,5 +21,6 @@ export {
     TheIcon,
     GroupList,
     MessageList,
-    MessageInput
+    MessageInput,
+    RadialProgress
 }

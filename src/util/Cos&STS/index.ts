@@ -24,15 +24,39 @@ export class Cos {
             }
         })();
     }
-    public async putImage(image: File[]): Promise<string[]>
-    public async putImage(image: File): Promise<string>
-    public async putImage(image: FileList): Promise<string[]>
-    public async putImage(image: File | File[] | FileList): Promise<string | string[]> {
-        return new Promise<string>(async (resolve, reject) => {
-            if (Array.isArray(image)) {
 
+    /**
+     * 
+     * @param image 用于发送的图像，可以是单个/复数的File，也可以是一个FileList
+     * @param loadingCallBack 在发送过程中调用的回调，可以获得发送的进度和速度
+     */
+    public async putImage(image: File[], loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string[]>
+    public async putImage(image: File, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string>
+    public async putImage(image: FileList, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string[]>
+    public async putImage(image: File | File[] | FileList, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string | string[]> {
+        return new Promise<string[]>(async (resolve, reject) => {
+            //首先查看credential是否过期
+            if (!Sts.checkCredentialValid()) {
+                //重新获取临时token
+                const {
+                    tmpSecretId,
+                    tmpSecretKey,
+                    sessionToken } = await Sts.getCredential();
+                this.cos = new COS({
+                    SecretKey: tmpSecretKey,
+                    SecretId: tmpSecretId,
+                })
+                this.SessionToken = sessionToken;
+            }
+            if (Array.isArray(image)) {
+                if (image.length === 0) {
+                    resolve([]);
+                }
             } else if (image instanceof FileList) {
                 const files: any = [];
+                if (image.length === 0) {
+                    resolve([]);
+                }
                 for (const file of image) {
                     const arrayBuffer = await file.arrayBuffer();
                     const type = file.type.split('/')[1];
@@ -52,17 +76,22 @@ export class Cos {
                     files,
                     SliceSize: 1024 * 1024 * 10,
                     onProgress: function (info) {
-                        var percent = parseInt(info.percent * 10000) / 100;
-                        var speed = parseInt(info.speed / 1024 / 1024 * 100) / 100;
-                        console.log('进度：' + percent + '%; 速度：' + speed + 'Mb/s;');
+                        loadingCallBack ? loadingCallBack(Math.floor(info.percent * 100), info.speed) : undefined;
                     },
                     onFileFinish: function (err, data, options) {
-                        console.log(options.Key + '上传' + (err ? '失败' : '完成'));
+                        if (err) {
+                            finishCallBack ? finishCallBack(false) : undefined;
+                            reject();
+                        }
+                        finishCallBack ? finishCallBack(true) : undefined;
+                        console.log(data.Location);
                     },
                 })
-                console.log(result);
-            }
-            else {
+                const locations = result.files.map((file) => {
+                    return 'http://' + file.data.Location;
+                })
+                resolve(locations)
+            } else {
                 const fileName = image.name;
                 const config = {
                     Bucket: this.cosPath.Bucket,
@@ -72,13 +101,6 @@ export class Cos {
                 }
                 console.log(config);
             }
-
-            // this.cos.uploadFile({
-            //     Bucket: this.cosPath.Bucket,
-            //     Region: this.cosPath.Region,
-            //     Body: image,
-            //     Key: this.cosPath.baseKey + fileName
-            // })
         })
     }
 }
@@ -102,10 +124,8 @@ export class CredentialGenerator {
     }
 
     public async getCredential() {
-        const expiredDate = new Date(this.credential?.expiredTime);
-        const currentDate = new Date();
         //如果凭证已经过期，则向API请求新的凭证
-        if (currentDate >= expiredDate) {
+        if (this.checkCredentialValid()) {
             await this.getCredentialFromAPI();
         }
         return this.credential.credentials;
@@ -119,7 +139,11 @@ export class CredentialGenerator {
         const credentialString = localStorage.getItem(this.localStorageKey);
         return credentialString ? JSON.parse(credentialString) as CredentialData : null;
     }
-
+    public checkCredentialValid() {
+        const expiredDate = new Date(this.credential?.expiredTime);
+        const currentDate = new Date();
+        return (currentDate >= expiredDate);
+    }
     private async getCredentialFromAPI() {
         try {
             const res = await queryTempCredential();

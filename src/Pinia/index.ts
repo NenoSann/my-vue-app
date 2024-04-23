@@ -163,7 +163,6 @@ const Socket_Message = defineStore('Socket_Message', {
                 this.$state.messages.get(id)?.data?.push(...content as Array<LocalMessageContent>);
             } else {
                 this.$state.messages.get(id)?.data?.push(content as LocalMessageContent)
-                return this.$state.messages.get(id)?.data?.length;
             }
             const target = this.$state.messages.get(id);
             if (Array.isArray(userInfo)) {
@@ -171,6 +170,7 @@ const Socket_Message = defineStore('Socket_Message', {
             } else {
                 target.user?.set(userInfo.userId, userInfo)
             }
+            return this.$state.messages.get(id)?.data?.length - 1;
         },
         storeLocalGroup(id: string, content: LocalMessageContent, userInfo: {
             avatar: string,
@@ -188,7 +188,7 @@ const Socket_Message = defineStore('Socket_Message', {
             const target = this.$state.messages.get(id);
             target.data?.push(content);
             target.user?.set(userInfo.userId, userInfo)
-            return target.data.length;
+            return target.data.length - 1;
         },
         clearUnread(id: string) {
             if (this.$state.message?.has(id)) {

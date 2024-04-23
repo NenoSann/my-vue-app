@@ -1,5 +1,5 @@
 <template>
-    <div class="h-[30%] bg-base-200">
+    <div class="h-[calc(30%-3rem)] bg-base-200 relative">
         <div class="btn-section">
             <div class="sidebar-icon">
                 <Icon size="24">
@@ -27,14 +27,16 @@
         <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4" @click="handleClick">
             发送
         </div>
+        <RadialProgress :percent="progress.percent" :show="progress.show"></RadialProgress>
     </div>
 </template>
 
 <script setup lang="ts">
-import { Ref, ref } from 'vue';
+import { Ref, ref, reactive } from 'vue';
 import { GrinTongueRegular, FileRegular, FileImageRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
-import { sendMessage, createImgElement, readFileAsDataURL, appendImgElement } from '../util';
+import { sendMessage, readFileAsDataURL, appendImgElement, replaceImage } from '../util';
+import { RadialProgress } from './';
 import { cos } from '../util/Cos&STS';
 import type { Window } from '../Interface/Global'
 const emits = defineEmits(['update:scroll']);
@@ -42,15 +44,29 @@ const props = defineProps<{
     disabled: boolean
 }>()
 const imageInput: Ref<HTMLInputElement | undefined> = ref();
-const images: string[] = [];
 const contentRef: Ref<HTMLDivElement> = ref() as Ref<HTMLDivElement>;
-
-const handleClick = () => {
+const progress = reactive({
+    percent: 0,
+    show: false,
+})
+const handleClick = async () => {
     const callback = () => {
         emits('update:scroll')
+        setTimeout(() => {
+            progress.show = false;
+            progress.percent = 0;
+        }, 500)
     }
-    // sendMessage((contentRef.value as HTMLDivElement).innerHTML as string, callback);
-    cos.putImage(imageInput.value?.files as FileList);
+    const locations = await cos.putImage(imageInput.value?.files as FileList,
+        (percent: number, _speed: number) => {
+            //showing progress in progress
+            progress.percent = percent;
+            progress.show = true;
+        },
+    );
+    replaceImage(contentRef.value, locations);
+    console.log(contentRef.value.innerHTML);
+    sendMessage((contentRef.value as HTMLDivElement).innerHTML as string, callback);
     (contentRef.value as HTMLDivElement).textContent = '';
 }
 
@@ -60,6 +76,7 @@ const handleImageClick = async () => {
     for (const image of files) {
         promiseArr.push(readFileAsDataURL(image));
     }
+    const images: string[] = [];
     images.push(...(await Promise.all(promiseArr)));
     console.log(images);
     appendImgElement(contentRef.value, images, [], ['div-img']);
