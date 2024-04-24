@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import builtinModules from 'builtin-modules';
 // https://vitejs.dev/config
 export default defineConfig({
   assetsInclude: ['./assets/*.jpg'],
@@ -7,6 +8,11 @@ export default defineConfig({
     browserField: false,
     conditions: ['node'],
     mainFields: ['module', 'jsnext:main', 'jsnext'],
+  },
+  build: {
+    rollupOptions: {
+      external: [...builtinModules, "better-sqlite3"]
+    }
   },
   server: {
     proxy: {

@@ -2,6 +2,9 @@
 // the socket.io client into electron main process, but this file remain, reuse it when
 // neccessary
 //
+/**
+ * @deprecated
+ */
 import { pinia, User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
 import { io } from "socket.io-client";
 const user = User(pinia);

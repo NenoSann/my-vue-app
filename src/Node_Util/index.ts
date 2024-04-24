@@ -5,14 +5,15 @@ import type { SocketUserInfo, PrivateMessage, MessageContent, GroupMessage } fro
 import { WorkerController } from './WorkerController';
 import { NotificationController } from "../Electron/index.ts";
 import { MessageType, LocalUserInfo, LocalMessageContent } from "../Interface/NodeLocalStorage.ts";
+import { SqlLiteWorker } from "./SqlLiteWorker.ts";
 const SocketURL = 'http://43.163.234.220:8081';
 class Socketio {
     private static instance: Socketio | undefined;
     private socket: typeof Socket;
     private usermap: Map<string, SocketUserInfo>;
     private message: Map<string, Array<PrivateMessage>>;
-    private friends: Array<SocketUserInfo>;
     private workerController: WorkerController;
+    private SqlLiteController: SqlLiteWorker;
     private constructor(url: string, name: string, _id: string, avatar: string) {
         this.socket = io(url, {
             auth: {
@@ -21,32 +22,26 @@ class Socketio {
                 avatar
             },
         });
-
         this.usermap = new Map();
         this.message = new Map();
-        this.friends = [];
+        this.SqlLiteController = new SqlLiteWorker(_id);
         this.workerController = new WorkerController();
-
         // binding socket event here
         this.socket.on('connect', (data: any) => {
-            console.log('nodejs socket client connected');
             mainWindow?.webContents.send('connect', this.socket.id);
         })
         this.socket.on('users', (data: string) => {
             // when server sends new usermap, we replace it
-            console.log('got usermap from server \n', data);
             this.usermap = new Map(JSON.parse(data));
             mainWindow?.webContents.send('usermap', this.usermap);
         });
 
         this.socket.on('user_connected', (data: any) => {
-            console.log('user connected!', data);
             this.usermap.set(data.userid, data);
             mainWindow?.webContents.send('userConnected', data.userInfo);
         });
 
         this.socket.on('user_disconnect', (userid: string) => {
-            console.log('user disconnected! ', userid);
             this.usermap.delete(userid);
             mainWindow?.webContents.send('userDiconnected', userid);
         });
@@ -68,11 +63,9 @@ class Socketio {
                     avatar: data.senderavatar,
                     userId: data.senderid
                 });
-            console.log('got private message from server');
         });
 
         this.socket.on('user_group_message', (data: GroupMessage) => {
-            console.log('got user group message');
             mainWindow?.webContents.send('userGroupMessage', data);
             this.workerController.saveMessage(data.from, MessageType.Group,
                 {
@@ -116,9 +109,22 @@ class Socketio {
             this?.socket.emit('private_message', {
                 to,
                 ...message
-            }, () => {
+            }, (messageId: string) => {
                 // We sending message to receiver, so we store the info
                 // of the receiver, not ours
+                try {
+                    this.SqlLiteController.insertMessageContent(messageId,
+                        senderid,
+                        receiverid,
+                        content.text,
+                        content.image as unknown as string,
+                        Math.floor(new Date().getTime() * 1000)
+
+                    )
+                    console.log('messageId:', messageId);
+                } catch (error) {
+                    console.error(error);
+                }
                 this.workerController.saveMessage(message.receiverid, MessageType.Private, {
                     content: {
                         type: 'to',
@@ -147,15 +153,10 @@ class Socketio {
     }
     public async sendGroupMessage(to: string, message: GroupMessage): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
-            console.log('sending group message to server: \n', {
-                to,
-                message
-            })
             this?.socket.emit('group_message', {
                 to,
                 ...message
             }, () => {
-                console.log('socket promise resolve');
                 const { content, senderid: userId, senderavatar: avatar, sendername: userName } = message
                 this.workerController.saveMessage(to, MessageType.Group, {
                     content: { type: 'to', sendBy: userId, content: { ...content } },

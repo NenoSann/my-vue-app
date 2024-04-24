@@ -17,11 +17,9 @@ export class BufferController {
                 const buffer = await fsP.readFile(path)
                 if (buffer.byteLength > MAX_IMAGE_SIZE) {
                     const img = await jimp.read(buffer).then((img) => {
-                        console.log(`scale ratio is :${MAX_IMAGE_SIZE / buffer.byteLength}\n`)
                         return img.scale(MAX_IMAGE_SIZE / buffer.byteLength)
                     })
                     const scaledImg = await img.getBufferAsync(img.getMIME());
-                    console.log(`scaledImg is :${scaledImg.byteLength}, ratio:${scaledImg.byteLength / buffer.byteLength}\n`)
                     buffers.push(scaledImg);
                 } else {
                     buffers.push(buffer);
@@ -33,9 +31,6 @@ export class BufferController {
                     const extname = path.extname(imagePath[index]).slice(1);
                     const mimeType = `image/${extname}`;
                     base64.push(this.bufferToBase64(buffer, mimeType));
-                    console.log(`path is , size: ${buffer.byteLength}, base64 size :${Buffer.from(base64[index]).byteLength},
-                        ratio:${Buffer.from(base64[index]).byteLength / buffer.byteLength}
-                    \n`);
                 }
                 return base64;
             }

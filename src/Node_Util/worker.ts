@@ -47,7 +47,6 @@ const messageListMap: Map<string, LocalMessageList> = new Map();
 
 parentPort?.on('message', (data: any) => {
     // check the data types in WorkerController.ts
-    console.log('got message from main thread: ', data);
     const { operateType, type } = data;
     const { limit, content, userId, userInfo, info } = data.content;
     switch (operateType) {
@@ -67,7 +66,6 @@ parentPort?.on('message', (data: any) => {
             writeMessage(userId, type as MessageType, content, userInfo as LocalUserInfo);
             break;
         case 'readMessageList':
-            console.log('worker.ts got readMessageList', data);
             readMessageList().then((res) => {
                 parentPort?.postMessage({
                     type: 'readMessageList',
@@ -76,7 +74,6 @@ parentPort?.on('message', (data: any) => {
             })
             break;
         case 'writeMessageList':
-            console.log('worker.ts got writeMessageList', data);
             setMessageList(info, type, content).then(() => {
                 parentPort?.postMessage({
                     type: 'writeMessageList'
@@ -136,7 +133,6 @@ async function createStream(userID: string, userInfo: LocalUserInfo, type: Messa
             indexFilePath,
             index
         });
-        console.log('first create index: ', index);
     } catch (error) {
         handleFsError(error);
     }
@@ -147,7 +143,6 @@ async function writeMessage(userID: string, type: MessageType, content: any, use
         if (!messageMap.has(userID)) {
             await createStream(userID, userInfo, type);
         }
-        console.log('write message trigger', { userID, type, content, userInfo });
         // doing type assertion because we had create those variables
         const { wStream, rStream, indexFilePath, index } = messageMap.get(userID) as {
             rStream: fs.ReadStream,
@@ -182,7 +177,6 @@ async function writeMessage(userID: string, type: MessageType, content: any, use
         wStream.write('\n');
         // assign updatedIndex to messageMap
         messageMap.set(userID, { rStream, wStream, indexFilePath, index: updatedIndex });
-        console.log('check index: ', updatedIndex);
     } catch (error) {
         handleFsError(error);
     }

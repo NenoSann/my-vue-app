@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -42,7 +42,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  *  这个模块用来管理electron本地的聊天记录的存储和读取, 它使用一个map来管理一个userID => {wStream,rStream}的关系,
  *  通过判断mainThread通过postMessage中附带的类别和data来进行读取/储存用户发送的内容, 并通过postMessage方法来和mainThread沟通
@@ -73,7 +73,6 @@ var messageMap = new Map();
 var messageListMap = new Map();
 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.on('message', function (data) {
     // check the data types in WorkerController.ts
-    console.log('got message from main thread: ', data);
     var operateType = data.operateType, type = data.type;
     var _a = data.content, limit = _a.limit, content = _a.content, userId = _a.userId, userInfo = _a.userInfo, info = _a.info;
     switch (operateType) {
@@ -83,7 +82,7 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
                     type: 'readMessage',
                     content: {
                         messages: res === null || res === void 0 ? void 0 : res.messages,
-                        userInfo: res === null || res === void 0 ? void 0 : res.userInfo
+                        userInfo: res === null || res === void 0 ? void 0 : res.userInfo,
                     }
                 });
             });
@@ -93,7 +92,6 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
             writeMessage(userId, type, content, userInfo);
             break;
         case 'readMessageList':
-            console.log('worker.ts got readMessageList', data);
             readMessageList().then(function (res) {
                 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.postMessage({
                     type: 'readMessageList',
@@ -102,7 +100,6 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
             });
             break;
         case 'writeMessageList':
-            console.log('worker.ts got writeMessageList', data);
             setMessageList(info, type, content).then(function () {
                 node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.postMessage({
                     type: 'writeMessageList'
@@ -175,7 +172,6 @@ function createStream(userID, userInfo, type) {
                         indexFilePath: indexFilePath,
                         index: index
                     });
-                    console.log('first create index: ', index);
                     return [3 /*break*/, 12];
                 case 11:
                     error_1 = _b.sent();
@@ -199,7 +195,6 @@ function writeMessage(userID, type, content, userInfo) {
                     _b.sent();
                     _b.label = 2;
                 case 2:
-                    console.log('write message trigger', { userID: userID, type: type, content: content, userInfo: userInfo });
                     _a = messageMap.get(userID), wStream = _a.wStream, rStream = _a.rStream, indexFilePath = _a.indexFilePath, index = _a.index;
                     // build updatedIndex
                     // we have two index, one for memory
@@ -229,7 +224,6 @@ function writeMessage(userID, type, content, userInfo) {
                     wStream.write('\n');
                     // assign updatedIndex to messageMap
                     messageMap.set(userID, { rStream: rStream, wStream: wStream, indexFilePath: indexFilePath, index: updatedIndex });
-                    console.log('check index: ', updatedIndex);
                     return [3 /*break*/, 6];
                 case 5:
                     error_2 = _b.sent();
@@ -455,40 +449,48 @@ function handleFsError(error) {
     node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort === void 0 ? void 0 : node_worker_threads_1.parentPort.emit('messageerror', error);
 }
 function readLines(inputFilePath, lineCounts) {
-    var e_1, _a;
+    var _a, e_1, _b, _c;
     return __awaiter(this, void 0, void 0, function () {
-        var file, res, _b, _c, line, e_1_1;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        var file, res, _d, _e, _f, line, e_1_1;
+        return __generator(this, function (_g) {
+            switch (_g.label) {
                 case 0:
                     file = fsP.open(inputFilePath);
                     res = [];
-                    _d.label = 1;
+                    _g.label = 1;
                 case 1:
-                    _d.trys.push([1, 7, 8, 13]);
+                    _g.trys.push([1, 7, 8, 13]);
+                    _d = true;
                     return [4 /*yield*/, file];
                 case 2:
-                    _b = __asyncValues.apply(void 0, [(_d.sent()).readLines()]);
-                    _d.label = 3;
-                case 3: return [4 /*yield*/, _b.next()];
+                    _e = __asyncValues.apply(void 0, [(_g.sent()).readLines()]);
+                    _g.label = 3;
+                case 3: return [4 /*yield*/, _e.next()];
                 case 4:
-                    if (!(_c = _d.sent(), !_c.done)) return [3 /*break*/, 6];
-                    line = _c.value;
-                    res.push(line);
-                    _d.label = 5;
+                    if (!(_f = _g.sent(), _a = _f.done, !_a)) return [3 /*break*/, 6];
+                    _c = _f.value;
+                    _d = false;
+                    try {
+                        line = _c;
+                        res.push(line);
+                    }
+                    finally {
+                        _d = true;
+                    }
+                    _g.label = 5;
                 case 5: return [3 /*break*/, 3];
                 case 6: return [3 /*break*/, 13];
                 case 7:
-                    e_1_1 = _d.sent();
+                    e_1_1 = _g.sent();
                     e_1 = { error: e_1_1 };
                     return [3 /*break*/, 13];
                 case 8:
-                    _d.trys.push([8, , 11, 12]);
-                    if (!(_c && !_c.done && (_a = _b["return"]))) return [3 /*break*/, 10];
-                    return [4 /*yield*/, _a.call(_b)];
+                    _g.trys.push([8, , 11, 12]);
+                    if (!(!_d && !_a && (_b = _e.return))) return [3 /*break*/, 10];
+                    return [4 /*yield*/, _b.call(_e)];
                 case 9:
-                    _d.sent();
-                    _d.label = 10;
+                    _g.sent();
+                    _g.label = 10;
                 case 10: return [3 /*break*/, 12];
                 case 11:
                     if (e_1) throw e_1.error;

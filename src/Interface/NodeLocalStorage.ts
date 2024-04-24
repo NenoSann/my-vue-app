@@ -1,7 +1,8 @@
 export type LocalUserIndex = {
     users: Array<LocalUserInfo>,
+    message: LocalMessageList,
     messageCounts: number,
-    type: MessageType
+    type: MessageType,
 }
 
 export enum MessageType {
