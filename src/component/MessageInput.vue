@@ -57,7 +57,7 @@ const handleClick = async () => {
             progress.percent = 0;
         }, 500)
     }
-    const locations = await cos.putImage(imageInput.value?.files as FileList,
+    const locations = await cos.putImages(imageInput.value?.files as FileList,
         (percent: number, _speed: number) => {
             //showing progress in progress
             progress.percent = percent;

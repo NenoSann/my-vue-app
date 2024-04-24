@@ -30,10 +30,10 @@ export class Cos {
      * @param image 用于发送的图像，可以是单个/复数的File，也可以是一个FileList
      * @param loadingCallBack 在发送过程中调用的回调，可以获得发送的进度和速度
      */
-    public async putImage(image: File[], loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string[]>
-    public async putImage(image: File, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string>
-    public async putImage(image: FileList, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string[]>
-    public async putImage(image: File | File[] | FileList, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string | string[]> {
+    public async putImages(image: File[], loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string[]>
+    public async putImages(image: File, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string>
+    public async putImages(image: FileList, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string[]>
+    public async putImages(image: File | File[] | FileList, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string | string[]> {
         return new Promise<string[]>(async (resolve, reject) => {
             //首先查看credential是否过期
             if (!Sts.checkCredentialValid()) {
@@ -140,7 +140,7 @@ export class CredentialGenerator {
         return credentialString ? JSON.parse(credentialString) as CredentialData : null;
     }
     public checkCredentialValid() {
-        const expiredDate = new Date(this.credential?.expiredTime);
+        const expiredDate = new Date(this.credential?.expiredTime * 1000);
         const currentDate = new Date();
         return (currentDate >= expiredDate);
     }
