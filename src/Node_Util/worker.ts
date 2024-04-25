@@ -62,7 +62,6 @@ parentPort?.on('message', (data: any) => {
             });
             break;
         case 'writeMessage':
-            console.log('worker.ts got message: \n', data);
             writeMessage(userId, type as MessageType, content, userInfo as LocalUserInfo);
             break;
         case 'readMessageList':

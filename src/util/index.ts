@@ -60,7 +60,6 @@ export function createImgElement(base64: string[], path: string[], classes?: str
     const nodes: HTMLImageElement[] = [];
     for (const [index, img] of base64.entries()) {
         const node = document.createElement('img');
-        node.dataset['path'] = path[index];
         if (classes) {
             node.classList.add(...classes);
         }

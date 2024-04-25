@@ -36,7 +36,7 @@ export class Cos {
     public async putImages(image: File | File[] | FileList, loadingCallBack?: (percent: number, speed: number) => void, finishCallBack?: (ok: boolean) => void): Promise<string | string[]> {
         return new Promise<string[]>(async (resolve, reject) => {
             //首先查看credential是否过期
-            if (!Sts.checkCredentialValid()) {
+            if (Sts.checkCredentialValid()) {
                 //重新获取临时token
                 const {
                     tmpSecretId,

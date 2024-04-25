@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function () { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function () { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -40,7 +40,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     var m = o[Symbol.asyncIterator], i;
     return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
     function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function (v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
@@ -88,7 +88,6 @@ node_worker_threads_1.parentPort === null || node_worker_threads_1.parentPort ==
             });
             break;
         case 'writeMessage':
-            console.log('worker.ts got message: \n', data);
             writeMessage(userId, type, content, userInfo);
             break;
         case 'readMessageList':
@@ -263,9 +262,9 @@ function readMessage(userID, type, limit) {
                     (_c = res.messages).push.apply(_c, messages);
                     res.userInfo = userInfo;
                     _d.label = 4;
-                case 4: 
-                // TODO: compile this typescript file and test the new feature
-                return [2 /*return*/, res];
+                case 4:
+                    // TODO: compile this typescript file and test the new feature
+                    return [2 /*return*/, res];
                 case 5:
                     error_3 = _d.sent();
                     handleFsError(error_3);
@@ -282,7 +281,8 @@ function createMessageList() {
     return __awaiter(this, void 0, void 0, function () {
         var _this = this;
         return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+            return [2 /*return*/, new Promise(function (resolve, reject) {
+                return __awaiter(_this, void 0, void 0, function () {
                     var newlyCreated, messageList, _i, messageList_1, message, error_4;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
@@ -320,7 +320,8 @@ function createMessageList() {
                             case 7: return [2 /*return*/];
                         }
                     });
-                }); })];
+                });
+            })];
         });
     });
 }
@@ -328,7 +329,8 @@ function readMessageList() {
     return __awaiter(this, void 0, void 0, function () {
         var _this = this;
         return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+            return [2 /*return*/, new Promise(function (resolve, reject) {
+                return __awaiter(_this, void 0, void 0, function () {
                     var messageList, error_5;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
@@ -351,7 +353,8 @@ function readMessageList() {
                             case 4: return [2 /*return*/];
                         }
                     });
-                }); })];
+                });
+            })];
         });
     });
 }
@@ -405,8 +408,8 @@ function createUserFile(path) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve, reject) {
-                    createEmptyFile(path).then(function () { return resolve(true); });
-                })];
+                createEmptyFile(path).then(function () { return resolve(true); });
+            })];
         });
     });
 }
@@ -513,27 +516,27 @@ function readLastLines(inputFilePath, maxLineCount, encoding) {
                     if (!fs.existsSync(inputFilePath))
                         throw new Error("File ".concat(inputFilePath, " does not exist."));
                     return [4 /*yield*/, Promise.all([
-                            new Promise(function (resolve, reject) {
-                                return fs.stat(inputFilePath, function (err, stat) {
-                                    if (err) {
-                                        reject(err);
-                                    }
-                                    else {
-                                        resolve(stat);
-                                    }
-                                });
-                            }),
-                            new Promise(function (resolve, reject) {
-                                return fs.open(inputFilePath, "r", function (err, file) {
-                                    if (err) {
-                                        reject(err);
-                                    }
-                                    else {
-                                        resolve(file);
-                                    }
-                                });
-                            }),
-                        ])];
+                        new Promise(function (resolve, reject) {
+                            return fs.stat(inputFilePath, function (err, stat) {
+                                if (err) {
+                                    reject(err);
+                                }
+                                else {
+                                    resolve(stat);
+                                }
+                            });
+                        }),
+                        new Promise(function (resolve, reject) {
+                            return fs.open(inputFilePath, "r", function (err, file) {
+                                if (err) {
+                                    reject(err);
+                                }
+                                else {
+                                    resolve(file);
+                                }
+                            });
+                        }),
+                    ])];
                 case 1:
                     _a = _b.sent(), stat = _a[0], file = _a[1];
                     chars = 0;
@@ -573,15 +576,15 @@ function readPreviousChar(stat, file, currentCharacterCount, encoding) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve, reject) {
-                    fs.read(file, Buffer.alloc(1), 0, 1, stat.size - 1 - currentCharacterCount, function (err, bytesRead, buffer) {
-                        if (err) {
-                            reject(err);
-                        }
-                        else {
-                            resolve(buffer.toString(encoding));
-                        }
-                    });
-                })];
+                fs.read(file, Buffer.alloc(1), 0, 1, stat.size - 1 - currentCharacterCount, function (err, bytesRead, buffer) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve(buffer.toString(encoding));
+                    }
+                });
+            })];
         });
     });
 }

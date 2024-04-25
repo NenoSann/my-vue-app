@@ -26,7 +26,14 @@ class Socketio {
         this.message = new Map();
         this.SqlLiteController = new SqlLiteWorker(_id);
         this.workerController = new WorkerController();
-        // binding socket event here
+        //              Socket.io event listener binding
+        //  In this area we can add eventlistener for upcoming socket.io event,
+        //  including private_message/group_message, when adding event listener be sure
+        //  the server will actually send those events.
+        //              Socket.io 事件监听绑定区域
+        //  在这个地方可以为socket.io 服务器发送的事件添加事件监听回调函数，在监听事件的时候请注意查看
+        //  服务器发送的事件名字以及参数。
+        //
         this.socket.on('connect', (data: any) => {
             mainWindow?.webContents.send('connect', this.socket.id);
         })
@@ -47,6 +54,7 @@ class Socketio {
         });
 
         this.socket.on('private_message', (data: PrivateMessage) => {
+            const { senderid, senderavatar, sendername, content, receivername, receiveravatar, receiverid, ObjectId } = data;
             if (!this.message.has(data.senderid)) {
                 this.message.set(data.senderid, []);
             }
@@ -63,8 +71,16 @@ class Socketio {
                     avatar: data.senderavatar,
                     userId: data.senderid
                 });
+            const unixTimeStamp = new Date().getTime() * 1000
+            this.SqlLiteController.insertUser(senderid, sendername, senderavatar);
+            this.SqlLiteController.insertUser(receiverid, receivername, receiveravatar);
+            this.SqlLiteController.insertMessages(senderid, 'private', unixTimeStamp, ObjectId as string);
+            this.SqlLiteController.insertMessageContent(ObjectId as string,
+                senderid, receiverid,
+                content.text,
+                content.image as unknown as string,
+                unixTimeStamp);
         });
-
         this.socket.on('user_group_message', (data: GroupMessage) => {
             mainWindow?.webContents.send('userGroupMessage', data);
             this.workerController.saveMessage(data.from, MessageType.Group,
@@ -83,6 +99,13 @@ class Socketio {
         })
     }
 
+    //              Socket.io client emits
+    //  In this area we can define method that use io object to send event 
+    //  to serve, make sure server is actually listening those events
+    //              Socket.io 客户端事件发送
+    //  在这个地方可以定义客户端向服务器发送的事件，大部分的事件都需要使用io对象发送。
+    //  在发送的时候请注意查看服务器是否在监听这些事件，以及发送的参数数据是否被接收。
+    //
     public static getInstance(): Socketio;
     public static getInstance(name: string, _id: string, avatar: string): Socketio | undefined;
     public static getInstance(name?: string, _id?: string, avatar?: string): Socketio | undefined {
@@ -98,14 +121,21 @@ class Socketio {
         return this.socket;
     }
 
-
     public getUserMap() {
         return this.usermap;
     }
+
+    /**
+     * 用于发送私信的函数，这个函数会将message发送到socket服务器，服务器会首先尝试将消息
+     * 存储到数据库，随后会向目标用户发送私信事件。当这两者都完成后会执行回调，将消息的id返回到客户端。
+     * 获得消息的id后我们将其存储到用户的sqlite数据库内。
+     * @param to 
+     * @param message 
+     */
     public sendPrivateMessage(to: string, message: PrivateMessage): Promise<Boolean> {
         // send the content to target recerver
         return new Promise<Boolean>((resolve, reject) => {
-            const { senderid, content, receivername, receiveravatar, receiverid } = message;
+            const { senderid, senderavatar, sendername, content, receivername, receiveravatar, receiverid } = message;
             this?.socket.emit('private_message', {
                 to,
                 ...message
@@ -113,14 +143,20 @@ class Socketio {
                 // We sending message to receiver, so we store the info
                 // of the receiver, not ours
                 try {
+                    // insert sender's and receiver's userinfo into sqlite
+                    // exist info will be replaced
+                    this.SqlLiteController.insertUser(senderid, sendername, senderavatar);
+                    this.SqlLiteController.insertUser(receiverid, receivername, receiveravatar);
+                    // try to save message
+                    const unixTimeStamp = new Date().getTime() * 1000
                     this.SqlLiteController.insertMessageContent(messageId,
                         senderid,
                         receiverid,
                         content.text,
                         content.image as unknown as string,
-                        Math.floor(new Date().getTime() * 1000)
-
+                        Math.floor(unixTimeStamp)
                     )
+                    this.SqlLiteController.insertMessages(receiverid, 'private', unixTimeStamp, messageId)
                     console.log('messageId:', messageId);
                 } catch (error) {
                     console.error(error);
@@ -177,8 +213,10 @@ class Socketio {
     }
 
     public async readMessageList() {
+        this.SqlLiteController.getMessageList();
         const res = await this.workerController.readMessageList();
-        return res;
+        const sqliteRes = this.SqlLiteController.getMessageList();
+        return sqliteRes;
     }
 
     public async writeMessageList(info: LocalUserInfo, type: MessageType, content: LocalMessageContent) {

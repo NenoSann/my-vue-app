@@ -2,13 +2,17 @@ import * as FsP from 'node:fs/promises';
 import path from 'path';
 import Database from 'better-sqlite3';
 import { cwd } from 'process'
+import type { MessageListItem, SqlMessage, SqlMessageContent, SqlUser } from '../Interface/NodeLocalStorage';
 enum operation {
     'createUser',
     'createMessages',
     'createMessageContent',
     'insertMessages',
     'insertUser',
+    'getUser',
     'getMessageContent',
+    'getMessageContentById',
+    'getMessages',
     'insertMessageContent'
 }
 
@@ -30,6 +34,12 @@ export class SqlLiteWorker {
         }
     }
 
+    /**
+     * 将user的id，name和avatar插入数据库内，如果原用户存在，则进行替换操作
+     * @param id 
+     * @param name 
+     * @param avatar 
+     */
     public insertUser(id: string, name: string, avatar: string) {
         try {
             const statement = this.statementMap.get(operation.insertUser);
@@ -39,12 +49,42 @@ export class SqlLiteWorker {
         }
     }
 
-    public insertMessages(id: string, type: string, date: number, userId: string) {
+    public insertMessages(id: string, type: string, date: number, lastMessage: string) {
         try {
             const statement = this.statementMap.get(operation.insertMessages);
-            statement?.run({ id, type, date, userId });
+            const result = statement?.run({ id, type, date, lastMessage });
+            console.log('sqlite insert Messages: ', result);
         } catch (error) {
             this.handleError(error);
+        }
+    }
+
+    /**
+     * 返回所有的消息列表
+     */
+    public getMessageList(): MessageListItem[] {
+        try {
+            const statement = this.statementMap.get(operation.getMessages);
+            const contentStatement = this.statementMap.get(operation.getMessageContentById);
+            const userStatement = this.statementMap.get(operation.getUser);
+            const messageList: MessageListItem[] = [];
+            const result = statement?.all() as SqlMessage[];
+            for (const message of result) {
+                const messageContent = contentStatement?.get({ id: message.lastMessage }) as SqlMessageContent;
+                const user = userStatement?.get({ id: message.id }) as SqlUser;
+                messageList.push({
+                    type: message.type,
+                    info: user,
+                    content: messageContent,
+                    date: message.date
+                })
+            }
+            console.log('\n\n\n\n\nsql messageList ', messageList);
+            console.log('\n\n\n\n\n\n\n');
+            return messageList;
+        } catch (error) {
+            this.handleError(error);
+            throw (error)
         }
     }
 
@@ -56,7 +96,8 @@ export class SqlLiteWorker {
         date: number) {
         try {
             const statement = this.statementMap.get(operation.insertMessageContent);
-            statement?.run({ id, sendBy, sendTo, text, image, date });
+            const res = statement?.run({ id, sendBy, sendTo, text, image, date });
+            console.log('sql insert messageContent: ', res);
         } catch (error) {
             this.handleError(error);
         }
@@ -89,8 +130,8 @@ export class SqlLiteWorker {
                 id TEXT PRIMARY KEY,
                 type TEXT NOT NULL,
                 date INT NOT NULL,
-                userId TEXT NOT NULL,
-                FOREIGN KEY (userId) REFERENCES USER (id)
+                lastMessage TEXT NOT NULL,
+                FOREIGN KEY("lastMessage") REFERENCES "MESSAGECONTENT"("id")
             );
             `
         )
@@ -102,9 +143,7 @@ export class SqlLiteWorker {
                 sendTo TEXT NOT NULL,
                 text TEXT NOT NULL,
                 image TEXT,
-                date INT NOT NULL,
-                FOREIGN KEY (sendBy) REFERENCES USER (id)
-                FOREIGN KEY (sendTo) REFERENCES USER (id)
+                date INT NOT NULL
             )
             `
         )
@@ -134,8 +173,8 @@ export class SqlLiteWorker {
         )
         const insertMessages = this.db.prepare(
             `
-            INSERT OR REPLACE INTO MESSAGES (id, type, date, userId)
-            VALUES(@id, @type, @date, @userId)
+            INSERT OR REPLACE INTO MESSAGES (id, type, date, lastMessage)
+            VALUES(@id, @type, @date, @lastMessage)
             `
         )
 
@@ -144,13 +183,35 @@ export class SqlLiteWorker {
             SELECT * FROM MESSAGECONTENT WHERE sendBy = @sendBy AND sendTo = @sendTo
             `
         )
+
+        const getMessageContentById = this.db.prepare(
+            `
+            SELECT * FROM MESSAGECONTENT WHERE id = @id
+            `
+        )
+
+        const getMessages = this.db.prepare(
+            `
+            SELECT * FROM MESSAGES
+            `
+        )
+
+        const getUser = this.db.prepare(
+            `
+            SELECT * FROM USER
+            WHERE id = @id
+            `
+        )
         this.statementMap.set(operation.insertMessages, insertMessages);
         this.statementMap.set(operation.insertMessageContent, insertMessageContent);
         this.statementMap.set(operation.insertUser, insertUser)
         this.statementMap.set(operation.getMessageContent, getMessageContent);
+        this.statementMap.set(operation.getMessageContentById, getMessageContentById);
+        this.statementMap.set(operation.getMessages, getMessages);
+        this.statementMap.set(operation.getUser, getUser)
     }
 
-    private handleError(error: unknown) {
+    private handleError(error: unknown): any {
         console.error(error);
         throw error;
     }

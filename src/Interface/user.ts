@@ -30,7 +30,8 @@ export type PrivateMessage = {
     senderid: string,
     sendername: string,
     senderavatar: string,
-    date?: Date
+    date?: Date,
+    ObjectId?: string
 }
 
 export type GroupMessage = {

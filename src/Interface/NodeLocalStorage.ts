@@ -32,3 +32,33 @@ export type LocalMessageList = {
     content: Array<LocalMessageContent>,
     date: Date
 }
+
+export type SqlMessage = {
+    id: string,
+    type: MessageType,
+    lastMessage: string,
+    date: number
+}
+
+export type MessageListItem = {
+    type: MessageType,
+    info: SqlUser,
+    content: SqlMessageContent,
+    date: number
+}
+
+export type SqlUser = {
+    id: string,
+    name: string,
+    avatar: string
+}
+
+export type SqlMessageContent = {
+    id: string,
+    type: 'from' | 'to'
+    sendBy: string,
+    sendTo: string,
+    text: string,
+    image?: Array<string>,
+    date?: string
+}
