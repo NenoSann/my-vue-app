@@ -134,10 +134,10 @@ app.on('ready', () => {
         console.debug('groupIds: \n', groupIds);
         Socketio.getInstance().joinGroup(groupIds)
     });
-    ipcMain.handle('socket:queryMessages', (_event, userId: string, type: MessageType, limit: number, offset: number) => {
+    ipcMain.handle('socket:queryMessages', (_event, userId: string, targetId: string, type: MessageType, limit: number, offset: number) => {
         return new Promise(async (resolve, reject) => {
             try {
-                const res = await Socketio.getInstance().queryMessages(userId, type, limit, offset);
+                const res = await Socketio.getInstance().queryMessages(userId, targetId, type, limit, offset);
                 resolve(res);
             } catch {
                 reject();
@@ -171,13 +171,10 @@ app.on('ready', () => {
         shell.openExternal(url);
     })
 
-    ipcMain.handle('file:getImage', async (_event, type: 'Base64' | 'Buffer') => {
-        try {
-            const imagePath = (await DialogController.openSelectImageDialog(mainWindow)).filePaths;
-            const base64 = await BufferController.readImageFromPath(imagePath, type);
-            return { base64, imagePath };
-        } catch (error) {
-            console.error(error);
+    // oepn emoji panel
+    ipcMain.handle('openEmojiPanel', () => {
+        if (app.isEmojiPanelSupported()) {
+            app.showEmojiPanel();
         }
     })
 });

@@ -47,6 +47,11 @@ export type MessageListItem = {
     date: number
 }
 
+export type Messages = {
+    messages: SqlMessageContent[],
+    userInfo: Map<string, SqlUser>
+}
+
 export type SqlUser = {
     id: string,
     name: string,
@@ -60,5 +65,5 @@ export type SqlMessageContent = {
     sendTo: string,
     text: string,
     image?: Array<string>,
-    date?: string
+    date?: number
 }

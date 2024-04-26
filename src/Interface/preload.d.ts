@@ -1,6 +1,6 @@
 import { SocketUserInfo } from './user'
 import type { GroupMessage, PrivateMessage } from './user';
-import type { LocalGroupIndex, LocalMessageContent, LocalUserIndex, MessageType, LocalMessageList } from './NodeLocalStorage';
+import type { LocalGroupIndex, LocalMessageContent, LocalUserIndex, MessageType, LocalMessageList, SqlMessageContent, SqlUser } from './NodeLocalStorage';
 declare global {
     interface Window extends Window {
         storeUserInfo: {
@@ -12,9 +12,9 @@ declare global {
             connect: () => Promise<Boolean>;
             close: () => Promise<Boolean>;
             getUserMap: () => Promise<Map<string, SocketUserInfo>>;
-            queryMessages: (userId: string, type: MessageType, limit: number, offset: number) => Promise<{
-                messages: Array<LocalMessageContent>,
-                userInfo: LocalUserIndex
+            queryMessages: (userId: string, targteId: string, type: MessageType, limit: number, offset: number) => Promise<{
+                messages: Array<SqlMessageContent>,
+                userInfo: Map<string, SqlUser>
             }>;
             sendPrivateMessage: (to: string, content: PrivateMessage) => Promise<Boolean>;
             sendGroupMessage: (to: string, content: GroupMessage) => Promise<Boolean>;
@@ -30,8 +30,8 @@ declare global {
         urlAPI: {
             openURL: (url: string) => void;
         },
-        fileAPI: {
-            getImage: (type: 'Base64' | 'Buffer') => Promise<{ base64: string[] | Buffer[], imagePath: string[] }>;
+        emoji: {
+            openNativeEmoji: () => void;
         }
     }
 }

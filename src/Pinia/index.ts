@@ -1,7 +1,7 @@
 import { createPinia, defineStore } from "pinia";
 import { login } from "../API/user";
 import type { MessageContent } from '../Interface/user';
-import { MessageType } from "../Interface/NodeLocalStorage";
+import { MessageType, SqlMessageContent } from "../Interface/NodeLocalStorage";
 
 interface IFriend {
     name: string,
@@ -35,7 +35,7 @@ interface LocalMessageContent {
 interface ChatUserInfo {
     avatar: string,
     name: string,
-    userId: string
+    id: string
 }
 
 enum eSideBar {
@@ -166,9 +166,9 @@ const Socket_Message = defineStore('Socket_Message', {
             }
             const target = this.$state.messages.get(id);
             if (Array.isArray(userInfo)) {
-                userInfo.forEach((info) => target.user?.set(info.userId, info));
+                userInfo.forEach((info) => target.user?.set(info.id, info));
             } else {
-                target.user?.set(userInfo.userId, userInfo)
+                target.user?.set(userInfo.id, userInfo)
             }
             return this.$state.messages.get(id)?.data?.length - 1;
         },

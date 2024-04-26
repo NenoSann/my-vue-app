@@ -4,8 +4,8 @@
         <div class="bg-base-200 h-[70%] w-full border-b-[1px] border-b-neutral-700 pb-4 px-2 overflow-auto"
             ref="chatListRef">
             <TransitionGroup name="list">
-                <ChatBubble :type="msg.type" :time="formatDate(msg.date)"
-                    :avatar="users?.get(msg.sendBy)?.avatar as string" :content="msg.content" :date="msg.date"
+                <ChatBubble :type="msg.type" :time="formatDate(msg.date)" :avatar="users?.get(msg.sendBy)?.avatar as
+                    string" :content="msg.content" :date="msg.date"
                     :name="SocketTarget.type === 'Group' ? users?.get(msg.sendBy)?.name : undefined"
                     v-for="(msg, index) in messages" :key="msg.date"></ChatBubble>
             </TransitionGroup>
@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { ChatBubble, MessageInput } from '../component';
-import { ref, computed, watch, nextTick, onMounted } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { User, Socket_Target, Socket_Message } from '../Pinia';
 import { LocalUserIndex, MessageType } from '../Interface/NodeLocalStorage.ts';
 import { formatDate, scrollDiv } from '../util';
@@ -51,20 +51,27 @@ watch(SocketTarget, async (target) => {
     const userId = target.userid;
     if (userId) {
         if (!SocketMessage.messages.has(userId)) {
-            const res = await window.socket.queryMessages(userId, target.type, 2, 0);
+            const res = await window.socket.queryMessages(user._id, target.userid, target.type, 10, 0);
+            console.log('DEBUG:check query message:', res);
             // we have to rename the userInfo to userinfo or
             // we will face dublicated names
-            const { userInfo: userinfo } = res;
-            const { users } = userinfo;
-            // TODO: we need to change this format in worker.ts
-            const messages = res.messages.map((msg) => {
+            const { userInfo, messages: newMessages } = res;
+            // const { users } = userinfo;
+            // // TODO: we need to change this format in worker.ts
+            const messages = newMessages.map((msg) => {
                 return {
-                    ...msg.content,
-                    date: msg.date,
+                    type: msg.type,
+                    content: {
+                        text: msg.text,
+                        image: msg.image
+                    },
+                    sendBy: msg.sendBy,
+                    sent: true,
+                    date: new Date(msg.date as number / 1000).toString()
                 }
             })
             if (target.type === MessageType.Private) {
-                SocketMessage.storeLocally(users[0].userId, messages as any, [...users, userInfo.value]);
+                SocketMessage.storeLocally(userId, messages as any, [...userInfo.values()]);
             } else if (target.type === MessageType.Group) {
                 SocketMessage.storeLocally(target.userid, messages as any, users);
             }

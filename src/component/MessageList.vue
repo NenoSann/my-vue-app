@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import UserItemSkeleton from './UserItemSkeleton.vue'
 import { UserItem } from '.';
-import { onMounted, ref, Ref, computed } from 'vue';
+import { onMounted, ref, Ref } from 'vue';
 import { MessageListItem } from '../Interface/NodeLocalStorage';
 import { changeSocketTarget, extractTextContent, checkUserInUsermap } from '../util';
 const messageList: Ref<Array<MessageListItem> | undefined> = ref();

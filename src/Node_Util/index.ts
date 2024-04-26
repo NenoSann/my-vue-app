@@ -78,6 +78,7 @@ class Socketio {
             this.SqlLiteController.insertMessageContent(ObjectId as string,
                 senderid, receiverid,
                 content.text,
+                'to',
                 content.image as unknown as string,
                 unixTimeStamp);
         });
@@ -153,6 +154,7 @@ class Socketio {
                         senderid,
                         receiverid,
                         content.text,
+                        'to',
                         content.image as unknown as string,
                         Math.floor(unixTimeStamp)
                     )
@@ -207,9 +209,10 @@ class Socketio {
         })
     }
 
-    public async queryMessages(userId: string, type: MessageType, limit: number, offset: number) {
-        const res = await this.workerController.readMessages(userId, type, limit);
-        return res;
+    public async queryMessages(userId: string, targetId: string, type: MessageType, limit: number, offset: number) {
+        const res = await this.workerController.readMessages(targetId, type, limit);
+        const sqlRes = this.SqlLiteController.getMessageContents(userId, targetId, limit, offset);
+        return sqlRes;
     }
 
     public async readMessageList() {

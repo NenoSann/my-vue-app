@@ -39,9 +39,9 @@ contextBridge.exposeInMainWorld('socket', {
             ipcRenderer.invoke('socket:groupMessage', ...args).then(() => resolve(true)).catch(() => reject());
         })
     },
-    queryMessages: (userId: string, type: MessageType, limit: number, offset: number) => {
+    queryMessages: (userId: string, targetId: string, type: MessageType, limit: number, offset: number) => {
         return new Promise((resolve, reject) => {
-            ipcRenderer.invoke('socket:queryMessages', userId, limit, offset).then((res) =>
+            ipcRenderer.invoke('socket:queryMessages', userId, targetId, type, limit, offset).then((res) =>
                 resolve(res)
             ).catch(() => reject());
         })
@@ -78,10 +78,8 @@ contextBridge.exposeInMainWorld('urlAPI', {
     }
 })
 
-contextBridge.exposeInMainWorld('fileAPI', {
-    getImage: async (type: 'Buffer' | 'Base64') => {
-        return ipcRenderer.invoke('file:getImage', type).then((res: string[] | string) => {
-            return res;
-        });
+contextBridge.exposeInMainWorld('emoji', {
+    openNativeEmoji: () => {
+        ipcRenderer.invoke('openEmojiPanel');
     }
 })

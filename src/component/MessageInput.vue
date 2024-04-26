@@ -1,7 +1,7 @@
 <template>
     <div class="h-[calc(30%-3rem)] bg-base-200 relative">
         <div class="btn-section">
-            <div class="sidebar-icon">
+            <div class="sidebar-icon" @click="handleEmojiClick">
                 <Icon size="24">
                     <GrinTongueRegular />
                 </Icon>
@@ -49,6 +49,7 @@ const progress = reactive({
     percent: 0,
     show: false,
 })
+
 const handleClick = async () => {
     const callback = () => {
         emits('update:scroll')
@@ -80,6 +81,10 @@ const handleImageClick = async () => {
     images.push(...(await Promise.all(promiseArr)));
     console.log(images);
     appendImgElement(contentRef.value, images, [], ['div-img']);
+}
+
+const handleEmojiClick = () => {
+    window.emoji.openNativeEmoji();
 }
 </script>
 
