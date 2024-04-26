@@ -12,7 +12,7 @@
         <div class="daisy-chat-footer">
             <time class=" text-xs opacity-50">{{ time }}</time>
         </div>
-        <div class="daisy-chat-bubble relative">
+        <div class="daisy-chat-bubble relative" @contextmenu="handleContextMenu">
             <p v-html="props.content.text" ref="pNodeRef"></p>
             <span v-if="props.loading"
                 class="daisy-loading daisy-loading-ring daisy-loading-lg absolute absolute-center"></span>
@@ -22,6 +22,7 @@
 
 <script setup lang="ts">
 import { replaceWebLinks } from '../util';
+import { handleContextMenu } from '../util/context_menu';
 import type { MessageContent } from '../Interface/user';
 import { ref, Ref, VNodeRef, onMounted } from 'vue';
 const pNodeRef: Ref<VNodeRef | null> = ref(null);

@@ -2,10 +2,13 @@
     <div id="app">
         <RouterView>
         </RouterView>
+        <ContextMenuContainer>
+        </ContextMenuContainer>
     </div>
 </template>
 
 <script setup lang="ts">
+import ContextMenuContainer from './component/ContextMenuContainer.vue';
 import { onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router'
 import { User } from './Pinia';
@@ -49,5 +52,6 @@ onMounted(() => {
 <style scoped>
 #app {
     @apply flex flex-row;
-    @apply h-screen w-screen;}
+    @apply h-screen w-screen;
+}
 </style>

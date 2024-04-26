@@ -1,15 +1,14 @@
 <template>
-    <div class="home-main">
+    <div class="home-main" @click="unmountContextMenu">
         <SideBar></SideBar>
-        <!-- <Channel></Channel> -->
         <UserHome></UserHome>
-        <!-- <UserHome></UserHome> -->
     </div>
 </template>
 
 <script setup lang="ts">
 import SideBar from '../component/SideBar.vue';
 import UserHome from '../component/UserHome.vue';
+import { unmountContextMenu } from '../util/context_menu';
 </script>
 
 <style scoped>

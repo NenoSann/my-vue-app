@@ -11,7 +11,7 @@ const app = createApp(App);
 app.use(router);
 app.use(pinia);
 app.mount('#app');
-
+export { app };
 
 const socketTarget = Socket_Target();
 // electron event listening
