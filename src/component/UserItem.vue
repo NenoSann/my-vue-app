@@ -1,7 +1,6 @@
 <template>
     <li class="list-item"
-        @click="() => { if (props.callback) { props.callback(avatar, name, userid, MessageType.Private) } }"
-        @keypress.enter="">
+        @click="() => { if (props.callback) { props.callback(avatar, name, userid, MessageType.Private) } }">
         <a :tabindex="props.index">
             <div class="daisy-avatar w-12" :class="{ 'daisy-online': props.online, 'daisy-offline': !props.online }">
                 <img class="rounded-full" :src="props.avatar">

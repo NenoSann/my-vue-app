@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify';
 import { User, Socket_Target, Socket_Message, Socket_Info, Socket_Users } from '../Pinia';
 import { MessageType } from '../Interface/NodeLocalStorage.ts';
 import { computed } from 'vue';
+import { handleContextMenu } from './context_menu';
 import type { Window } from '../Interface/preload';
 
 const uriRegex = /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z]+)+)(?:\/\S*)?/g;
@@ -63,6 +64,9 @@ export function createImgElement(base64: string[], path: string[], classes?: str
         if (classes) {
             node.classList.add(...classes);
         }
+        node.addEventListener('contextmenu', (event) => {
+            handleContextMenu(event);
+        })
         node.src = img;
         nodes.push(node);
     }
@@ -192,3 +196,5 @@ export function sendMessage(text: string, callback: Function) {
         });
     }
 }
+
+export { handleContextMenu }

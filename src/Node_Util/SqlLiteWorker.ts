@@ -24,7 +24,6 @@ export class SqlLiteWorker {
         try {
             // create SqlLiteWorker instance, if not exists, it is created
             this.dbPath = path.join(cwd(), 'message', `${userId}.db`);
-            console.log(this.dbPath);
             this.db = Database(this.dbPath);
             this.db.pragma('journal_mode = WAL');
             this.createTable();
@@ -87,19 +86,12 @@ export class SqlLiteWorker {
 
     public getMessageContents(senderid: string, receiverid: string, limit?: number, offset?: number): Messages {
         try {
-            console.log({
-                senderid,
-                receiverid,
-                limit,
-                offset
-            })
             const userStatement = this.statementMap.get(operation.getUser);
             const messageStatement = this.statementMap.get(operation.getMessageContent);
             const userInfo: Map<string, SqlUser> = new Map();
             userInfo.set(senderid, userStatement?.get({ id: senderid }) as SqlUser);
             userInfo.set(receiverid, userStatement?.get({ id: receiverid }) as SqlUser);
             const messages = messageStatement?.all({ sendBy: senderid, sendTo: receiverid, offset, limit }) as SqlMessageContent[];
-            console.log({ messages, userInfo });
             return { messages, userInfo }
         } catch (error) {
             this.handleError(error);
@@ -115,8 +107,9 @@ export class SqlLiteWorker {
         image: string[] | string | null,
         date: number) {
         try {
+            console.log({ id, sendBy, sendTo, text, type, image, date });
             const statement = this.statementMap.get(operation.insertMessageContent);
-            const res = statement?.run({ id, sendBy, sendTo, text, type, image, date });
+            const res = statement?.run({ id, sendBy, sendTo, text, image, date, type });
             console.log('sql insert messageContent: ', res);
         } catch (error) {
             this.handleError(error);
@@ -182,8 +175,8 @@ export class SqlLiteWorker {
     private prepare() {
         const insertMessageContent = this.db.prepare(
             `
-            INSERT INTO MESSAGECONTENT (id, sendBy, sendTo, text, image, date)
-            VALUES (@id, @sendBy, @sendTo, @text, @image, @date)
+            INSERT INTO MESSAGECONTENT (id, sendBy, sendTo, text, image, date, type)
+            VALUES (@id, @sendBy, @sendTo, @text, @image, @date, @type)
             `
         )
         const insertUser = this.db.prepare(
@@ -203,7 +196,7 @@ export class SqlLiteWorker {
             `
             SELECT * FROM MESSAGECONTENT 
             WHERE (sendBy = @sendBy AND sendTo = @sendTo) OR (sendBy = @sendTo AND sendTo = @sendBy)
-            ORDER BY date DESC
+            ORDER BY date ASC
             LIMIT @limit OFFSET @offset
             `
         )

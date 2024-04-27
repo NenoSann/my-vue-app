@@ -32,10 +32,10 @@
 </template>
 
 <script setup lang="ts">
-import { Ref, ref, reactive } from 'vue';
+import { Ref, ref, reactive, onMounted } from 'vue';
 import { GrinTongueRegular, FileRegular, FileImageRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
-import { sendMessage, readFileAsDataURL, appendImgElement, replaceImage } from '../util';
+import { sendMessage, readFileAsDataURL, appendImgElement, replaceImage, handleContextMenu } from '../util';
 import { RadialProgress } from './';
 import { cos } from '../util/Cos&STS';
 import type { Window } from '../Interface/Global'
@@ -86,6 +86,12 @@ const handleImageClick = async () => {
 const handleEmojiClick = () => {
     window.emoji.openNativeEmoji();
 }
+
+onMounted(() => {
+    contentRef.value.addEventListener('contextmenu', (event) => {
+        handleContextMenu(event);
+    })
+})
 </script>
 
 <style scoped>

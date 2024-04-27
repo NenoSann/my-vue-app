@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeImage, Menu, Tray, Screen, screen, shell, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeImage, Menu, Tray, shell } from 'electron';
 import * as path from 'path';
 import { Socketio } from './Node_Util/index.ts';
 import { GroupMessage, PrivateMessage } from './Interface/user.ts';
@@ -13,9 +13,12 @@ const icon = nativeImage.createFromPath('D:\\Web\\ElectronVueApp\\assets\\oie_ic
 let tray: Tray;
 const createWindow = () => {
     // Create the browser window.
+    const Store = require('electron-store');
+    const store = new Store();
+    const size = store.get('windowSize');
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: size?.width || 800,
+        height: size?.height || 600,
         minHeight: 600,
         minWidth: 800,
         autoHideMenuBar: true,
@@ -35,7 +38,13 @@ const createWindow = () => {
             mainWindow?.hide();
         }
     })
-
+    mainWindow.on('resize', (event) => {
+        const [x, y] = mainWindow?.getSize() as number[];
+        store.set('windowSize', {
+            width: x,
+            height: y
+        })
+    })
     // and load the index.html of the app.
     //@ts-ignore
     if (MAIN_WINDOW_VITE_DEV_SERVER_URL as any) {

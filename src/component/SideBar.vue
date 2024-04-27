@@ -18,13 +18,23 @@
                 <Cat />
             </Icon>
         </div>
+        <div class="sidebar-icon groups">
+            <Icon size="32">
+                <Award />
+            </Icon>
+        </div>
+        <div class="sidebar-icon groups">
+            <Icon size="32">
+                <FolderRegular />
+            </Icon>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { SideBar, TheIcon } from './index';
 import { useRouter } from 'vue-router';
-import { Comments, AddressBook, Cat } from '@vicons/fa';
+import { Comments, AddressBook, Cat, Award, FolderRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
 import { User, ComponentState, eSideBar } from '../Pinia';
 import { ref, watch, computed } from 'vue';

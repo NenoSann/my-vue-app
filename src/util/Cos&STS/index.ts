@@ -108,10 +108,11 @@ export class Cos {
 /**
  *  CredentialGenerator模块用于向服务器请求临时的密钥来进行存储服务，密钥是有时效的，如果密钥过期了模块会自动调用
  *  请求服务来重新获得密钥。
+ *  
  */
 export class CredentialGenerator {
     localStorageKey = 'stsCredential';
-    credential: CredentialData;
+    private credential: CredentialData;
     constructor() {
         try {
             //首先尝试从LocalStorage中读取Credential

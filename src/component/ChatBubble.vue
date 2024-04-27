@@ -21,10 +21,9 @@
 </template>
 
 <script setup lang="ts">
-import { replaceWebLinks } from '../util';
-import { handleContextMenu } from '../util/context_menu';
+import { replaceWebLinks, handleContextMenu } from '../util';
 import type { MessageContent } from '../Interface/user';
-import { ref, Ref, VNodeRef, onMounted } from 'vue';
+import { ref, Ref, VNodeRef, onMounted, nextTick } from 'vue';
 const pNodeRef: Ref<VNodeRef | null> = ref(null);
 const props = defineProps<{
     type: "to" | "from";
@@ -34,8 +33,8 @@ const props = defineProps<{
     name?: string;
     loading?: boolean
 }>();
-onMounted(() => {
-    (pNodeRef.value as unknown as Element).childNodes.forEach((node) => {
+onMounted(async () => {
+    (pNodeRef.value as unknown as Element).childNodes.forEach(async (node) => {
         // if the child node is a 'a' tag, we reset the click event 
         // of this tag
         if ((node as any).tagName === 'A') {
@@ -43,6 +42,12 @@ onMounted(() => {
                 event.preventDefault();
                 const href = (event.target as any).href as string;
                 window.urlAPI.openURL(href);
+            })
+        }
+        await nextTick();
+        if ((node as any).tagName === "IMG") {
+            node.addEventListener('contextmenu', (e: any) => {
+                handleContextMenu(e)
             })
         }
     })

@@ -47,6 +47,7 @@
     "cos-js-sdk-v5": "^1.7.1",
     "dompurify": "^3.1.0",
     "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^8.2.0",
     "jimp": "^0.22.12",
     "js-md5": "^0.8.3",
     "pinia": "^2.1.7",
