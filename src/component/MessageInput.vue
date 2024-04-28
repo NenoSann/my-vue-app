@@ -38,6 +38,7 @@ import { Icon } from '@vicons/utils';
 import { sendMessage, readFileAsDataURL, appendImgElement, replaceImage, handleContextMenu } from '../util';
 import { RadialProgress } from './';
 import { cos } from '../util/Cos&STS';
+import DOMPurify from 'dompurify';
 import type { Window } from '../Interface/Global'
 const emits = defineEmits(['update:scroll']);
 const props = defineProps<{
@@ -90,6 +91,20 @@ const handleEmojiClick = () => {
 onMounted(() => {
     contentRef.value.addEventListener('contextmenu', (event) => {
         handleContextMenu(event);
+    })
+    // custom paste event, purify the dom string that user copied
+    //https://stackoverflow.com/questions/55774733/how-to-modify-copied-text-before-pasting-using-javascript
+    contentRef.value.addEventListener('paste', (event) => {
+        event.preventDefault();
+        let selectedHTMLString = event.clipboardData?.getData('text/html');
+        if (selectedHTMLString) {
+            selectedHTMLString = DOMPurify.sanitize(selectedHTMLString, { FORBID_ATTR: ['style'] })
+        }
+        // use setTimeout to avoid recursivelly call document.execCommand
+        // see: https://github.com/nwjs/nw.js/issues/3403
+        setTimeout(function () {
+            document.execCommand('insertHTML', false, selectedHTMLString);
+        }, 0)
     })
 })
 </script>

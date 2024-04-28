@@ -5,6 +5,7 @@
  */
 import { render, h, VNode } from 'vue';
 import ContextMenu from '../../component/ContextMenu.vue';
+import DOMPurify from 'dompurify';
 let contextComponent: VNode | null = null;
 let container: Element | null = null;
 export function handleContextMenu(event: PointerEvent | MouseEvent) {
@@ -20,38 +21,76 @@ export function handleContextMenu(event: PointerEvent | MouseEvent) {
             x: event.clientX,
             y: event.clientY,
             targetType: target.tagName,
-            copy: copy(event),
-            paste: paste(event),
+            copy: copy(),
+            paste: paste(),
             subLeft,
         });
         render(contextComponent, container)
     }
 }
 
-export function copy(event: PointerEvent | MouseEvent) {
+export function _copy(event: PointerEvent | MouseEvent) {
     const target = event.target as HTMLElement;
     return () => {
         const selection = window.getSelection();
         const range = selection?.getRangeAt(0);
-        navigator.clipboard.writeText(selection?.toString());
+        console.log(range?.cloneContents());
+        if (range?.collapsed) {
+            navigator.clipboard.writeText(target.innerHTML);
+        } else {
+            // from https://gist.github.com/gleuch/2475825
+            // basicly we create a div and give it the selected document-fragment,
+            // so we can get document.innerHTML
+            const div = document.createElement('div');
+            div.appendChild(range?.cloneContents().cloneNode(true));
+            console.log('clipboard: ', div.innerHTML);
+            navigator.clipboard.writeText(div.innerHTML);
+        }
     }
 }
 
-export function paste(event: PointerEvent | MouseEvent) {
-    // see https://stackoverflow.com/questions/2920150/insert-text-at-cursor-in-a-content-editable-div
-    function insertTextAtCursor(text: string) {
-        const selection = window.getSelection();
-        let range = selection?.getRangeAt(0)
-        range?.deleteContents();
-        let node = document.createTextNode(text);
-        range?.insertNode(node);
-    }
-    const target = event.target as HTMLElement;
+/**
+ * calling the **deprecated** api 'execCommand', it's the most viable
+ * way to handle copy/paste.
+ * It's officially deprecated without alternatives, if you want to refactor it,
+ * go check _copy and _paste
+ */
+export function copy() {
     return () => {
-        navigator.clipboard.readText().then((value) => {
-            insertTextAtCursor(value);
+        document.execCommand('copy');
+    }
+}
+
+export function insertTextAtCursor(text: string) {
+    console.log('insertTextAtCursor', text);
+    const selection = window.getSelection();
+    let range = selection?.getRangeAt(0)
+    range?.deleteContents();
+    let node = document.createElement('span');
+    node.innerHTML = text;
+    range?.insertNode(node);
+}
+
+export function _paste(event: PointerEvent | MouseEvent) {
+    // see https://stackoverflow.com/questions/2920150/insert-text-at-cursor-in-a-content-editable-div
+    return () => {
+        navigator.clipboard.read().then((value) => {
+            const item = value[0];
+            console.log(item.types);
+            item.getType('text/plain').then((val) => {
+                val.text().then((text) => {
+                    DOMPurify.sanitize(text, { FORBID_ATTR: ['style'] });
+                    insertTextAtCursor(text);
+                })
+            })
             return;
         })
+    }
+}
+
+export function paste() {
+    return () => {
+        document.execCommand('paste');
     }
 }
 
