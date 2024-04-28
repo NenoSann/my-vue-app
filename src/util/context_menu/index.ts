@@ -23,6 +23,7 @@ export function handleContextMenu(event: PointerEvent | MouseEvent) {
             targetType: target.tagName,
             copy: copy(),
             paste: paste(),
+            addEmoji: addEmoji(event),
             subLeft,
         });
         render(contextComponent, container)
@@ -91,6 +92,16 @@ export function _paste(event: PointerEvent | MouseEvent) {
 export function paste() {
     return () => {
         document.execCommand('paste');
+    }
+}
+
+export function addEmoji(event: MouseEvent | PointerEvent) {
+    const target = event.target as HTMLImageElement;
+    const src = target?.src;
+    const chars = src.split('/');
+    const md5 = chars[chars.length - 1].split('.')[0];
+    return () => {
+        window.emoji.addEmoji(md5, src);
     }
 }
 

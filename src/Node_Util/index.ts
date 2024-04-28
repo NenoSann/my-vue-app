@@ -13,7 +13,7 @@ class Socketio {
     private usermap: Map<string, SocketUserInfo>;
     private message: Map<string, Array<PrivateMessage>>;
     private workerController: WorkerController;
-    private SqlLiteController: SqlLiteWorker;
+    public SqlLiteController: SqlLiteWorker;
     private constructor(url: string, name: string, _id: string, avatar: string) {
         this.socket = io(url, {
             auth: {

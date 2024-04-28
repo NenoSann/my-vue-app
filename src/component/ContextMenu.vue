@@ -6,10 +6,10 @@
                 <Icon size="18" class="icon" tag="svg">
                     <Paste />
                 </Icon>
-                <span>粘贴 </span>
+                <span>粘贴</span>
             </a>
         </li>
-        <li v-if="props.targetType && props.targetType === 'IMG'" class="menu-item">
+        <li v-if="props.targetType && props.targetType === 'IMG'" class="menu-item" @click="props.addEmoji">
             <a class="h-full text-slate-200">
                 <Icon size="18" class="icon" tag="svg">
                     <GrinWinkRegular />
@@ -44,7 +44,8 @@ const props = defineProps<{
     targetType: string,
     subLeft: boolean,
     copy: () => void,
-    paste: () => void
+    paste: () => void,
+    addEmoji: () => void,
 }>();
 
 </script>

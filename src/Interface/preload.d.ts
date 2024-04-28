@@ -32,6 +32,8 @@ declare global {
         },
         emoji: {
             openNativeEmoji: () => void;
+            addEmoji: (md5: string, remoteAdd: string) => void;
+            getEmojis: () => Array<any>;
         }
     }
 }

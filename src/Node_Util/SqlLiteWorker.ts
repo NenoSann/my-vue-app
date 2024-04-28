@@ -13,7 +13,9 @@ enum operation {
     'getMessageContent',
     'getMessageContentById',
     'getMessages',
-    'insertMessageContent'
+    'insertMessageContent',
+    'insertEmoji',
+    'getEmoji',
 }
 
 export class SqlLiteWorker {
@@ -126,6 +128,35 @@ export class SqlLiteWorker {
         }
     }
 
+    public insertEmoji(id: string, date: number, remoteAdd: string, localAdd: string) {
+        try {
+            const statement = this.db.prepare(
+                `
+                INSERT OR REPLACE INTO EMOJI(id, date, remoteAdd, localAdd)
+                VALUES(@id, @date, @remoteAdd, @localAdd)
+                `
+            )
+            statement.run({ id, date, remoteAdd, localAdd });
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
+    public getEmojis() {
+        try {
+            const statement = this.db.prepare(
+                `
+                SELECT * FROM EMOJI
+                ORDER BY date ASC
+                `
+            )
+            const emojis = statement.all();
+            return emojis;
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
     /**
      * 创建所需的sql table
      */
@@ -161,9 +192,20 @@ export class SqlLiteWorker {
             )
             `
         )
+        const createEmoji = this.db.prepare(
+            `
+            CREATE TABLE IF NOT EXISTS EMOJI(
+                id TEXT PRIMARY KEY NOT NULL,
+                date INT NOT NULL,
+                remoteAdd TEXT,
+                localAdd TEXT
+            )
+            `
+        )
         createUser.run();
         createMessages.run();
         createMessageContent.run();
+        createEmoji.run();
         this.statementMap.set(operation.createUser, createUser);
         this.statementMap.set(operation.createMessages, createMessages);
         this.statementMap.set(operation.createMessageContent, createMessageContent);
@@ -226,6 +268,32 @@ export class SqlLiteWorker {
         this.statementMap.set(operation.getMessageContentById, getMessageContentById);
         this.statementMap.set(operation.getMessages, getMessages);
         this.statementMap.set(operation.getUser, getUser)
+    }
+
+    public async saveRemoteFile(type: 'emoji' | 'file' | 'images', url: string, fileName: string) {
+        try {
+            const Path = await import('path')
+            const fsP = await import('node:fs/promises');
+            const imagePath = Path.join(cwd(), 'message', type, fileName);
+            const isExisted = await fsP.stat(imagePath).catch(() => null);
+            // if target emoji is existed, we just return the path
+            if (isExisted) {
+                return imagePath;
+            } else {
+                // or we download the image and save it locally
+                const handle = await fsP.open(imagePath, 'w');
+                const response = await fetch(url);
+                if (response.ok) {
+                    const buffer = Buffer.from(new Uint8Array(await response.arrayBuffer()));
+                    await fsP.writeFile(handle, buffer);
+                    handle.close();
+                    return imagePath;
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            return undefined;
+        }
     }
 
     private handleError(error: unknown): any {

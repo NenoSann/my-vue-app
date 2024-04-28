@@ -186,5 +186,21 @@ app.on('ready', () => {
             app.showEmojiPanel();
         }
     })
+    ipcMain.handle('emoji:addEmoji', async (_event, md5: string, remoteAdd: string) => {
+        try {
+            const unixStamp = new Date().getTime() / 1000;
+            let fileName = remoteAdd.split('/').at(-1) as string;
+            // Socketio.getInstance().SqlLiteController.insertEmoji(md5, unixStamp, remoteAdd, 'test');
+            const localAdd = await Socketio.getInstance().SqlLiteController.saveRemoteFile('emoji', remoteAdd, fileName)
+            if (localAdd) {
+                Socketio.getInstance().SqlLiteController.insertEmoji(md5, unixStamp, remoteAdd, localAdd);
+            } else {
+                Socketio.getInstance().SqlLiteController.insertEmoji(md5, unixStamp, remoteAdd, 'null');
+            }
+        } catch (error) {
+            console.log('fail at addEmoji main');
+            console.error(error);
+        }
+    })
 });
 export { mainWindow }

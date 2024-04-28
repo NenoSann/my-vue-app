@@ -81,5 +81,11 @@ contextBridge.exposeInMainWorld('urlAPI', {
 contextBridge.exposeInMainWorld('emoji', {
     openNativeEmoji: () => {
         ipcRenderer.invoke('openEmojiPanel');
+    },
+    addEmoji: (md5: string, remoteAdd: string) => {
+        ipcRenderer.invoke('emoji:addEmoji', md5, remoteAdd);
+    },
+    getEmojis: async () => {
+        return await ipcRenderer.invoke('emoji:getEmojis');
     }
 })
