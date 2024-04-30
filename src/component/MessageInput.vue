@@ -6,7 +6,8 @@
                     <GrinTongueRegular />
                 </Icon>
                 <Transition>
-                    <EmojiPanel v-show="showEmojiPanel"></EmojiPanel>
+                    <EmojiPanel v-show="showEmojiPanel" v-on:close-emoji="showEmojiPanel = !showEmojiPanel">
+                    </EmojiPanel>
                 </Transition>
             </div>
             <div class="sidebar-icon">
@@ -24,7 +25,7 @@
                     accept="image/png, image/jpeg, image/gif" multiple @change="handleImageClick">
             </div>
         </div>
-        <div :spellcheck="false" :contenteditable="!props.disabled" ref="contentRef"
+        <div :spellcheck="false" :contenteditable="!props.disabled" ref="contentRef" id="message-input"
             class="text-area daisy-textarea h-full overflow-auto focus:outline-none">
         </div>
         <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4" @click="handleClick">
@@ -87,10 +88,6 @@ const handleImageClick = async () => {
     appendImgElement(contentRef.value, images, [], ['div-img']);
 }
 
-const handleEmojiClick = () => {
-    window.emoji.openNativeEmoji();
-}
-
 onMounted(() => {
     contentRef.value.addEventListener('contextmenu', (event) => {
         handleContextMenu(event);
@@ -121,7 +118,7 @@ onMounted(() => {
 }
 
 .text-area {
-    @apply bg-base-200;
+    @apply bg-base-200 caret-primary;
     @apply relative;
     @apply pt-8;
     @apply h-full resize-none w-full rounded-none;

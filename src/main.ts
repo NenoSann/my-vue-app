@@ -46,7 +46,7 @@ const createWindow = () => {
         })
     })
     // and load the index.html of the app.
-    //@ts-ignore
+    // @ts-ignore
     if (MAIN_WINDOW_VITE_DEV_SERVER_URL as any) {
         //@ts-ignore
         mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL as any);
@@ -54,9 +54,6 @@ const createWindow = () => {
         //@ts-ignore
         mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
     }
-
-    // Open the DevTools.
-    // mainWindow.webContents.openDevTools();
 };
 
 const createTray = () => {

@@ -103,6 +103,34 @@ export class Cos {
             }
         })
     }
+
+    private async checkImage(fileName: string): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            if (Sts.checkCredentialValid()) {
+                //重新获取临时token
+                const {
+                    tmpSecretId,
+                    tmpSecretKey,
+                    sessionToken } = await Sts.getCredential();
+                this.cos = new COS({
+                    SecretKey: tmpSecretKey,
+                    SecretId: tmpSecretId,
+                })
+                this.SessionToken = sessionToken;
+            }
+            this.cos.headObject({
+                Bucket: this.cosPath.Bucket,
+                Region: this.cosPath.Region,
+                Key: this.cosPath.baseKey + fileName
+            }, (err, data) => {
+                if (data) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            })
+        })
+    }
 }
 
 /**
