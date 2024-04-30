@@ -45,7 +45,7 @@ const props = defineProps<{
     subLeft: boolean,
     copy: () => void,
     paste: () => void,
-    addEmoji: () => void,
+    addEmoji?: () => void,
 }>();
 
 </script>

@@ -1,10 +1,13 @@
 <template>
     <div class="h-[calc(30%-3rem)] bg-base-200 relative">
         <div class="btn-section">
-            <div class="sidebar-icon" @click="handleEmojiClick">
-                <Icon size="24">
+            <div class="sidebar-icon relative">
+                <Icon size="24" @click="showEmojiPanel = !showEmojiPanel">
                     <GrinTongueRegular />
                 </Icon>
+                <Transition>
+                    <EmojiPanel v-show="showEmojiPanel"></EmojiPanel>
+                </Transition>
             </div>
             <div class="sidebar-icon">
                 <Icon size="22">
@@ -36,7 +39,7 @@ import { Ref, ref, reactive, onMounted } from 'vue';
 import { GrinTongueRegular, FileRegular, FileImageRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
 import { sendMessage, readFileAsDataURL, appendImgElement, replaceImage, handleContextMenu } from '../util';
-import { RadialProgress } from './';
+import { RadialProgress, EmojiPanel } from './';
 import { cos } from '../util/Cos&STS';
 import DOMPurify from 'dompurify';
 import type { Window } from '../Interface/Global'
@@ -50,7 +53,7 @@ const progress = reactive({
     percent: 0,
     show: false,
 })
-
+const showEmojiPanel = ref(false);
 const handleClick = async () => {
     const callback = () => {
         emits('update:scroll')
@@ -147,5 +150,15 @@ onMounted(() => {
 :deep(.sidebar-icon > label >span > svg > path) {
     @apply fill-inherit;
     @apply transition-all;
+}
+
+.v-enter-active,
+.v-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+    opacity: 0;
 }
 </style>

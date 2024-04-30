@@ -202,5 +202,8 @@ app.on('ready', () => {
             console.error(error);
         }
     })
+    ipcMain.handle('emoji:getEmojis', () => {
+        return Socketio.getInstance().SqlLiteController.getEmojis();
+    })
 });
 export { mainWindow }

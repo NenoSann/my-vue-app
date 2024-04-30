@@ -10,6 +10,8 @@ import GroupList from './GroupList.vue';
 import MessageList from './MessageList.vue';
 import MessageInput from './MessageInput.vue';
 import RadialProgress from './RadialProgress.vue';
+import EmojiPanel from "./EmojiPanel.vue";
+import ContextMenu from "./ContextMenu.vue";
 export {
     Channel,
     ChatBubble,
@@ -22,5 +24,7 @@ export {
     GroupList,
     MessageList,
     MessageInput,
-    RadialProgress
+    RadialProgress,
+    EmojiPanel,
+    ContextMenu
 }

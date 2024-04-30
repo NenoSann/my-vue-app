@@ -4,7 +4,7 @@
  * @param event 
  */
 import { render, h, VNode } from 'vue';
-import ContextMenu from '../../component/ContextMenu.vue';
+import { ContextMenu, EmojiPanel } from '../../component';
 import DOMPurify from 'dompurify';
 let contextComponent: VNode | null = null;
 let container: Element | null = null;
@@ -23,12 +23,23 @@ export function handleContextMenu(event: PointerEvent | MouseEvent) {
             targetType: target.tagName,
             copy: copy(),
             paste: paste(),
-            addEmoji: addEmoji(event),
+            addEmoji: target.tagName === 'IMG' ? addEmoji(event) : undefined,
             subLeft,
         });
         render(contextComponent, container)
     }
 }
+
+// let emojiPanelComponent: VNode | null = null;
+// export function openEmojisPanel(event: PointerEvent | MouseEvent) {
+//     const target = event.target as HTMLElement;
+//     const container = document.querySelector('#_ContextMenuContainer');
+//     if (!emojiPanelComponent) {
+//         emojiPanelComponent = h(EmojiPanel);
+
+//     }
+
+// }
 
 export function _copy(event: PointerEvent | MouseEvent) {
     const target = event.target as HTMLElement;
