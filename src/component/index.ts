@@ -12,6 +12,7 @@ import MessageInput from './MessageInput.vue';
 import RadialProgress from './RadialProgress.vue';
 import EmojiPanel from "./EmojiPanel.vue";
 import ContextMenu from "./ContextMenu.vue";
+import UserItemSkeleton from "./UserItemSkeleton.vue";
 export {
     Channel,
     ChatBubble,
@@ -26,5 +27,6 @@ export {
     MessageInput,
     RadialProgress,
     EmojiPanel,
-    ContextMenu
+    ContextMenu,
+    UserItemSkeleton
 }

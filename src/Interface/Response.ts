@@ -26,4 +26,20 @@ interface IFriend {
     online: boolean
 }
 
+export interface MessagesResponse extends ResponseWithOffset {
+    data: {
+        type: 'from' | 'to' | string
+        sendBy: string,
+        sendTo: string,
+        text: string,
+        image?: string[],
+        date: number | string,
+    }[],
+    info: {
+        id: string,
+        avatar: string,
+        name: string
+    }
+}
+
 export { BaseResponse, ResponseWithOffset, ItemsResponse, FriendsResponse, IFriend }

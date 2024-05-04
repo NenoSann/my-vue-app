@@ -1,4 +1,4 @@
-import { ItemsResponse, IFriend } from '../../Interface/Response';
+import { ItemsResponse, IFriend, MessagesResponse } from '../../Interface/Response';
 import axios from "axios";
 import { IUser } from '../../Interface/user'
 const baseURL = (import.meta as any).env.DEV ? '/api' : 'http://43.163.234.220:8081';
@@ -42,10 +42,10 @@ export async function queryFriends(urlOrUserId: string, limit?: number, offset?:
     })
 }
 
-export async function queryUnreadChats(userId: string) {
+export async function queryUnreadChatList(userId: string) {
     return new Promise((resolve, reject) => {
         if (userId) {
-            axios.get(baseURL + '/queryUnreadChats', {
+            axios.get(baseURL + '/queryUnreadChatList', {
                 params: {
                     userId
                 }
@@ -55,6 +55,24 @@ export async function queryUnreadChats(userId: string) {
             }).catch((error) => {
                 reject(error);
             })
+        }
+    })
+}
+
+export async function queryUnreadChats(userId: string, targetUserId: string, offset: number, limit: number) {
+    return new Promise<MessagesResponse>(async (resolve, reject) => {
+        if (userId && targetUserId) {
+            axios.get(baseURL + '/queryUnreadChats', {
+                params: {
+                    userId,
+                    targetUserId,
+                    offset,
+                    limit
+                }
+            }).then((response) => {
+                console.log(response);
+                resolve(response.data);
+            }).catch(() => reject());
         }
     })
 }

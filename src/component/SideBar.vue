@@ -38,7 +38,6 @@ import { Comments, AddressBook, Cat, Award, FolderRegular } from '@vicons/fa';
 import { Icon } from '@vicons/utils';
 import { User, ComponentState, eSideBar } from '../Pinia';
 import { ref, watch, computed } from 'vue';
-import { queryUnreadChats } from '../API/user';
 import { MessageType } from '../Interface/NodeLocalStorage.ts';
 const user = User();
 const sidebar = ComponentState();
@@ -46,13 +45,7 @@ const router = useRouter();
 const imageURL = computed(() => {
     return user?.avatar;
 });
-const testQueryUnreadChats = async (userId: string) => {
-    try {
-        console.log(await queryUnreadChats(userId));
-    } catch (error) {
-        console.log(error);
-    }
-}
+
 
 
 const testReadMessageList = async () => {

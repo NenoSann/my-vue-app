@@ -9,7 +9,7 @@
                 <p id="username" class=" h-7">{{ name }}</p>
                 <p id="lastest-message" class="truncate max-w-[70%]">{{ props.description }}</p>
             </div>
-            <span v-if="props.unread" class="daisy-badge daisy-badge-primary">{{ props.unread }}</span>
+            <span v-if="props.unread && props.unread !== 0" class="daisy-badge rounded-full daisy-badge-primary">{{ props.unread }}</span>
         </a>
     </li>
 </template>
@@ -24,7 +24,7 @@ const props = defineProps<{
     name: string,
     index: number | string,
     callback: (avatar: string, username: string, userid: string, type: MessageType) => void,
-    unread?: string | null,
+    unread?: number | string | null | undefined,
     online?: boolean | null,
     description?: string | null,
     loadable?: boolean,
@@ -42,10 +42,10 @@ onMounted(() => {
 }
 
 .list-item {
-    @apply h-16 max-h-16;
+    @apply h-16 max-h-16 w-full;
 }
 
-.list-item>a {
+.list-item > a {
     @apply h-full;
 }
 

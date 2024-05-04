@@ -44,7 +44,8 @@ export type MessageListItem = {
     type: MessageType,
     info: SqlUser,
     content: SqlMessageContent,
-    date: number
+    date: number,
+    total?: number
 }
 
 export type Messages = {

@@ -17,29 +17,23 @@
 
 <script setup lang="ts">
 import { ChatBubble, MessageInput } from '../component';
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch, nextTick,reactive } from 'vue';
 import { User, Socket_Target, Socket_Message } from '../Pinia';
 import { LocalUserIndex, MessageType } from '../Interface/NodeLocalStorage.ts';
 import { formatDate, scrollDiv } from '../util';
 import type { Window } from '../Interface/preload';
+import { queryUnreadChats } from '../API/user/index.ts';
 
 // vue state
 const user = User();
 const chatListRef = ref();
 const SocketTarget = Socket_Target();
 const SocketMessage = Socket_Message();
-
+const offset = ref(0);
 const messages = computed(() => {
     return SocketMessage.messages.get(SocketTarget.userid)?.data
 })
 const users = computed(() => SocketMessage.messages.get(SocketTarget.userid)?.user)
-const userInfo = computed(() => {
-    return {
-        avatar: user.avatar,
-        name: user.name,
-        userId: user._id
-    }
-})
 const scrollListToEnd = () => {
     // when DOM is updated we call the scrollDiv function
     nextTick().then(() => {
@@ -47,14 +41,13 @@ const scrollListToEnd = () => {
     });
 }
 
-watch(SocketTarget, async (target) => {
-    const userId = target.userid;
-    if (userId) {
-        if (!SocketMessage.messages.has(userId)) {
-            const res = await window.socket.queryMessages(user._id, target.userid, target.type, 10, 0);
+const queryLocalMessage = async(target: typeof SocketTarget)=>{
+    const userId = user._id;
+    const targetUserId = target.userid;
+    const res = await window.socket.queryMessages(userId, targetUserId, target.type, 10, 0);
             console.log('DEBUG:check query message:', res);
             // we have to rename the userInfo to userinfo or
-            // we will face dublicated names
+            // we will face duplicated names
             const { userInfo, messages: newMessages } = res;
             // const { users } = userinfo;
             // // TODO: we need to change this format in worker.ts
@@ -75,6 +68,30 @@ watch(SocketTarget, async (target) => {
             } else if (target.type === MessageType.Group) {
                 SocketMessage.storeLocally(target.userid, messages as any, users);
             }
+}
+
+const queryUnreadMessage = async(target: typeof SocketTarget)=>{
+    const res = await queryUnreadChats(user._id,target.userid,offset.value,10);
+    offset.value = offset.value + 1;
+    let {data,info} = res;
+    const messages = data.map((msg)=>{
+        return  {
+            ...msg,
+            content:{
+                text:msg.text,
+                image:msg.image
+            }
+        }
+    })
+    SocketMessage.storeLocally(info.id,messages,info);
+}
+
+watch(SocketTarget, async (target) => {
+    const userId = target.userid;
+    if (userId) {
+        if (!SocketMessage.messages.has(userId)) {
+            const res = await queryUnreadMessage(target);
+            console.log(res);
         }
         nextTick().then(() => {
             scrollDiv(chatListRef.value, 'end', 'instant');

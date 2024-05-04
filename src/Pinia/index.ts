@@ -25,9 +25,9 @@ interface IUser {
 }
 
 interface LocalMessageContent {
-    type: 'to' | 'from',
+    type: 'to' | 'from' | string,
     content: MessageContent,
-    date: Date | string,
+    date: Date | string | number,
     sendBy: string,
     sent?: boolean
 }
