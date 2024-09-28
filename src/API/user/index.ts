@@ -18,7 +18,7 @@ export function registe(
             .post("/api/register", {
                 username,
                 pwd: password,
-                email
+                email,
             })
             .then((response) => {
                 resolve(response.data);

@@ -13,6 +13,7 @@ import RadialProgress from "./RadialProgress.vue";
 import EmojiPanel from "./EmojiPanel.vue";
 import ContextMenu from "./ContextMenu.vue";
 import UserItemSkeleton from "./UserItemSkeleton.vue";
+import DropDown from "./DropDown.vue";
 export {
     Channel,
     ChatBubble,
@@ -29,4 +30,5 @@ export {
     EmojiPanel,
     ContextMenu,
     UserItemSkeleton,
+    DropDown,
 };

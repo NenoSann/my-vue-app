@@ -42,10 +42,14 @@
             <button
                 class="daisy-btn w-4/5 rounded-3xl bg-white text-black hover:text-white"
                 @click="isRegiste ? registe() : login()">
-                {{ isRegiste ? 'Registe' : 'Login' }}
+                {{ isRegiste ? "Registe" : "Login" }}
             </button>
             <p class="text-sm font-light -my-6">
-                {{isRegiste ? 'Already got an account?' : 'Don\' have an account?'}}
+                {{
+                    isRegiste
+                        ? "Already got an account?"
+                        : "Don' have an account?"
+                }}
                 <span
                     class="font-normal cursor-pointer"
                     @click="isRegiste = !isRegiste"
@@ -103,27 +107,28 @@ const credential = reactive({
 const isRegiste = ref(false);
 
 /**
- * 用户登录, 使用pinia内的action来进行登录, 同时将登录信息储存在pinia内进行全局管理  
+ * 用户登录, 使用pinia内的action来进行登录, 同时将登录信息储存在pinia内进行全局管理
  * **请不要直接使用api内的login函数来进行登录, 否则会造成状态不同步**
  */
 const login = async function () {
     loading.value = true;
     loginInfo.value = await user.login(credential.email, credential.password);
-    user.login(credential.email, credential.password).then(async (res) => {
-        loginInfo.value = res;
-        // await (window as Window).storeUserInfo.save(JSON.stringify(user.$state));
-        router.push("/channels/@me");
-    }).finally(() => {
-        loading.value = false;
-        
-    });
+    user.login(credential.email, credential.password)
+        .then(async (res) => {
+            loginInfo.value = res;
+            // await (window as Window).storeUserInfo.save(JSON.stringify(user.$state));
+            router.push("/channels/@me");
+        })
+        .finally(() => {
+            loading.value = false;
+        });
 };
 
 /**
  * 注册用户, 使用api创建账号信息之后转换为登录状态
  */
-const registe = async function() {
-    console.log('registing')
+const registe = async function () {
+    console.log("registing");
     loading.value = true;
     const { username, email, password } = credential;
     try {
@@ -131,11 +136,10 @@ const registe = async function() {
             registeUser(username, password, email);
         }
     } catch (error) {
-        
     } finally {
         loading.value = false;
     }
-}
+};
 </script>
 
 <style scoped>

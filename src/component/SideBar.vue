@@ -13,7 +13,7 @@
                 }
             ">
             <Icon size="36" class="fill-primary">
-                <Comments />
+                <Chat />
             </Icon>
         </div>
         <div
@@ -24,12 +24,12 @@
                 }
             ">
             <Icon size="32">
-                <AddressBook />
+                <Friendship />
             </Icon>
         </div>
         <div class="sidebar-icon groups" @click="testReadMessageList">
             <Icon size="32">
-                <Cat />
+                <NodeJs />
             </Icon>
         </div>
         <div class="sidebar-icon groups">
@@ -39,16 +39,25 @@
         </div>
         <div class="sidebar-icon groups">
             <Icon size="32">
-                <FolderRegular />
+                <Folder />
             </Icon>
+        </div>
+
+        <div class="sidebar-icons-bottom">
+            <div class="sidebar-icon sidebar-icon-bottom">
+                <DropDown :items="dropdownItems">
+                    <Settings></Settings>
+                </DropDown>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { SideBar, TheIcon } from "./index";
+import { SideBar, TheIcon, DropDown } from "./index";
 import { useRouter } from "vue-router";
-import { Comments, AddressBook, Cat, Award, FolderRegular } from "@vicons/fa";
+import { NodeJs, Award } from "@vicons/fa";
+import { Settings, Chat, Friendship, Folder, DataBackup } from "@vicons/carbon";
 import { Icon } from "@vicons/utils";
 import { User, ComponentState, eSideBar } from "../Pinia";
 import { ref, watch, computed } from "vue";
@@ -65,6 +74,16 @@ const testReadMessageList = async () => {
     const res = await window.socket.readMessageList();
     console.log(res);
 };
+
+const dropdownItems = [
+    {
+        icon: DataBackup,
+        text: "备份聊天记录",
+        onClick: () => {
+            console.log("test backup messages!");
+        },
+    },
+];
 </script>
 
 <style scoped>
@@ -79,6 +98,11 @@ const testReadMessageList = async () => {
     @apply flex justify-center items-center;
     @apply w-full h-[48px] rounded-xl p-1;
     @apply hover:bg-neutral-300 hover:bg-opacity-10 transition-all hover:isolate;
+}
+
+.sidebar-icons-bottom {
+    @apply flex flex-col;
+    @apply w-full h-[48px] mt-auto;
 }
 
 /* change the xicon fill */

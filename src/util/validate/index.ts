@@ -1,4 +1,4 @@
-import isEmail from 'validator/es/lib/isEmail';
+import isEmail from "validator/es/lib/isEmail";
 
 function emailValidate(email: string): boolean {
     if (email) {
@@ -7,4 +7,4 @@ function emailValidate(email: string): boolean {
     return false;
 }
 
-export { emailValidate }
+export { emailValidate };

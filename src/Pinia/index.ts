@@ -93,7 +93,7 @@ const User = defineStore("User", {
                     console.error(error);
                     reject(error);
                 }
-            })
+            });
         },
     },
 });
