@@ -1,7 +1,12 @@
 <template>
-    <ul class="context-main daisy-menu daisy-menu-vertical [&_li>*]:rounded-sm [&_li>*]:p-1"
-        :class="{ 'sub-left': props.subLeft }" :style="{ left: props.x + 'px', top: props.y + 'px' }">
-        <li v-if="props.targetType && props.targetType === 'DIV'" class="menu-item" @click="props.paste">
+    <ul
+        class="context-main daisy-menu daisy-menu-vertical [&_li>*]:rounded-sm [&_li>*]:p-1"
+        :class="{ 'sub-left': props.subLeft }"
+        :style="{ left: props.x + 'px', top: props.y + 'px' }">
+        <li
+            v-if="props.targetType && props.targetType === 'DIV'"
+            class="menu-item"
+            @click="props.paste">
             <a class="h-full text-slate-200">
                 <Icon size="18" class="icon" tag="svg">
                     <Paste />
@@ -9,7 +14,10 @@
                 <span>粘贴</span>
             </a>
         </li>
-        <li v-if="props.targetType && props.targetType === 'IMG'" class="menu-item" @click="props.addEmoji">
+        <li
+            v-if="props.targetType && props.targetType === 'IMG'"
+            class="menu-item"
+            @click="props.addEmoji">
             <a class="h-full text-slate-200">
                 <Icon size="18" class="icon" tag="svg">
                     <GrinWinkRegular />
@@ -36,18 +44,22 @@
     </ul>
 </template>
 <script setup lang="ts">
-import { CopyRegular, ShareSquareRegular, GrinWinkRegular, Paste } from '@vicons/fa';
-import { Icon } from '@vicons/utils';
+import {
+    CopyRegular,
+    ShareSquareRegular,
+    GrinWinkRegular,
+    Paste,
+} from "@vicons/fa";
+import { Icon } from "@vicons/utils";
 const props = defineProps<{
-    x: number,
-    y: number,
-    targetType: string,
-    subLeft: boolean,
-    copy: () => void,
-    paste: () => void,
-    addEmoji?: () => void,
+    x: number;
+    y: number;
+    targetType: string;
+    subLeft: boolean;
+    copy: () => void;
+    paste: () => void;
+    addEmoji?: () => void;
 }>();
-
 </script>
 <style scoped>
 .context-main {

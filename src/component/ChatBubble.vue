@@ -1,6 +1,10 @@
 <template>
-    <div class="daisy-chat"
-        :class="{ 'daisy-chat-end': props.type === 'to', 'daisy-chat-start': props.type === 'from' }">
+    <div
+        class="daisy-chat"
+        :class="{
+            'daisy-chat-end': props.type === 'to',
+            'daisy-chat-start': props.type === 'from',
+        }">
         <div class="daisy-chat-image daisy-avatar">
             <div class="w-10 rounded-full">
                 <img alt="You" :src="props.avatar" />
@@ -10,20 +14,23 @@
             <span v-if="props.name">{{ props.name }}</span>
         </div>
         <div class="daisy-chat-footer">
-            <time class=" text-xs opacity-50">{{ time }}</time>
+            <time class="text-xs opacity-50">{{ time }}</time>
         </div>
-        <div class="daisy-chat-bubble relative" @contextmenu="handleContextMenu">
+        <div
+            class="daisy-chat-bubble relative"
+            @contextmenu="handleContextMenu">
             <p v-html="props.content.text" ref="pNodeRef"></p>
-            <span v-if="props.loading"
+            <span
+                v-if="props.loading"
                 class="daisy-loading daisy-loading-ring daisy-loading-lg absolute absolute-center"></span>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { replaceWebLinks, handleContextMenu } from '../util';
-import type { MessageContent } from '../Interface/user';
-import { ref, Ref, VNodeRef, onMounted, nextTick } from 'vue';
+import { replaceWebLinks, handleContextMenu } from "../util";
+import type { MessageContent } from "../Interface/user";
+import { ref, Ref, VNodeRef, onMounted, nextTick } from "vue";
 const pNodeRef: Ref<VNodeRef | null> = ref(null);
 const props = defineProps<{
     type: "to" | "from";
@@ -31,27 +38,27 @@ const props = defineProps<{
     avatar: string;
     time: string;
     name?: string;
-    loading?: boolean
+    loading?: boolean;
 }>();
 onMounted(async () => {
     (pNodeRef.value as unknown as Element).childNodes.forEach(async (node) => {
-        // if the child node is a 'a' tag, we reset the click event 
+        // if the child node is a 'a' tag, we reset the click event
         // of this tag
-        if ((node as any).tagName === 'A') {
-            node.addEventListener('click', (event) => {
+        if ((node as any).tagName === "A") {
+            node.addEventListener("click", (event) => {
                 event.preventDefault();
                 const href = (event.target as any).href as string;
                 window.urlAPI.openURL(href);
-            })
+            });
         }
         await nextTick();
         if ((node as any).tagName === "IMG") {
-            node.addEventListener('contextmenu', (e: any) => {
-                handleContextMenu(e)
-            })
+            node.addEventListener("contextmenu", (e: any) => {
+                handleContextMenu(e);
+            });
         }
-    })
-})
+    });
+});
 </script>
 
 <style scope>

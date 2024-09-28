@@ -1,7 +1,7 @@
 /**
- *  这个模块用来管理electron本地的聊天记录的存储和读取, 它使用一个map来管理一个userID => {wStream,rStream}的关系,  
+ *  这个模块用来管理electron本地的聊天记录的存储和读取, 它使用一个map来管理一个userID => {wStream,rStream}的关系,
  *  通过判断mainThread通过postMessage中附带的类别和data来进行读取/储存用户发送的内容, 并通过postMessage方法来和mainThread沟通
- *  
+ *
  *  存储结构:
  *  message:
  *      |   'id1'
@@ -16,82 +16,93 @@
 // const stream = require('node:stream/promises');
 // const readline = require('readline');
 // const path = require('node:path');
-import { parentPort } from 'node:worker_threads';
-import * as fs from 'node:fs';
-import * as fsP from 'node:fs/promises';
-import * as path from 'node:path';
-import * as stream from 'node:stream/promises';
-import * as readline from 'readline';
+import { parentPort } from "node:worker_threads";
+import * as fs from "node:fs";
+import * as fsP from "node:fs/promises";
+import * as path from "node:path";
+import * as stream from "node:stream/promises";
+import * as readline from "readline";
 import {
     LocalMessageList,
     LocalMessageContent,
     LocalUserIndex,
     LocalUserInfo,
-    MessageType
-} from '../Interface/NodeLocalStorage';
+    MessageType,
+} from "../Interface/NodeLocalStorage";
 const cwd = process.cwd();
 const NEW_LINE_CHARACTERS = ["\n"];
-const _path = path.join(cwd, 'message');
-const messageListPath = path.join(_path, 'messageList.json');
-const messageMap = new Map<string, {
-    rStream: fs.ReadStream,
-    wStream: fs.WriteStream,
-    indexFilePath: fs.PathLike
-    index: {
-        users: Map<string, LocalUserInfo>,
-        messageCounts: number,
-        type: MessageType
+const _path = path.join(cwd, "message");
+const messageListPath = path.join(_path, "messageList.json");
+const messageMap = new Map<
+    string,
+    {
+        rStream: fs.ReadStream;
+        wStream: fs.WriteStream;
+        indexFilePath: fs.PathLike;
+        index: {
+            users: Map<string, LocalUserInfo>;
+            messageCounts: number;
+            type: MessageType;
+        };
     }
-}>();
+>();
 const messageListMap: Map<string, LocalMessageList> = new Map();
 
-parentPort?.on('message', (data: any) => {
+parentPort?.on("message", (data: any) => {
     // check the data types in WorkerController.ts
     const { operateType, type } = data;
     const { limit, content, userId, userInfo, info } = data.content;
     switch (operateType) {
-        case 'readMessage':
+        case "readMessage":
             readMessage(userId, type, limit).then((res) => {
                 parentPort?.postMessage({
-                    type: 'readMessage',
+                    type: "readMessage",
                     content: {
                         messages: res?.messages,
                         userInfo: res?.userInfo,
-                    }
-                })
+                    },
+                });
             });
             break;
-        case 'writeMessage':
-            writeMessage(userId, type as MessageType, content, userInfo as LocalUserInfo);
+        case "writeMessage":
+            writeMessage(
+                userId,
+                type as MessageType,
+                content,
+                userInfo as LocalUserInfo,
+            );
             break;
-        case 'readMessageList':
+        case "readMessageList":
             readMessageList().then((res) => {
                 parentPort?.postMessage({
-                    type: 'readMessageList',
-                    content: res
-                })
-            })
+                    type: "readMessageList",
+                    content: res,
+                });
+            });
             break;
-        case 'writeMessageList':
+        case "writeMessageList":
             setMessageList(info, type, content).then(() => {
                 parentPort?.postMessage({
-                    type: 'writeMessageList'
-                })
+                    type: "writeMessageList",
+                });
             });
             break;
         default:
             break;
     }
-})
-
+});
 
 /**
  * @description create wStream and rStream for target user, and store in messageMap
- * @param userID id use to open target chat file 
+ * @param userID id use to open target chat file
  */
-async function createStream(userID: string, userInfo: LocalUserInfo, type: MessageType) {
+async function createStream(
+    userID: string,
+    userInfo: LocalUserInfo,
+    type: MessageType,
+) {
     const streamPath = path.join(_path, userID);
-    const indexFilePath = path.join(_path, userID + '.json');
+    const indexFilePath = path.join(_path, userID + ".json");
     let isIndexNewlyCreated: Boolean = false;
     // check if streamPath and indexPath exist, if not create them
     try {
@@ -107,18 +118,18 @@ async function createStream(userID: string, userInfo: LocalUserInfo, type: Messa
         // 'a' means for appending, and 'r+' means write and read,
         // https://nodejs.org/api/fs.html#file-system-flags
         const rStream = fs.createReadStream(streamPath);
-        const wStream = fs.createWriteStream(streamPath, { flags: 'a' });
+        const wStream = fs.createWriteStream(streamPath, { flags: "a" });
         let index;
         // if indexFile is newly created we will try to overwrite it
         if (isIndexNewlyCreated) {
             const users = [userInfo];
-            const stringfyIndex = { users, type, messageCounts: 0 }
+            const stringfyIndex = { users, type, messageCounts: 0 };
             index = { users, type, messageCounts: 0 };
-            await fsP.truncate(indexFilePath, 0)
+            await fsP.truncate(indexFilePath, 0);
             await fsP.writeFile(indexFilePath, JSON.stringify(stringfyIndex));
         } else {
             index = await readJSON(indexFilePath);
-            Object.assign(index, userInfo)
+            Object.assign(index, userInfo);
         }
         // cast the array to a messageMap
         const userMap = new Map();
@@ -128,31 +139,39 @@ async function createStream(userID: string, userInfo: LocalUserInfo, type: Messa
         index.users = userMap;
         messageMap.set(userID, {
             // we set the default state for the user
-            rStream, wStream,
+            rStream,
+            wStream,
             indexFilePath,
-            index
+            index,
         });
     } catch (error) {
         handleFsError(error);
     }
 }
 
-async function writeMessage(userID: string, type: MessageType, content: any, userInfo: LocalUserInfo) {
+async function writeMessage(
+    userID: string,
+    type: MessageType,
+    content: any,
+    userInfo: LocalUserInfo,
+) {
     try {
         if (!messageMap.has(userID)) {
             await createStream(userID, userInfo, type);
         }
         // doing type assertion because we had create those variables
-        const { wStream, rStream, indexFilePath, index } = messageMap.get(userID) as {
-            rStream: fs.ReadStream,
-            wStream: fs.WriteStream,
-            indexFilePath: fs.PathLike
+        const { wStream, rStream, indexFilePath, index } = messageMap.get(
+            userID,
+        ) as {
+            rStream: fs.ReadStream;
+            wStream: fs.WriteStream;
+            indexFilePath: fs.PathLike;
             index: {
-                users: Map<string, LocalUserInfo>,
-                messageCounts: number,
-                type: MessageType
-            }
-        }
+                users: Map<string, LocalUserInfo>;
+                messageCounts: number;
+                type: MessageType;
+            };
+        };
 
         // build updatedIndex
         // we have two index, one for memory
@@ -161,47 +180,65 @@ async function writeMessage(userID: string, type: MessageType, content: any, use
         const updatedIndex = {
             users: index.users,
             type,
-            messageCounts: index.messageCounts + 1
-        }
+            messageCounts: index.messageCounts + 1,
+        };
         const stringfyUpdatedIndex = {
             users: Array.from(index.users.values()),
             type,
-            messageCounts: index.messageCounts + 1
-        }
+            messageCounts: index.messageCounts + 1,
+        };
         // store updated user index and message content into file
         // flag:'w' means overwrite the file
         await fsP.truncate(indexFilePath, 0);
-        await fsP.writeFile(indexFilePath, JSON.stringify(stringfyUpdatedIndex));
+        await fsP.writeFile(
+            indexFilePath,
+            JSON.stringify(stringfyUpdatedIndex),
+        );
         wStream.write(JSON.stringify(content));
-        wStream.write('\n');
+        wStream.write("\n");
         // assign updatedIndex to messageMap
-        messageMap.set(userID, { rStream, wStream, indexFilePath, index: updatedIndex });
+        messageMap.set(userID, {
+            rStream,
+            wStream,
+            indexFilePath,
+            index: updatedIndex,
+        });
     } catch (error) {
         handleFsError(error);
     }
 }
 
-async function readMessage(userID: string, type: MessageType, limit: number = 1) {
+async function readMessage(
+    userID: string,
+    type: MessageType,
+    limit: number = 1,
+) {
     try {
         // In readMessage we don't want to be complicated
         // just read and return the info
         const userPath = path.join(_path, userID);
-        const indexPath = path.join(_path, userID + '.json');
+        const indexPath = path.join(_path, userID + ".json");
         const res: {
-            messages: Array<string>,
-            userInfo: LocalUserIndex | null | undefined
+            messages: Array<string>;
+            userInfo: LocalUserIndex | null | undefined;
         } = {
             messages: [],
-            userInfo: null
-        }
+            userInfo: null,
+        };
         if (fs.existsSync(userPath) && fs.existsSync(indexPath)) {
             // asyncly read the index file and parse into object
-            const userInfo = JSON.parse(await (await fsP.open(indexPath, 'r')).readFile({ encoding: 'utf-8' }));
-            const messages = (await readLines(userPath, limit)).map((jsonString) => {
-                return JSON.parse(jsonString);
-            });
+            const userInfo = JSON.parse(
+                await (
+                    await fsP.open(indexPath, "r")
+                ).readFile({ encoding: "utf-8" }),
+            );
+            const messages = (await readLines(userPath, limit)).map(
+                (jsonString) => {
+                    return JSON.parse(jsonString);
+                },
+            );
             res.messages.push(...messages);
-            res.userInfo = userInfo
+            res.userInfo = userInfo;
         }
         // TODO: compile this typescript file and test the new feature
         return res;
@@ -211,8 +248,8 @@ async function readMessage(userID: string, type: MessageType, limit: number = 1)
 }
 
 /** Creates a message list file if it doesn't already exist.
-* @throws {Error} If there is an error while creating the file.
-*/
+ * @throws {Error} If there is an error while creating the file.
+ */
 async function createMessageList() {
     return new Promise<boolean>(async (resolve, reject) => {
         try {
@@ -225,7 +262,9 @@ async function createMessageList() {
             }
             // do a type assertion
             if (!newlyCreated) {
-                messageList = await readJSON(messageListPath) as LocalMessageList[];
+                messageList = (await readJSON(
+                    messageListPath,
+                )) as LocalMessageList[];
             }
             for (const message of messageList) {
                 messageListMap.set(message.info.userId, message);
@@ -235,7 +274,7 @@ async function createMessageList() {
             handleFsError(error);
             reject(false);
         }
-    })
+    });
 }
 
 async function readMessageList() {
@@ -247,21 +286,27 @@ async function readMessageList() {
             }
             // create return result from messageListMap valuse
             const messageList = Array.from(messageListMap.values());
-            resolve(messageList)
+            resolve(messageList);
         } catch (error) {
             handleFsError(error);
             reject();
         }
-    })
+    });
 }
 
-async function setMessageList(info: LocalUserInfo, type: MessageType, content: LocalMessageContent) {
+async function setMessageList(
+    info: LocalUserInfo,
+    type: MessageType,
+    content: LocalMessageContent,
+) {
     try {
         if (messageListMap.size === 0) {
             await createMessageList();
         }
         if (messageListMap.has(info.userId)) {
-            const { content: prevContent } = messageListMap.get(info.userId) as LocalMessageList;
+            const { content: prevContent } = messageListMap.get(
+                info.userId,
+            ) as LocalMessageList;
             // Check if prevContent has more than 10 elements
             if (prevContent.length >= 1) {
                 // Delete the first element using Array.prototype.shift()
@@ -270,10 +315,20 @@ async function setMessageList(info: LocalUserInfo, type: MessageType, content: L
             // Push the new message content to the end of prevContent
             prevContent.push(content);
             // Update the messageListMap with the updated prevContent
-            messageListMap.set(info.userId, { content: prevContent, type, info, date: new Date() });
+            messageListMap.set(info.userId, {
+                content: prevContent,
+                type,
+                info,
+                date: new Date(),
+            });
         } else {
             // If the user doesn't have a message list, create a new one with the current message
-            const newMessageList: LocalMessageList = { content: [content], type, info, date: new Date() };
+            const newMessageList: LocalMessageList = {
+                content: [content],
+                type,
+                info,
+                date: new Date(),
+            };
             messageListMap.set(info.userId, newMessageList);
         }
         await writeJSON(messageListPath, Array.from(messageListMap.values()));
@@ -281,7 +336,6 @@ async function setMessageList(info: LocalUserInfo, type: MessageType, content: L
         handleFsError(error);
     }
 }
-
 
 /**
  * @description use to create user's chat history
@@ -294,16 +348,16 @@ async function createUserFile(path: string) {
 }
 
 /**
- * @description create a empty file with given path, if that path is exist 
+ * @description create a empty file with given path, if that path is exist
  *              then it will be truncated.
- * @param path 
+ * @param path
  */
 async function createEmptyFile(path: string | fs.PathLike) {
     try {
         if (fs.existsSync(path)) {
             await fsP.truncate(path, 0);
         }
-        (await fsP.open(path, 'w')).close();
+        (await fsP.open(path, "w")).close();
         return true;
     } catch (error) {
         handleFsError(error);
@@ -316,11 +370,14 @@ async function createEmptyFile(path: string | fs.PathLike) {
  * @param error catched error in fs function
  */
 function handleFsError(error: any) {
-    console.error('error on worker', error);
-    parentPort?.emit('messageerror', error);
+    console.error("error on worker", error);
+    parentPort?.emit("messageerror", error);
 }
 
-async function readLines(inputFilePath: string, lineCounts: number): Promise<Array<string>> {
+async function readLines(
+    inputFilePath: string,
+    lineCounts: number,
+): Promise<Array<string>> {
     const file = fsP.open(inputFilePath);
     const res: Array<string> = [];
     for await (const line of (await file).readLines()) {
@@ -332,10 +389,11 @@ async function readLines(inputFilePath: string, lineCounts: number): Promise<Arr
 async function readLastLines(
     inputFilePath: string,
     maxLineCount: number = 200,
-    encoding: BufferEncoding = "utf8"
+    encoding: BufferEncoding = "utf8",
 ): Promise<string> {
     // 检查文件是否存在
-    if (!fs.existsSync(inputFilePath)) throw new Error(`File ${inputFilePath} does not exist.`);
+    if (!fs.existsSync(inputFilePath))
+        throw new Error(`File ${inputFilePath} does not exist.`);
 
     // 获取文件的状态和文件句柄
     const [stat, file] = await Promise.all([
@@ -346,7 +404,7 @@ async function readLastLines(
                 } else {
                     resolve(stat);
                 }
-            })
+            }),
         ),
         new Promise<number>((resolve, reject) =>
             fs.open(inputFilePath, "r", (err, file) => {
@@ -355,7 +413,7 @@ async function readLastLines(
                 } else {
                     resolve(file);
                 }
-            })
+            }),
         ),
     ]);
 
@@ -365,7 +423,12 @@ async function readLastLines(
 
     while (lines.length < stat.size && lineCount < maxLineCount) {
         // 逐个读取字符，并将其添加到 `lines` 变量中
-        const nextCharacter = await readPreviousChar(stat, file, chars, encoding);
+        const nextCharacter = await readPreviousChar(
+            stat,
+            file,
+            chars,
+            encoding,
+        );
         lines = nextCharacter + lines;
 
         // 检查是否遇到换行符，并增加行数计数器
@@ -394,7 +457,7 @@ async function readPreviousChar(
     stat: fs.Stats,
     file: number,
     currentCharacterCount: number,
-    encoding: BufferEncoding = "utf-8"
+    encoding: BufferEncoding = "utf-8",
 ): Promise<string> {
     return new Promise((resolve, reject) => {
         fs.read(
@@ -409,7 +472,7 @@ async function readPreviousChar(
                 } else {
                     resolve(buffer.toString(encoding));
                 }
-            }
+            },
         );
     });
 }
@@ -420,7 +483,7 @@ async function readPreviousChar(
  */
 async function readJSON(file: fsP.FileHandle | fs.PathLike) {
     try {
-        const jsonString = await fsP.readFile(file, { encoding: 'utf-8' });
+        const jsonString = await fsP.readFile(file, { encoding: "utf-8" });
         return JSON.parse(jsonString);
     } catch (err) {
         handleFsError(err);
@@ -439,4 +502,4 @@ async function writeJSON(file: fsP.FileHandle | fs.PathLike, object: Object) {
     }
 }
 
-module.exports
+module.exports;

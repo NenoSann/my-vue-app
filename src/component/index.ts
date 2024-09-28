@@ -6,10 +6,10 @@ import SideBar2 from "./SideBar2.vue";
 import UserItem from "./UserItem.vue";
 import UserList from "./UserList.vue";
 import TheIcon from "./TheIcon.vue";
-import GroupList from './GroupList.vue';
-import MessageList from './MessageList.vue';
-import MessageInput from './MessageInput.vue';
-import RadialProgress from './RadialProgress.vue';
+import GroupList from "./GroupList.vue";
+import MessageList from "./MessageList.vue";
+import MessageInput from "./MessageInput.vue";
+import RadialProgress from "./RadialProgress.vue";
 import EmojiPanel from "./EmojiPanel.vue";
 import ContextMenu from "./ContextMenu.vue";
 import UserItemSkeleton from "./UserItemSkeleton.vue";
@@ -28,5 +28,5 @@ export {
     RadialProgress,
     EmojiPanel,
     ContextMenu,
-    UserItemSkeleton
-}
+    UserItemSkeleton,
+};

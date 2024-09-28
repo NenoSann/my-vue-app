@@ -16,35 +16,41 @@ export interface CredentialData {
 
         /** 请求时需要用的 token 字符串，最终请求 COS API 时，需要放在 Header 的 x-cos-security-token 字段 */
         sessionToken: string;
-    }
+    };
 }
 
 export interface CosPath {
     /** 文件的储存路径基础路径 */
-    baseKey: string,
+    baseKey: string;
     /** 储存的 Bucket的名称 */
-    Bucket: string,
+    Bucket: string;
     /** Bucket的地域 */
-    Region: string
+    Region: string;
 }
 
 export async function queryTempCredential(): Promise<CredentialData> {
     return new Promise<CredentialData>((resolve, reject) => {
-        axios.post('/api/getTempSTS').then((result) => {
-            const res = result.data as CredentialData;
-            resolve(res);
-        }).catch((err) => {
-            reject(err);
-        });
-    })
+        axios
+            .post("/api/getTempSTS")
+            .then((result) => {
+                const res = result.data as CredentialData;
+                resolve(res);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
 }
 
 export async function queryCosPath(): Promise<CosPath> {
     return new Promise<CosPath>(async (resolve, reject) => {
-        axios.get('/api/getCosPath').then((res) => {
-            resolve(res.data as CosPath);
-        }).catch((err) => {
-            reject(err);
-        })
-    })
+        axios
+            .get("/api/getCosPath")
+            .then((res) => {
+                resolve(res.data as CosPath);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
 }

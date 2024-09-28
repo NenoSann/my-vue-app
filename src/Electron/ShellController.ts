@@ -1,3 +1,1 @@
-export class ShellController {
-
-}
+export class ShellController {}

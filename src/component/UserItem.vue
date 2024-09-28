@@ -1,39 +1,62 @@
 <template>
-    <li class="list-item"
-        @click="() => { if (props.callback) { props.callback(avatar, name, userid, MessageType.Private) } }">
+    <li
+        class="list-item"
+        @click="
+            () => {
+                if (props.callback) {
+                    props.callback(avatar, name, userid, MessageType.Private);
+                }
+            }
+        ">
         <a :tabindex="props.index">
-            <div class="daisy-avatar w-12" :class="{ 'daisy-online': props.online, 'daisy-offline': !props.online }">
-                <img class="rounded-full" :src="props.avatar">
+            <div
+                class="daisy-avatar w-12"
+                :class="{
+                    'daisy-online': props.online,
+                    'daisy-offline': !props.online,
+                }">
+                <img class="rounded-full" :src="props.avatar" />
             </div>
             <div class="flex flex-col">
-                <p id="username" class=" h-7">{{ name }}</p>
-                <p id="lastest-message" class="truncate max-w-[70%]">{{ props.description }}</p>
+                <p id="username" class="h-7">{{ name }}</p>
+                <p id="lastest-message" class="truncate max-w-[70%]">
+                    {{ props.description }}
+                </p>
             </div>
-            <span v-if="props.unread && props.unread !== 0" class="daisy-badge rounded-full daisy-badge-primary">{{ props.unread }}</span>
+            <span
+                v-if="props.unread && props.unread !== 0"
+                class="daisy-badge rounded-full daisy-badge-primary"
+                >{{ props.unread }}</span
+            >
         </a>
     </li>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { Socket_Message } from '../Pinia';
-import { MessageType } from '../Interface/NodeLocalStorage.ts';
+import { onMounted } from "vue";
+import { Socket_Message } from "../Pinia";
+import { MessageType } from "../Interface/NodeLocalStorage.ts";
 const props = defineProps<{
-    userid: string,
-    avatar: string,
-    name: string,
-    index: number | string,
-    callback: (avatar: string, username: string, userid: string, type: MessageType) => void,
-    unread?: number | string | null | undefined,
-    online?: boolean | null,
-    description?: string | null,
-    loadable?: boolean,
-    loading?: boolean
+    userid: string;
+    avatar: string;
+    name: string;
+    index: number | string;
+    callback: (
+        avatar: string,
+        username: string,
+        userid: string,
+        type: MessageType,
+    ) => void;
+    unread?: number | string | null | undefined;
+    online?: boolean | null;
+    description?: string | null;
+    loadable?: boolean;
+    loading?: boolean;
 }>();
 
 onMounted(() => {
     Socket_Message().clearUnread(props.userid);
-})
+});
 </script>
 
 <style scoped>

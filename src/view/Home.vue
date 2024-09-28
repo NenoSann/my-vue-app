@@ -6,9 +6,9 @@
 </template>
 
 <script setup lang="ts">
-import SideBar from '../component/SideBar.vue';
-import UserHome from '../component/UserHome.vue';
-import { unmountContextMenu } from '../util/context_menu';
+import SideBar from "../component/SideBar.vue";
+import UserHome from "../component/UserHome.vue";
+import { unmountContextMenu } from "../util/context_menu";
 </script>
 
 <style scoped>

@@ -1,14 +1,28 @@
 <template>
     <div class="side-bar flex flex-col shrink-0 gap-1 p-2">
         <div class="me border-b-[1px]">
-            <TheIcon @click="router.push('/login')" :img_url="imageURL"></TheIcon>
+            <TheIcon
+                @click="router.push('/login')"
+                :img_url="imageURL"></TheIcon>
         </div>
-        <div class="sidebar-icon friends" @click="() => { sidebar.sidebar = eSideBar.Friends }">
-            <Icon size="36" class=" fill-primary">
+        <div
+            class="sidebar-icon friends"
+            @click="
+                () => {
+                    sidebar.sidebar = eSideBar.Friends;
+                }
+            ">
+            <Icon size="36" class="fill-primary">
                 <Comments />
             </Icon>
         </div>
-        <div class="sidebar-icon groups" @click="() => { sidebar.sidebar = eSideBar.Groups }">
+        <div
+            class="sidebar-icon groups"
+            @click="
+                () => {
+                    sidebar.sidebar = eSideBar.Groups;
+                }
+            ">
             <Icon size="32">
                 <AddressBook />
             </Icon>
@@ -32,13 +46,13 @@
 </template>
 
 <script setup lang="ts">
-import { SideBar, TheIcon } from './index';
-import { useRouter } from 'vue-router';
-import { Comments, AddressBook, Cat, Award, FolderRegular } from '@vicons/fa';
-import { Icon } from '@vicons/utils';
-import { User, ComponentState, eSideBar } from '../Pinia';
-import { ref, watch, computed } from 'vue';
-import { MessageType } from '../Interface/NodeLocalStorage.ts';
+import { SideBar, TheIcon } from "./index";
+import { useRouter } from "vue-router";
+import { Comments, AddressBook, Cat, Award, FolderRegular } from "@vicons/fa";
+import { Icon } from "@vicons/utils";
+import { User, ComponentState, eSideBar } from "../Pinia";
+import { ref, watch, computed } from "vue";
+import { MessageType } from "../Interface/NodeLocalStorage.ts";
 const user = User();
 const sidebar = ComponentState();
 const router = useRouter();
@@ -46,13 +60,11 @@ const imageURL = computed(() => {
     return user?.avatar;
 });
 
-
-
 const testReadMessageList = async () => {
-    console.log('foo');
+    console.log("foo");
     const res = await window.socket.readMessageList();
     console.log(res);
-}
+};
 </script>
 
 <style scoped>
@@ -62,8 +74,6 @@ const testReadMessageList = async () => {
     @apply bg-neutral;
     @apply bg-neutral;
 }
-
-
 
 .sidebar-icon {
     @apply flex justify-center items-center;
@@ -76,7 +86,7 @@ const testReadMessageList = async () => {
     @apply fill-primary;
 }
 
-.sidebar-icon>svg {
+.sidebar-icon > svg {
     isolation: isolate;
 }
 </style>

@@ -1,8 +1,15 @@
 <template>
     <div>
-        <ul class="daisy-menu bg-base-200 w-full h-full p-0 [&_li>*]:rounded-none">
-            <UserItem v-for="(user, index) in userlist" :userid="user[1].userid" :name="user[1].name"
-                :avatar="user[1].avatar" :index="index" :callback="changeSocketTarget" :online="user[1].online"
+        <ul
+            class="daisy-menu bg-base-200 w-full h-full p-0 [&_li>*]:rounded-none">
+            <UserItem
+                v-for="(user, index) in userlist"
+                :userid="user[1].userid"
+                :name="user[1].name"
+                :avatar="user[1].avatar"
+                :index="index"
+                :callback="changeSocketTarget"
+                :online="user[1].online"
                 :unread="getUnread(user[1].userid)">
             </UserItem>
         </ul>
@@ -10,12 +17,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { User, Socket_Users, Socket_Target, Socket_Message } from '../Pinia';
-import { useRouter } from 'vue-router';
-import { MessageType } from '../Interface/NodeLocalStorage.ts';
-import UserItem from './UserItem.vue';
-import { changeSocketTarget } from '../util';
+import { computed } from "vue";
+import { User, Socket_Users, Socket_Target, Socket_Message } from "../Pinia";
+import { useRouter } from "vue-router";
+import { MessageType } from "../Interface/NodeLocalStorage.ts";
+import UserItem from "./UserItem.vue";
+import { changeSocketTarget } from "../util";
 const router = useRouter();
 const SocketUsers = Socket_Users();
 const user = User();
@@ -25,16 +32,15 @@ const SocketMessage = Socket_Message();
 const userlist = computed(() => {
     // return SocketUsers.usermap;
     return user.friends;
-})
+});
 
 function getUnread(targetUserId: string) {
     const unread = SocketMessage.messages.get(targetUserId)?.unread;
     if (!unread) {
-        return '';
+        return "";
     }
     return unread.toString();
 }
-
 </script>
 
 <style scoped>

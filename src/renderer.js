@@ -1,16 +1,23 @@
 import "./style.css";
-import devtools from '@vue/devtools';
+import devtools from "@vue/devtools";
 // if (process.env.NODE_ENV === 'development') {
 //     devtools.connect(/* host, port */)
 // }
-import { createApp, watch } from 'vue';
-import App from './App.vue';
-import { router } from './router'
-import { pinia, Socket_Info, Socket_Users, Socket_Message, Socket_Target, User } from './Pinia/index';
+import { createApp, watch } from "vue";
+import App from "./App.vue";
+import { router } from "./router";
+import {
+    pinia,
+    Socket_Info,
+    Socket_Users,
+    Socket_Message,
+    Socket_Target,
+    User,
+} from "./Pinia/index";
 const app = createApp(App);
 app.use(router);
 app.use(pinia);
-app.mount('#app');
+app.mount("#app");
 export { app };
 
 const socketTarget = Socket_Target();
@@ -18,7 +25,7 @@ const socketTarget = Socket_Target();
 window.socket.onConnect((socketid) => {
     // store current socketid in node main
     Socket_Info().Socket_ID = socketid;
-})
+});
 
 window.socket.onUserMap((map) => {
     const user = User();
@@ -31,11 +38,11 @@ window.socket.onUserMap((map) => {
             targetUser.online = true;
             user.friends.set(userid, targetUser);
         }
-    })
-    if (Socket_Target().type === 'User') {
+    });
+    if (Socket_Target().type === "User") {
         socketTarget.updateSocketId();
     }
-})
+});
 
 window.socket.onUserConnected((newUser) => {
     // store new user into usermap
@@ -47,10 +54,10 @@ window.socket.onUserConnected((newUser) => {
         connectedUser.online = true;
         user.friends.set(newUser.userid, connectedUser);
     }
-    if (Socket_Target().type === 'User') {
+    if (Socket_Target().type === "User") {
         socketTarget.updateSocketId();
     }
-})
+});
 
 window.socket.onUserDisconnected((userid) => {
     Socket_Users().usermap.delete(userid);
@@ -61,43 +68,51 @@ window.socket.onUserDisconnected((userid) => {
         connectedUser.online = false;
         user.friends.set(userid, connectedUser);
     }
-    if (Socket_Target().type === 'User') {
+    if (Socket_Target().type === "User") {
         socketTarget.updateSocketId();
     }
-})
+});
 
 window.socket.onUserGroupMessage((data) => {
     // when vue receive emits that Group message is coming,
     // we will save the message and sender info to pinia
     // this message had been store in disk before vue got this emit
-    console.log('got group message from server', data);
+    console.log("got group message from server", data);
     const { content, from, senderid, senderavatar, sendername } = data;
     const SocketMessage = Socket_Message();
-    SocketMessage.storeLocalGroup(from, {
-        type: 'from',
-        content,
-        date: new Date(),
-        sendBy: senderid
-    }, {
-        avatar: senderavatar,
-        name: sendername,
-        userId: senderid
-    })
-})
+    SocketMessage.storeLocalGroup(
+        from,
+        {
+            type: "from",
+            content,
+            date: new Date(),
+            sendBy: senderid,
+        },
+        {
+            avatar: senderavatar,
+            name: sendername,
+            userId: senderid,
+        },
+    );
+});
 
 window.socket.onPrivateMessage((msg) => {
-    // this event will happened when nodejs socket receive the 
+    // this event will happened when nodejs socket receive the
     // 'Private_Message' event from server, here we will store
     // the message into pinia's Socket_Message
     const SocketMessage = Socket_Message();
-    SocketMessage.storeLocally(msg.senderid, {
-        sendBy: msg.senderid,
-        type: 'from',
-        content: msg.content,
-        date: new Date()
-    }, {
-        avatar: msg.senderavatar,
-        name: msg.sendername,
-        userId: msg.senderid
-    })
-})
+    SocketMessage.storeLocally(
+        msg.senderid,
+        {
+            sendBy: msg.senderid,
+            type: "from",
+            content: msg.content,
+            date: new Date(),
+        },
+        {
+            avatar: msg.senderavatar,
+            name: msg.sendername,
+            userId: msg.senderid,
+        },
+    );
+});

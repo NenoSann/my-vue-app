@@ -1,14 +1,15 @@
 <template>
-    <div class="flex flex-col w-72 h-full border-r-[1px] border-neutral-600  select-none shrink-0">
+    <div
+        class="flex flex-col w-72 h-full border-r-[1px] border-neutral-600 select-none shrink-0">
         <component :is="component"></component>
         <!-- <MessageList></MessageList> -->
     </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
-import { ComponentState, eContent, eSideBar } from '../Pinia';
-import { UserList, FriendsAndGroup, MessageList } from '.';
+import { onMounted, computed } from "vue";
+import { ComponentState, eContent, eSideBar } from "../Pinia";
+import { UserList, FriendsAndGroup, MessageList } from ".";
 const state = ComponentState();
 const component = computed(() => {
     switch (state.sidebar) {
@@ -19,8 +20,7 @@ const component = computed(() => {
         default:
             break;
     }
-})
-
+});
 </script>
 
 <style scoped>

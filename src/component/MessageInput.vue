@@ -6,7 +6,9 @@
                     <GrinTongueRegular />
                 </Icon>
                 <Transition>
-                    <EmojiPanel v-show="showEmojiPanel" v-on:close-emoji="showEmojiPanel = !showEmojiPanel">
+                    <EmojiPanel
+                        v-show="showEmojiPanel"
+                        v-on:close-emoji="showEmojiPanel = !showEmojiPanel">
                     </EmojiPanel>
                 </Transition>
             </div>
@@ -16,54 +18,77 @@
                 </Icon>
             </div>
             <div class="sidebar-icon">
-                <label for="image-file" class="w-full h-full flex items-center justify-center">
+                <label
+                    for="image-file"
+                    class="w-full h-full flex items-center justify-center">
                     <Icon size="22">
                         <FileImageRegular />
                     </Icon>
                 </label>
-                <input ref="imageInput" style="display: none" type="file" id="image-file" name="image-file"
-                    accept="image/png, image/jpeg, image/gif" multiple @change="handleImageClick">
+                <input
+                    ref="imageInput"
+                    style="display: none"
+                    type="file"
+                    id="image-file"
+                    name="image-file"
+                    accept="image/png, image/jpeg, image/gif"
+                    multiple
+                    @change="handleImageClick" />
             </div>
         </div>
-        <div :spellcheck="false" :contenteditable="!props.disabled" ref="contentRef" id="message-input"
-            class="text-area daisy-textarea h-full overflow-auto focus:outline-none">
-        </div>
-        <div class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4" @click="handleClick">
+        <div
+            :spellcheck="false"
+            :contenteditable="!props.disabled"
+            ref="contentRef"
+            id="message-input"
+            class="text-area daisy-textarea h-full overflow-auto focus:outline-none"></div>
+        <div
+            class="daisy-btn daisy-btn-outline daisy-btn-primary absolute bottom-4 right-4"
+            @click="handleClick">
             发送
         </div>
-        <RadialProgress :percent="progress.percent" :show="progress.show"></RadialProgress>
+        <RadialProgress
+            :percent="progress.percent"
+            :show="progress.show"></RadialProgress>
     </div>
 </template>
 
 <script setup lang="ts">
-import { Ref, ref, reactive, onMounted } from 'vue';
-import { GrinTongueRegular, FileRegular, FileImageRegular } from '@vicons/fa';
-import { Icon } from '@vicons/utils';
-import { sendMessage, readFileAsDataURL, appendImgElement, replaceImage, handleContextMenu } from '../util';
-import { RadialProgress, EmojiPanel } from './';
-import { cos } from '../util/Cos&STS';
-import DOMPurify from 'dompurify';
-import type { Window } from '../Interface/Global'
-const emits = defineEmits(['update:scroll']);
+import { Ref, ref, reactive, onMounted } from "vue";
+import { GrinTongueRegular, FileRegular, FileImageRegular } from "@vicons/fa";
+import { Icon } from "@vicons/utils";
+import {
+    sendMessage,
+    readFileAsDataURL,
+    appendImgElement,
+    replaceImage,
+    handleContextMenu,
+} from "../util";
+import { RadialProgress, EmojiPanel } from "./";
+import { cos } from "../util/Cos&STS";
+import DOMPurify from "dompurify";
+import type { Window } from "../Interface/Global";
+const emits = defineEmits(["update:scroll"]);
 const props = defineProps<{
-    disabled: boolean
-}>()
+    disabled: boolean;
+}>();
 const imageInput: Ref<HTMLInputElement | undefined> = ref();
 const contentRef: Ref<HTMLDivElement> = ref() as Ref<HTMLDivElement>;
 const progress = reactive({
     percent: 0,
     show: false,
-})
+});
 const showEmojiPanel = ref(false);
 const handleClick = async () => {
     const callback = () => {
-        emits('update:scroll')
+        emits("update:scroll");
         setTimeout(() => {
             progress.show = false;
             progress.percent = 0;
-        }, 500)
-    }
-    const locations = await cos.putImages(imageInput.value?.files as FileList,
+        }, 500);
+    };
+    const locations = await cos.putImages(
+        imageInput.value?.files as FileList,
         (percent: number, _speed: number) => {
             //showing progress in progress
             progress.percent = percent;
@@ -72,9 +97,12 @@ const handleClick = async () => {
     );
     replaceImage(contentRef.value, locations);
     console.log(contentRef.value.innerHTML);
-    sendMessage((contentRef.value as HTMLDivElement).innerHTML as string, callback);
-    (contentRef.value as HTMLDivElement).textContent = '';
-}
+    sendMessage(
+        (contentRef.value as HTMLDivElement).innerHTML as string,
+        callback,
+    );
+    (contentRef.value as HTMLDivElement).textContent = "";
+};
 
 const handleImageClick = async () => {
     const files = imageInput.value?.files as FileList;
@@ -85,28 +113,30 @@ const handleImageClick = async () => {
     const images: string[] = [];
     images.push(...(await Promise.all(promiseArr)));
     console.log(images);
-    appendImgElement(contentRef.value, images, [], ['div-img']);
-}
+    appendImgElement(contentRef.value, images, [], ["div-img"]);
+};
 
 onMounted(() => {
-    contentRef.value.addEventListener('contextmenu', (event) => {
+    contentRef.value.addEventListener("contextmenu", (event) => {
         handleContextMenu(event);
-    })
+    });
     // custom paste event, purify the dom string that user copied
     //https://stackoverflow.com/questions/55774733/how-to-modify-copied-text-before-pasting-using-javascript
-    contentRef.value.addEventListener('paste', (event) => {
+    contentRef.value.addEventListener("paste", (event) => {
         event.preventDefault();
-        let selectedHTMLString = event.clipboardData?.getData('text/html');
+        let selectedHTMLString = event.clipboardData?.getData("text/html");
         if (selectedHTMLString) {
-            selectedHTMLString = DOMPurify.sanitize(selectedHTMLString, { FORBID_ATTR: ['style'] })
+            selectedHTMLString = DOMPurify.sanitize(selectedHTMLString, {
+                FORBID_ATTR: ["style"],
+            });
         }
         // use setTimeout to avoid recursivelly call document.execCommand
         // see: https://github.com/nwjs/nw.js/issues/3403
         setTimeout(function () {
-            document.execCommand('insertHTML', false, selectedHTMLString);
-        }, 0)
-    })
-})
+            document.execCommand("insertHTML", false, selectedHTMLString);
+        }, 0);
+    });
+});
 </script>
 
 <style scoped>
@@ -134,7 +164,7 @@ onMounted(() => {
     @apply hover:fill-primary;
 }
 
-:deep(.sidebar-icon > label> span > svg) {
+:deep(.sidebar-icon > label > span > svg) {
     @apply hover:fill-primary;
 }
 
@@ -144,7 +174,7 @@ onMounted(() => {
     @apply transition-all;
 }
 
-:deep(.sidebar-icon > label >span > svg > path) {
+:deep(.sidebar-icon > label > span > svg > path) {
     @apply fill-inherit;
     @apply transition-all;
 }

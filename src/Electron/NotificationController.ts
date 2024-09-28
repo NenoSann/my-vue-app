@@ -5,19 +5,34 @@ import { nativeImage, NativeImage, Notification } from "electron";
 import { mainWindow } from "../main.ts";
 export class NotificationController {
     private static avatarMap: Map<string, NativeImage> = new Map();
-    public static async sendNotification(notificationBody: string, notificationTitle: string, iconUrl: string) {
+    public static async sendNotification(
+        notificationBody: string,
+        notificationTitle: string,
+        iconUrl: string,
+    ) {
         // if the mainWindow is showing, then now show the notification
-        console.log('debug: notification: ', notificationBody, notificationTitle, iconUrl);
+        console.log(
+            "debug: notification: ",
+            notificationBody,
+            notificationTitle,
+            iconUrl,
+        );
         if (!mainWindow?.isVisible()) {
-            console.log('sending notification...');
+            console.log("sending notification...");
             let userAvatar: NativeImage | null | undefined = null;
             if (this.avatarMap.has(iconUrl)) {
                 userAvatar = this.avatarMap.get(iconUrl);
             } else {
-                userAvatar = await this.fetchAvatar(iconUrl) as unknown as NativeImage;
+                userAvatar = (await this.fetchAvatar(
+                    iconUrl,
+                )) as unknown as NativeImage;
                 this.avatarMap.set(iconUrl, userAvatar);
             }
-            this.showNotification(notificationBody, notificationTitle, userAvatar as unknown as NativeImage)
+            this.showNotification(
+                notificationBody,
+                notificationTitle,
+                userAvatar as unknown as NativeImage,
+            );
         }
     }
     private static async fetchAvatar(iconUrl: string): Promise<NativeImage> {
@@ -26,11 +41,15 @@ export class NotificationController {
                 res.arrayBuffer().then((aBuffer) => {
                     const avatarBuffer = Buffer.from(aBuffer);
                     resolve(nativeImage.createFromBuffer(avatarBuffer));
-                })
-            })
-        })
+                });
+            });
+        });
     }
-    private static showNotification(body: string, title: string, icon: NativeImage) {
+    private static showNotification(
+        body: string,
+        title: string,
+        icon: NativeImage,
+    ) {
         new Notification({
             body,
             title,

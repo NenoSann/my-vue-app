@@ -13,7 +13,7 @@ export class WindowsController {
         });
         window.setSkipTaskbar(true);
         // Load the desired URL or local file
-        window.loadURL('https://Google.com');
+        window.loadURL("https://Google.com");
         window.show();
     }
 

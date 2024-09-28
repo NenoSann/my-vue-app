@@ -1,30 +1,38 @@
 <template>
     <div>
-        <ul class="daisy-menu bg-base-200 w-full h-full p-0 [&_li>*]:rounded-none">
-            <UserItem v-for="(group, index) in groupList" :userid="group._id" :name="group.groupName"
-                :avatar="group.groupAvatar" :index="index" :online="true" :unread="'0'" :callback="handleLiSelect">
+        <ul
+            class="daisy-menu bg-base-200 w-full h-full p-0 [&_li>*]:rounded-none">
+            <UserItem
+                v-for="(group, index) in groupList"
+                :userid="group._id"
+                :name="group.groupName"
+                :avatar="group.groupAvatar"
+                :index="index"
+                :online="true"
+                :unread="'0'"
+                :callback="handleLiSelect">
             </UserItem>
         </ul>
     </div>
 </template>
 
 <script setup lang="ts">
-import { UserItem } from '.';
-import { MessageType } from '../Interface/NodeLocalStorage.ts';
-import { User, Socket_Target } from '../Pinia';
-import { computed } from 'vue';
+import { UserItem } from ".";
+import { MessageType } from "../Interface/NodeLocalStorage.ts";
+import { User, Socket_Target } from "../Pinia";
+import { computed } from "vue";
 const SocketTarget = Socket_Target();
 const groupList = computed(() => {
     const user = User();
     return user.groups;
-})
+});
 function handleLiSelect(avatar: string, username: string, userid: string) {
     SocketTarget.isActive = true;
     SocketTarget.type = MessageType.Group;
     SocketTarget.avatar = avatar;
-    SocketTarget.name = username
+    SocketTarget.name = username;
     SocketTarget.socketid = userid;
-    SocketTarget.userid = userid
+    SocketTarget.userid = userid;
 }
 </script>
 

@@ -2,8 +2,10 @@
     <div class="h-full flex flex-col">
         <div class="px-4">
             <div class="flex h-8 my-2">
-                <input type="text" placeholder="搜索"
-                    class=" placeholder:text-sm placeholder:font-semibold daisy-input w-52 daisy-input-bordered h-full focus:outline-none ">
+                <input
+                    type="text"
+                    placeholder="搜索"
+                    class="placeholder:text-sm placeholder:font-semibold daisy-input w-52 daisy-input-bordered h-full focus:outline-none" />
                 <div class="daisy-btn ml-auto no-animation icon">
                     <Icon size="2rem">
                         <Add class="icon" />
@@ -11,7 +13,9 @@
                 </div>
             </div>
             <ul class="list !p-0">
-                <li class="list-item"><a class="list-item-a list-item-icon">好友请求</a></li>
+                <li class="list-item">
+                    <a class="list-item-a list-item-icon">好友请求</a>
+                </li>
             </ul>
         </div>
 
@@ -19,8 +23,16 @@
 
         <div class="px-4 mb-2">
             <ul class="list">
-                <li class="list-item"><a class="list-item-a" @click="component = UserList">好友</a></li>
-                <li class="list-item"><a class="list-item-a" @click="component = GroupList">群聊</a></li>
+                <li class="list-item">
+                    <a class="list-item-a" @click="component = UserList"
+                        >好友</a
+                    >
+                </li>
+                <li class="list-item">
+                    <a class="list-item-a" @click="component = GroupList"
+                        >群聊</a
+                    >
+                </li>
             </ul>
         </div>
         <component :is="component"></component>
@@ -28,12 +40,11 @@
 </template>
 
 <script setup lang="ts">
-import { Add } from '@vicons/carbon';
-import { Icon } from '@vicons/utils';
-import { UserList, GroupList } from './index';
-import { ref, Ref, shallowRef } from 'vue';
+import { Add } from "@vicons/carbon";
+import { Icon } from "@vicons/utils";
+import { UserList, GroupList } from "./index";
+import { ref, Ref, shallowRef } from "vue";
 const component = shallowRef(UserList);
-
 </script>
 
 <style scoped>
@@ -63,8 +74,7 @@ const component = shallowRef(UserList);
 
 .list-item-icon {
     &::after {
-        content: '>';
-
+        content: ">";
     }
 }
 </style>

@@ -1,27 +1,37 @@
 <template>
     <div class="emoji-main">
-        <div class="emoji-item" v-for="emoji in emojis" @click="() => { appendEmoji(emoji.remoteAdd, emoji.localAdd);$emit('close-emoji') }">
-            <img :src="emoji?.remoteAdd" :alt="emoji?.alt">
+        <div
+            class="emoji-item"
+            v-for="emoji in emojis"
+            @click="
+                () => {
+                    appendEmoji(emoji.remoteAdd, emoji.localAdd);
+                    $emit('close-emoji');
+                }
+            ">
+            <img :src="emoji?.remoteAdd" :alt="emoji?.alt" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, Ref } from 'vue';
-import { appendImgElement, createImgElement } from '../util';
-const emis = defineEmits(['close-emoji']);
+import { ref, onMounted, Ref } from "vue";
+import { appendImgElement, createImgElement } from "../util";
+const emis = defineEmits(["close-emoji"]);
 const emojis = ref();
 const messageInput: Ref<HTMLDivElement | undefined> = ref();
 onMounted(async () => {
     const res = await window.emoji.getEmojis();
     emojis.value = res;
-    messageInput.value = document.querySelector('#message-input') as HTMLDivElement;
-})
+    messageInput.value = document.querySelector(
+        "#message-input",
+    ) as HTMLDivElement;
+});
 const appendEmoji = function (src: string, localAdd: string) {
     if (messageInput.value) {
-        appendImgElement(messageInput.value, [src], [localAdd], ['div-img']);
+        appendImgElement(messageInput.value, [src], [localAdd], ["div-img"]);
     }
-}
+};
 </script>
 
 <style scoped>
