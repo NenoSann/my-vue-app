@@ -74,23 +74,26 @@ const User = defineStore("User", {
     },
     actions: {
         async login(email: string, password: string) {
-            try {
-                const user = (await login(email, password)).user.data;
-                const friends = new Map<string, IFriend>();
-                user.friends.forEach((friend) => {
-                    friends.set(friend.userid, friend);
-                });
-                Object.assign(this.$state, {
-                    ...user,
-                    friends,
-                });
-                console.log("user: ", user);
-                localStorage.setItem("user", JSON.stringify(user));
-                return user;
-            } catch (error) {
-                console.log("login fail");
-                console.error(error);
-            }
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const user = (await login(email, password)).user.data;
+                    const friends = new Map<string, IFriend>();
+                    user.friends.forEach((friend) => {
+                        friends.set(friend.userid, friend);
+                    });
+                    Object.assign(this.$state, {
+                        ...user,
+                        friends,
+                    });
+                    console.log("user: ", user);
+                    localStorage.setItem("user", JSON.stringify(user));
+                    resolve(user);
+                } catch (error) {
+                    console.log("login fail");
+                    console.error(error);
+                    reject(error);
+                }
+            })
         },
     },
 });

@@ -7,14 +7,20 @@
                 Login
             </p>
             <input
+                type="username"
+                v-model="credential.username"
+                class="daisy-input input"
+                placeholder="USER"
+                v-if="isRegiste" />
+            <input
                 type="text"
                 v-model="credential.email"
-                class="email-input daisy-input border-2 border-white daisy-input-ghost w-4/5 transition-all duration-500 rounded-3xl placeholder:text-white"
+                class="email-input daisy-input input"
                 placeholder="EMAIL" />
             <input
                 type="password"
                 v-model="credential.password"
-                class="password-input daisy-input border-2 border-white daisy-input-ghost w-4/5 transition-all duration-500 rounded-3xl placeholder:text-white -mt-6"
+                class="password-input daisy-input input -mt-6"
                 placeholder="PASSWORD" />
             <div class="option w-full -my-6">
                 <div class="flex justify-around items-center font-light">
@@ -35,23 +41,15 @@
             </div>
             <button
                 class="daisy-btn w-4/5 rounded-3xl bg-white text-black hover:text-white"
-                @click="Login">
-                login
+                @click="isRegiste ? registe() : login()">
+                {{ isRegiste ? 'Registe' : 'Login' }}
             </button>
-            <p class="text-sm font-light -my-6" v-if="!isRegister">
-                Don't have an account?
+            <p class="text-sm font-light -my-6">
+                {{isRegiste ? 'Already got an account?' : 'Don\' have an account?'}}
                 <span
                     class="font-normal cursor-pointer"
-                    @click="isRegister = !isRegister"
-                    >Register</span
-                >
-            </p>
-            <p class="text-sm font-light -my-6" v-if="isRegister">
-                Already got an account?
-                <span
-                    class="font-normal cursor-pointer"
-                    @click="isRegister = !isRegister"
-                    >Login</span
+                    @click="isRegiste = !isRegiste"
+                    >{{ isRegiste ? "Login" : "Registe" }}</span
                 >
             </p>
         </div>
@@ -88,6 +86,8 @@
 import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { User } from "../Pinia";
+import { emailValidate } from "../util/validate";
+import { registe as registeUser } from "../API/user";
 import { Window } from "../Interface/preload";
 
 // 响应变量数据
@@ -98,19 +98,44 @@ const loading = ref(false);
 const credential = reactive({
     email: "",
     password: "",
+    username: "",
 });
-const isRegister = ref(false);
+const isRegiste = ref(false);
 
-const Login = async function () {
+/**
+ * 用户登录, 使用pinia内的action来进行登录, 同时将登录信息储存在pinia内进行全局管理  
+ * **请不要直接使用api内的login函数来进行登录, 否则会造成状态不同步**
+ */
+const login = async function () {
     loading.value = true;
     loginInfo.value = await user.login(credential.email, credential.password);
     user.login(credential.email, credential.password).then(async (res) => {
         loginInfo.value = res;
         // await (window as Window).storeUserInfo.save(JSON.stringify(user.$state));
         router.push("/channels/@me");
+    }).finally(() => {
+        loading.value = false;
+        
     });
-    loading.value = false;
 };
+
+/**
+ * 注册用户, 使用api创建账号信息之后转换为登录状态
+ */
+const registe = async function() {
+    console.log('registing')
+    loading.value = true;
+    const { username, email, password } = credential;
+    try {
+        if (username && emailValidate(email) && password) {
+            registeUser(username, password, email);
+        }
+    } catch (error) {
+        
+    } finally {
+        loading.value = false;
+    }
+}
 </script>
 
 <style scoped>
@@ -120,5 +145,11 @@ const Login = async function () {
     @apply h-screen w-screen;
     background-image: url("../../assets/login_bg.png");
     background-size: cover;
+}
+
+.input {
+    @apply border-2 w-4/5 rounded-3xl;
+    @apply border-white;
+    @apply daisy-input-ghost transition-all duration-500 placeholder:text-white;
 }
 </style>

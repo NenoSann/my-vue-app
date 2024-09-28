@@ -9,7 +9,8 @@
         "package": "electron-forge package",
         "make": "electron-forge make",
         "publish": "electron-forge publish",
-        "lint": "echo \"No linting configured\""
+        "lint": "echo \"No linting configured\"",
+        "format": "npx prettier . -write"
     },
     "keywords": [],
     "author": {
@@ -27,6 +28,7 @@
         "@electron-forge/plugin-vite": "^7.0.0",
         "@types/better-sqlite3": "^7.6.10",
         "@types/dompurify": "^3.0.5",
+        "@types/validator": "^13.12.2",
         "@vicons/carbon": "^0.12.0",
         "@vicons/fa": "^0.12.0",
         "@vicons/utils": "^0.1.4",
@@ -53,6 +55,7 @@
         "lodash": "^4.17.21",
         "pinia": "^2.1.7",
         "socket.io-client": "^4.7.2",
+        "validator": "^13.12.0",
         "vue-router": "^4.2.5"
     }
 }

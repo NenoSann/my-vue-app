@@ -18,6 +18,9 @@ interface FriendsResponse extends BaseResponse {
     items: IFriend[]; // over all items
     total: number;
 }
+interface RegisteResponse extends BaseResponse {
+    items: {};
+}
 
 interface IFriend {
     name: string;
@@ -48,4 +51,5 @@ export {
     ItemsResponse,
     FriendsResponse,
     IFriend,
+    RegisteResponse,
 };

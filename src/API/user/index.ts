@@ -2,10 +2,32 @@ import {
     ItemsResponse,
     IFriend,
     MessagesResponse,
+    RegisteResponse,
 } from "../../Interface/Response";
-import axios from "axios";
+import { axios } from "../index";
 import { IUser } from "../../Interface/user";
 const baseURL = (import.meta as any).env.DEV ? "/api" : "http://localhost:8081";
+
+export function registe(
+    username: string,
+    password: string,
+    email: string,
+): Promise<RegisteResponse> {
+    return new Promise<RegisteResponse>((resolve, reject) => {
+        axios
+            .post("/api/register", {
+                username,
+                pwd: password,
+                email
+            })
+            .then((response) => {
+                resolve(response.data);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
 
 export const login = async function (email: string, password: string) {
     return new Promise<{
