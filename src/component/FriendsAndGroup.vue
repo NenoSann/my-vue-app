@@ -4,7 +4,7 @@
             <div class="flex h-8 my-2">
                 <input
                     type="text"
-                    placeholder="搜索"
+                    :placeholder="t('ui.search')"
                     class="placeholder:text-sm placeholder:font-semibold daisy-input w-52 daisy-input-bordered h-full focus:outline-none" />
                 <div class="daisy-btn ml-auto no-animation icon">
                     <Icon size="2rem">
@@ -14,7 +14,7 @@
             </div>
             <ul class="list !p-0">
                 <li class="list-item">
-                    <a class="list-item-a list-item-icon">好友请求</a>
+                    <a class="list-item-a list-item-icon">{{ $t('ui.friendReq') }}</a>
                 </li>
             </ul>
         </div>
@@ -25,12 +25,12 @@
             <ul class="list">
                 <li class="list-item">
                     <a class="list-item-a" @click="component = UserList"
-                        >好友</a
+                        >{{ t('ui.friends') }}</a
                     >
                 </li>
                 <li class="list-item">
                     <a class="list-item-a" @click="component = GroupList"
-                        >群聊</a
+                        >{{ t('ui.groups') }}</a
                     >
                 </li>
             </ul>
@@ -40,11 +40,15 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 import { Add } from "@vicons/carbon";
 import { Icon } from "@vicons/utils";
 import { UserList, GroupList } from "./index";
 import { ref, Ref, shallowRef } from "vue";
 const component = shallowRef(UserList);
+const { t } = useI18n();
+
 </script>
 
 <style scoped>

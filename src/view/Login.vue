@@ -4,24 +4,24 @@
         <div
             class="login-form flex items-center justify-evenly flex-col w-3/5 h-3/4 px-4 backdrop-blur-sm rounded-xl border-2 max-w-xl">
             <p class="font-bold text-4xl font-['Popins'] select-none my-6">
-                Login
+                {{ $t("ui.login") }}
             </p>
             <input
                 type="username"
                 v-model="credential.username"
                 class="daisy-input input"
-                placeholder="USER"
+                :placeholder="t('ui.user')"
                 v-if="isRegiste" />
             <input
                 type="text"
                 v-model="credential.email"
                 class="email-input daisy-input input"
-                placeholder="EMAIL" />
+                :placeholder="t('ui.email')" />
             <input
                 type="password"
                 v-model="credential.password"
                 class="password-input daisy-input input -mt-6"
-                placeholder="PASSWORD" />
+                :placeholder="t('ui.pwd')" />
             <div class="option w-full -my-6">
                 <div class="flex justify-around items-center font-light">
                     <div class="daisy-form-control">
@@ -30,30 +30,30 @@
                                 type="checkbox"
                                 class="daisy-checkbox daisy-checkbox-sm border-white [--chkbg:#fff] [--chkfg:#fff" />
                             <span class="daisy-label-text text-white"
-                                >Remember me</span
+                                >{{$t('ui.rememberme')}}</span
                             >
                         </label>
                     </div>
                     <p class="text-[0.875rem] cursor-pointer">
-                        Forget Password?
+                        {{ $t('ui.forget') }}
                     </p>
                 </div>
             </div>
             <button
                 class="daisy-btn w-4/5 rounded-3xl bg-white text-black hover:text-white"
                 @click="isRegiste ? registe() : login()">
-                {{ isRegiste ? "Registe" : "Login" }}
+                {{ isRegiste ? t('ui.registe') : t('ui.login') }}
             </button>
             <p class="text-sm font-light -my-6">
                 {{
                     isRegiste
-                        ? "Already got an account?"
-                        : "Don' have an account?"
+                        ? t('ui.hadAccount')
+                        : t('ui.notHadAccount')
                 }}
                 <span
                     class="font-normal cursor-pointer"
                     @click="isRegiste = !isRegiste"
-                    >{{ isRegiste ? "Login" : "Registe" }}</span
+                    >{{ isRegiste ? t('ui.login') : t('ui.registe') }}</span
                 >
             </p>
         </div>
@@ -87,12 +87,15 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { User } from "../Pinia";
 import { emailValidate } from "../util/validate";
 import { registe as registeUser } from "../API/user";
 import { Window } from "../Interface/preload";
+
+const { t } = useI18n();
 
 // 响应变量数据
 const router = useRouter();

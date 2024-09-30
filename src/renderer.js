@@ -1,4 +1,4 @@
-import "./style.css";
+import "./style/style.css";
 import devtools from "@vue/devtools";
 // if (process.env.NODE_ENV === 'development') {
 //     devtools.connect(/* host, port */)
@@ -6,6 +6,7 @@ import devtools from "@vue/devtools";
 import { createApp, watch } from "vue";
 import App from "./App.vue";
 import { router } from "./router";
+import { i18n } from "./i18n";
 import {
     pinia,
     Socket_Info,
@@ -17,6 +18,7 @@ import {
 const app = createApp(App);
 app.use(router);
 app.use(pinia);
+app.use(i18n);
 app.mount("#app");
 export { app };
 

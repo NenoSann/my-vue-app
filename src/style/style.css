@@ -24,6 +24,10 @@ a.external-url {
     width: 4px !important;
 }
 
+.sidebar-icon-hover {
+    @apply hover:bg-neutral-300 hover:bg-opacity-10 transition-all hover:isolate;
+}
+
 ::-webkit-scrollbar-thumb {
     width: 4px !important;
     border-radius: 8px;
