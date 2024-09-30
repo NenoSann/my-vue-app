@@ -1,4 +1,3 @@
-import * as FsP from "node:fs/promises";
 import path from "path";
 import Database from "better-sqlite3";
 import { cwd } from "process";
@@ -9,6 +8,7 @@ import type {
     SqlMessageContent,
     SqlUser,
 } from "../Interface/NodeLocalStorage";
+
 enum operation {
     "createUser",
     "createMessages",

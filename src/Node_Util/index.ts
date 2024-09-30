@@ -7,7 +7,7 @@ import type {
     MessageContent,
     GroupMessage,
 } from "../Interface/user.ts";
-import { WorkerController } from "./WorkerController";
+// import { WorkerController } from "./WorkerController.ts";
 import { NotificationController } from "../Electron/index.ts";
 import {
     MessageType,
@@ -15,13 +15,13 @@ import {
     LocalMessageContent,
 } from "../Interface/NodeLocalStorage.ts";
 import { SqlLiteWorker } from "./SqlLiteWorker.ts";
-const SocketURL = "http://43.163.234.220:8081";
+const SocketURL = "http://localhost:8081";
 class Socketio {
     private static instance: Socketio | undefined;
     private socket: typeof Socket;
     private usermap: Map<string, SocketUserInfo>;
     private message: Map<string, Array<PrivateMessage>>;
-    private workerController: WorkerController;
+    // private workerController: WorkerController;
     public SqlLiteController: SqlLiteWorker;
     private constructor(
         url: string,
@@ -39,7 +39,9 @@ class Socketio {
         this.usermap = new Map();
         this.message = new Map();
         this.SqlLiteController = new SqlLiteWorker(_id);
-        this.workerController = new WorkerController();
+        // this.workerController = new WorkerController();
+
+
         //              Socket.io event listener binding
         //  In this area we can add eventlistener for upcoming socket.io event,
         //  including private_message/group_message, when adding event listener be sure
@@ -88,23 +90,23 @@ class Socketio {
                 data.senderavatar,
             );
             mainWindow?.webContents.send("privateMessage", data);
-            this.workerController.saveMessage(
-                data.senderid,
-                MessageType.Private,
-                {
-                    content: {
-                        type: "from",
-                        sendBy: data.senderid,
-                        content: { ...data.content },
-                    },
-                    date: new Date(),
-                },
-                {
-                    name: data.sendername,
-                    avatar: data.senderavatar,
-                    userId: data.senderid,
-                },
-            );
+            // this.workerController.saveMessage(
+            //     data.senderid,
+            //     MessageType.Private,
+            //     {
+            //         content: {
+            //             type: "from",
+            //             sendBy: data.senderid,
+            //             content: { ...data.content },
+            //         },
+            //         date: new Date(),
+            //     },
+            //     {
+            //         name: data.sendername,
+            //         avatar: data.senderavatar,
+            //         userId: data.senderid,
+            //     },
+            // );
             const unixTimeStamp = new Date().getTime() * 1000;
             this.SqlLiteController.insertUser(
                 senderid,
@@ -134,23 +136,23 @@ class Socketio {
         });
         this.socket.on("user_group_message", (data: GroupMessage) => {
             mainWindow?.webContents.send("userGroupMessage", data);
-            this.workerController.saveMessage(
-                data.from,
-                MessageType.Group,
-                {
-                    content: {
-                        type: "from",
-                        sendBy: data.senderid,
-                        content: data.content,
-                    },
-                    date: new Date(),
-                },
-                {
-                    name: data.sendername,
-                    avatar: data.senderavatar,
-                    userId: data.senderid,
-                },
-            );
+            // this.workerController.saveMessage(
+            //     data.from,
+            //     MessageType.Group,
+            //     {
+            //         content: {
+            //             type: "from",
+            //             sendBy: data.senderid,
+            //             content: data.content,
+            //         },
+            //         date: new Date(),
+            //     },
+            //     {
+            //         name: data.sendername,
+            //         avatar: data.senderavatar,
+            //         userId: data.senderid,
+            //     },
+            // );
         });
         this.socket.on("user_join_group", (data) => {
             console.log(`A user join the room ${data.userName}`);
@@ -256,36 +258,36 @@ class Socketio {
                     } catch (error) {
                         console.error(error);
                     }
-                    this.workerController.saveMessage(
-                        message.receiverid,
-                        MessageType.Private,
-                        {
-                            content: {
-                                type: "to",
-                                sendBy: senderid,
-                                content: { ...content },
-                            },
-                            date: new Date(),
-                        },
-                        {
-                            name: receivername,
-                            avatar: receiveravatar,
-                            userId: receiverid,
-                        },
-                    );
-                    this.workerController.writeMessageList(
-                        {
-                            name: receivername,
-                            avatar: receiveravatar,
-                            userId: receiverid,
-                        },
-                        MessageType.Private,
-                        {
-                            type: "to",
-                            sendBy: senderid,
-                            content: { ...content },
-                        },
-                    );
+                    // this.workerController.saveMessage(
+                    //     message.receiverid,
+                    //     MessageType.Private,
+                    //     {
+                    //         content: {
+                    //             type: "to",
+                    //             sendBy: senderid,
+                    //             content: { ...content },
+                    //         },
+                    //         date: new Date(),
+                    //     },
+                    //     {
+                    //         name: receivername,
+                    //         avatar: receiveravatar,
+                    //         userId: receiverid,
+                    //     },
+                    // );
+                    // this.workerController.writeMessageList(
+                    //     {
+                    //         name: receivername,
+                    //         avatar: receiveravatar,
+                    //         userId: receiverid,
+                    //     },
+                    //     MessageType.Private,
+                    //     {
+                    //         type: "to",
+                    //         sendBy: senderid,
+                    //         content: { ...content },
+                    //     },
+                    // );
                     resolve(true);
                 },
             );
@@ -309,23 +311,23 @@ class Socketio {
                         senderavatar: avatar,
                         sendername: userName,
                     } = message;
-                    this.workerController.saveMessage(
-                        to,
-                        MessageType.Group,
-                        {
-                            content: {
-                                type: "to",
-                                sendBy: userId,
-                                content: { ...content },
-                            },
-                            date: new Date(),
-                        },
-                        {
-                            name: message.sendername,
-                            avatar: message.senderavatar,
-                            userId: message.senderid,
-                        },
-                    );
+                    // this.workerController.saveMessage(
+                    //     to,
+                    //     MessageType.Group,
+                    //     {
+                    //         content: {
+                    //             type: "to",
+                    //             sendBy: userId,
+                    //             content: { ...content },
+                    //         },
+                    //         date: new Date(),
+                    //     },
+                    //     {
+                    //         name: message.sendername,
+                    //         avatar: message.senderavatar,
+                    //         userId: message.senderid,
+                    //     },
+                    // );
                     resolve(true);
                 },
             );
@@ -339,11 +341,11 @@ class Socketio {
         limit: number,
         offset: number,
     ) {
-        const res = await this.workerController.readMessages(
-            targetId,
-            type,
-            limit,
-        );
+        // const res = await this.workerController.readMessages(
+        //     targetId,
+        //     type,
+        //     limit,
+        // );
         const sqlRes = this.SqlLiteController.getMessageContents(
             userId,
             targetId,
@@ -354,8 +356,8 @@ class Socketio {
     }
 
     public async readMessageList() {
-        this.SqlLiteController.getMessageList();
-        const res = await this.workerController.readMessageList();
+        // this.SqlLiteController.getMessageList();
+        // const res = await this.workerController.readMessageList();
         const sqliteRes = this.SqlLiteController.getMessageList();
         return sqliteRes;
     }
@@ -365,7 +367,7 @@ class Socketio {
         type: MessageType,
         content: LocalMessageContent,
     ) {
-        await this.workerController.writeMessageList(info, type, content);
+        // await this.workerController.writeMessageList(info, type, content);
     }
 
     public async joinGroup(groupIds: Array<string>) {

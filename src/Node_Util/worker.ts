@@ -1,4 +1,6 @@
+
 /**
+ * @deprecated 本地文件储存消息已经被废弃，请使用维护最新的基于sqlite的工具
  *  这个模块用来管理electron本地的聊天记录的存储和读取, 它使用一个map来管理一个userID => {wStream,rStream}的关系,
  *  通过判断mainThread通过postMessage中附带的类别和data来进行读取/储存用户发送的内容, 并通过postMessage方法来和mainThread沟通
  *

@@ -12,6 +12,9 @@ export default defineConfig({
     build: {
         rollupOptions: {
             external: [...builtinModules, "better-sqlite3"],
+            output: {
+                sourcemap: true
+            }
         },
     },
     server: {

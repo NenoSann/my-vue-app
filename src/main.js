@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36,31 +59,56 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.testFs = void 0;
+exports.mainWindow = void 0;
 var electron_1 = require("electron");
-var path = require("path");
-var fs = require("fs/promises");
-var Node_Socket_1 = require("./Node_Socket");
+var path = __importStar(require("path"));
+var index_ts_1 = require("./Node_Util/index.ts");
+var Electron_1 = require("./Electron");
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) {
+if (require("electron-squirrel-startup")) {
     electron_1.app.quit();
 }
+var mainWindow;
+exports.mainWindow = mainWindow;
+var icon = electron_1.nativeImage.createFromPath("D:\\Web\\ElectronVueApp\\assets\\oie_icon.png");
+var tray;
 var createWindow = function () {
     // Create the browser window.
-    var icon = electron_1.nativeImage.createFromPath('../assets/icon.png');
-    var mainWindow = new electron_1.BrowserWindow({
-        width: 800,
-        height: 600,
+    var Store = require("electron-store");
+    var store = new Store();
+    var size = store.get("windowSize");
+    exports.mainWindow = mainWindow = new electron_1.BrowserWindow({
+        width: (size === null || size === void 0 ? void 0 : size.width) || 800,
+        height: (size === null || size === void 0 ? void 0 : size.height) || 600,
         minHeight: 600,
         minWidth: 800,
         autoHideMenuBar: true,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, "preload.js"),
+            nodeIntegration: true,
         },
-        icon: icon
+        icon: icon,
+        titleBarOverlay: true,
+    });
+    mainWindow.on("close", function (event) {
+        //@ts-ignore
+        if (electron_1.app.quitting) {
+            exports.mainWindow = mainWindow = undefined;
+        }
+        else {
+            event.preventDefault();
+            mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.hide();
+        }
+    });
+    mainWindow.on("resize", function (event) {
+        var _a = mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.getSize(), x = _a[0], y = _a[1];
+        store.set("windowSize", {
+            width: x,
+            height: y,
+        });
     });
     // and load the index.html of the app.
-    //@ts-ignore
+    // @ts-ignore
     if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
         //@ts-ignore
         mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
@@ -69,22 +117,49 @@ var createWindow = function () {
         //@ts-ignore
         mainWindow.loadFile(path.join(__dirname, "../renderer/".concat(MAIN_WINDOW_VITE_NAME, "/index.html")));
     }
-    // Open the DevTools.
     mainWindow.webContents.openDevTools();
+};
+var createTray = function () {
+    tray = new electron_1.Tray(icon);
+    tray.on("double-click", function () {
+        // mainWindow?.show();
+        var windowsctl = new Electron_1.WindowsController();
+        windowsctl.createWindow();
+    });
+    var contextMenu = electron_1.Menu.buildFromTemplate([
+        { label: "好友", type: "normal" },
+        { label: "打开面板", type: "normal", click: function () { return mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.show(); } },
+        { type: "separator" },
+        {
+            label: "退出",
+            type: "normal",
+            click: function () { return electron_1.app.quit(); },
+        },
+    ]);
+    tray.setContextMenu(contextMenu);
 };
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-electron_1.app.on('ready', createWindow);
+electron_1.app.on("ready", function () {
+    createWindow();
+    createTray();
+});
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-electron_1.app.on('window-all-closed', function () {
-    if (process.platform !== 'darwin') {
-        electron_1.app.quit();
-    }
+electron_1.app.on("window-all-closed", function () {
+    // if (process.platform !== 'darwin') {
+    //     app.quit();
+    // }
 });
-electron_1.app.on('activate', function () {
+electron_1.app.on("before-quit", function () {
+    //@ts-ignore
+    // the 'quitting' is self defined property
+    electron_1.app.quitting = true;
+    index_ts_1.Socketio.getInstance().close();
+});
+electron_1.app.on("activate", function () {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (electron_1.BrowserWindow.getAllWindows().length === 0) {
@@ -93,62 +168,150 @@ electron_1.app.on('activate', function () {
 });
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-var testFs = function (content) {
-    return __awaiter(this, void 0, void 0, function () {
-        var targetPath;
-        var _this = this;
-        return __generator(this, function (_a) {
-            console.log('test fs running');
-            targetPath = path.join(__dirname, 'user');
-            fs.access(targetPath).then(function () { return __awaiter(_this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, fs.writeFile(path.join(targetPath, 'test'), content)];
-                        case 1:
-                            _a.sent();
-                            console.log('create success');
-                            return [2 /*return*/];
-                    }
-                });
-            }); }).catch(function (error) { return __awaiter(_this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, fs.mkdir(targetPath)];
-                        case 1:
-                            _a.sent();
-                            return [4 /*yield*/, fs.writeFile(path.join(targetPath, 'test'), content)];
-                        case 2:
-                            _a.sent();
-                            console.log('create success');
-                            return [2 /*return*/];
-                    }
-                });
-            }); });
-            return [2 /*return*/];
-        });
-    });
-};
-exports.testFs = testFs;
-var createSocket = function (url, name, _id, avatar) {
+var createSocket = function (name, _id, avatar) {
     return __awaiter(this, void 0, void 0, function () {
         var socket;
         return __generator(this, function (_a) {
-            socket = Node_Socket_1.default.getInstance('http://43.163.234.220:8081', 'Test', '65f811052ad56bf6b24a7c5f', 'default');
+            socket = index_ts_1.Socketio.getInstance(name, _id, avatar);
             return [2 /*return*/, socket];
         });
     });
 };
-electron_1.app.on('ready', function () {
-    electron_1.ipcMain.handle('testFS', function (event, data) { return __awaiter(void 0, void 0, void 0, function () {
+electron_1.app.on("ready", function () {
+    electron_1.ipcMain.handle("ping", function () { return "pong"; });
+    electron_1.ipcMain.handle("socket:create", function (event, name, _id, avatar) {
+        index_ts_1.Socketio.getInstance(name, _id, avatar);
+    });
+    electron_1.ipcMain.handle("socket:getUserMap", function (event, name, _id, avatar) {
+        return console.log(createSocket(name, _id, avatar));
+    });
+    electron_1.ipcMain.handle("socket:privateMessage", function (_event, to, content) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, new Promise(function (resolve, reject) {
+                    index_ts_1.Socketio.getInstance()
+                        .sendPrivateMessage(to, content)
+                        .then(function () {
+                        resolve(true);
+                    });
+                })];
+        });
+    }); });
+    electron_1.ipcMain.handle("socket:groupMessage", function (_event, to, content) {
+        return new Promise(function (resolve, reject) {
+            index_ts_1.Socketio.getInstance()
+                .sendGroupMessage(to, content)
+                .then(function () {
+                console.log("main.ts resolve");
+                resolve(true);
+            });
+        });
+    });
+    electron_1.ipcMain.handle("socket:joinGroup", function (_event, groupIds) {
+        console.debug("groupIds: \n", groupIds);
+        index_ts_1.Socketio.getInstance().joinGroup(groupIds);
+    });
+    electron_1.ipcMain.handle("socket:queryMessages", function (_event, userId, targetId, type, limit, offset) {
+        return new Promise(function (resolve, reject) { return __awaiter(void 0, void 0, void 0, function () {
+            var res, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, index_ts_1.Socketio.getInstance().queryMessages(userId, targetId, type, limit, offset)];
+                    case 1:
+                        res = _b.sent();
+                        resolve(res);
+                        return [3 /*break*/, 3];
+                    case 2:
+                        _a = _b.sent();
+                        reject();
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        }); });
+    });
+    electron_1.ipcMain.handle("socket:readMessageList", function (_event) {
+        return new Promise(function (resolve, reject) { return __awaiter(void 0, void 0, void 0, function () {
+            var res, error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, index_ts_1.Socketio.getInstance().readMessageList()];
+                    case 1:
+                        res = _a.sent();
+                        resolve(res);
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_1 = _a.sent();
+                        reject(error_1);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        }); });
+    });
+    electron_1.ipcMain.handle("socket:writeMessageList", function (_event, info, type, content) {
+        return new Promise(function (resolve, reject) { return __awaiter(void 0, void 0, void 0, function () {
+            var error_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, index_ts_1.Socketio.getInstance().writeMessageList(info, type, content)];
+                    case 1:
+                        _a.sent();
+                        resolve();
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_2 = _a.sent();
+                        reject();
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        }); });
+    });
+    electron_1.ipcMain.on("socket:close", function () { var _a; return (_a = index_ts_1.Socketio.getInstance()) === null || _a === void 0 ? void 0 : _a.close(); });
+    // url api handler
+    electron_1.ipcMain.handle("url:openURL", function (_event, url) {
+        electron_1.shell.openExternal(url);
+    });
+    // oepn emoji panel
+    electron_1.ipcMain.handle("openEmojiPanel", function () {
+        if (electron_1.app.isEmojiPanelSupported()) {
+            electron_1.app.showEmojiPanel();
+        }
+    });
+    electron_1.ipcMain.handle("emoji:addEmoji", function (_event, md5, remoteAdd) { return __awaiter(void 0, void 0, void 0, function () {
+        var unixStamp, fileName, localAdd, error_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, testFs(data)];
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    unixStamp = new Date().getTime() / 1000;
+                    fileName = remoteAdd.split("/").at(-1);
+                    return [4 /*yield*/, index_ts_1.Socketio.getInstance().SqlLiteController.saveRemoteFile("emoji", remoteAdd, fileName)];
                 case 1:
-                    _a.sent();
-                    return [2 /*return*/, 'success'];
+                    localAdd = _a.sent();
+                    if (localAdd) {
+                        index_ts_1.Socketio.getInstance().SqlLiteController.insertEmoji(md5, unixStamp, remoteAdd, localAdd);
+                    }
+                    else {
+                        index_ts_1.Socketio.getInstance().SqlLiteController.insertEmoji(md5, unixStamp, remoteAdd, "null");
+                    }
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_3 = _a.sent();
+                    console.log("fail at addEmoji main");
+                    console.error(error_3);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     }); });
-    electron_1.ipcMain.handle('ping', function () { return 'pong'; });
-    electron_1.ipcMain.handle('socket', function () { return console.log(createSocket('1', '1', '1', '1')); });
+    electron_1.ipcMain.handle("emoji:getEmojis", function () {
+        return index_ts_1.Socketio.getInstance().SqlLiteController.getEmojis();
+    });
 });
