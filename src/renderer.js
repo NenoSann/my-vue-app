@@ -104,6 +104,9 @@ window.socket.onPrivateMessage((msg) => {
     // the message into pinia's Socket_Message
     const SocketMessage = Socket_Message();
     SocketMessage.storeLocally(
+        // 将发送信息的用户id,消息内容和发送消息的用户信息
+        // 储存到pinia中. 'back'代表内容是新发送的,插入到
+        // 先前消息后面
         msg.senderid,
         {
             sendBy: msg.senderid,
@@ -116,5 +119,6 @@ window.socket.onPrivateMessage((msg) => {
             name: msg.sendername,
             userId: msg.senderid,
         },
+        'back'
     );
 });

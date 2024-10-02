@@ -28,8 +28,10 @@ contextBridge.exposeInMainWorld("socket", {
     // From webpage to main thread
     createSocket: (...args) => {
         try {
-            ipcRenderer.invoke("socket:create", ...args);
-            return true;
+            console.log('preload.ts : createSocket')
+            ipcRenderer.invoke("socket:create", ...args).then(() => {
+                return true;
+            });
         } catch (error) {
             console.error(error);
         }

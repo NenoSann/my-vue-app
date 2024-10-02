@@ -2,6 +2,7 @@ import { createPinia, defineStore } from "pinia";
 import { login } from "../API/user";
 import type { MessageContent } from "../Interface/user";
 import { MessageType, SqlMessageContent } from "../Interface/NodeLocalStorage";
+import { useStorage } from "@vueuse/core";
 
 interface IFriend {
     name: string;
@@ -71,6 +72,27 @@ const User = defineStore("User", {
                 __v: 0,
             } as unknown as IUser;
         }
+
+        // see https://vueuse.org/core/useStorage/
+        // const user = useStorage('user',
+        //     {
+        //         _id: '',
+        //         name: '',
+        //         email: "",
+        //         avatar: "",
+        //         friends: [],
+        //         groups: [],
+        //         __v: 0,
+        //     } as unknown as IUser,
+        //     localStorage,
+        //     { mergeDefaults: true }
+        // );
+        // const friends = new Map<string, IFriend>();
+        // (user.value.friends as Array<IFriend>).forEach((friend) => {
+        //     friends.set(friend.userid, friend);
+        // });
+        // user.value.friends = friends;
+        // return user;
     },
     actions: {
         async login(email: string, password: string) {
@@ -95,6 +117,12 @@ const User = defineStore("User", {
                 }
             });
         },
+        /**
+         * 清除localstorage中的user数据
+         */
+        logout() {
+            localStorage.removeItem('user');
+        }
     },
 });
 

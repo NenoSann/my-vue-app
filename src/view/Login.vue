@@ -4,7 +4,7 @@
         <div
             class="login-form flex items-center justify-evenly flex-col w-3/5 h-3/4 px-4 backdrop-blur-sm rounded-xl border-2 max-w-xl">
             <p class="font-bold text-4xl font-['Popins'] select-none my-6">
-                {{ $t("ui.login") }}
+                {{ t("ui.login") }}
             </p>
             <input
                 type="username"
@@ -30,12 +30,12 @@
                                 type="checkbox"
                                 class="daisy-checkbox daisy-checkbox-sm border-white [--chkbg:#fff] [--chkfg:#fff" />
                             <span class="daisy-label-text text-white"
-                                >{{$t('ui.rememberme')}}</span
+                                >{{t('ui.rememberme')}}</span
                             >
                         </label>
                     </div>
                     <p class="text-[0.875rem] cursor-pointer">
-                        {{ $t('ui.forget') }}
+                        {{ t('ui.forget') }}
                     </p>
                 </div>
             </div>
@@ -131,12 +131,11 @@ const login = async function () {
  * 注册用户, 使用api创建账号信息之后转换为登录状态
  */
 const registe = async function () {
-    console.log("registing");
     loading.value = true;
     const { username, email, password } = credential;
     try {
         if (username && emailValidate(email) && password) {
-            registeUser(username, password, email);
+            await registeUser(username, password, email);
         }
     } catch (error) {
     } finally {

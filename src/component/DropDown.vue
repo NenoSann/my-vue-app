@@ -7,8 +7,8 @@
         </div>
         <ul class="dropdown-content" v-if="showDropdown">
             <li v-for="(item, index) of items" :tabindex="index">
-                <a>
-                    <Icon size="16" @click="item.onClick()" class="group">
+                <a @click="item.onClick()">
+                    <Icon size="16"  class="group">
                         <component :is="item.icon"></component>
                     </Icon>
                     {{ item.text }}
@@ -21,16 +21,13 @@
 <script setup lang="ts">
 import { Icon } from "@vicons/utils";
 import { ref, onMounted } from "vue";
+import { onClickOutside } from '@vueuse/core';
 
 const showDropdown = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
+
 const toggleShow = () => {
     showDropdown.value = !showDropdown.value;
-    if (showDropdown.value) {
-        document.addEventListener("click", handleOutsideClick);
-    } else {
-        document.removeEventListener("click", handleOutsideClick);
-    }
 };
 
 const props = defineProps({
@@ -40,6 +37,10 @@ const props = defineProps({
         onClick: Function;
     }>,
 });
+
+onClickOutside(dropdownRef, () => {
+    showDropdown.value = !showDropdown.value;
+})
 
 onMounted(() => {
     document.addEventListener("click", handleOutsideClick);

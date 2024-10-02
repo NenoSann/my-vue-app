@@ -15,7 +15,7 @@ import {
     LocalMessageContent,
 } from "../Interface/NodeLocalStorage.ts";
 import { SqlLiteWorker } from "./SqlLiteWorker.ts";
-const SocketURL = "http://localhost:8081";
+const SocketURL = "http://43.163.233.68:8081";
 class Socketio {
     private static instance: Socketio | undefined;
     private socket: typeof Socket;
@@ -80,6 +80,7 @@ class Socketio {
                 receiverid,
                 ObjectId,
             } = data;
+            console.log('private_message: ', data);
             if (!this.message.has(data.senderid)) {
                 this.message.set(data.senderid, []);
             }
@@ -118,12 +119,6 @@ class Socketio {
                 receivername,
                 receiveravatar,
             );
-            this.SqlLiteController.insertMessages(
-                senderid,
-                "private",
-                unixTimeStamp,
-                ObjectId as string,
-            );
             this.SqlLiteController.insertMessageContent(
                 ObjectId as string,
                 senderid,
@@ -133,6 +128,13 @@ class Socketio {
                 content.image as unknown as string,
                 unixTimeStamp,
             );
+            this.SqlLiteController.insertMessages(
+                senderid,
+                "private",
+                unixTimeStamp,
+                ObjectId as string,
+            );
+
         });
         this.socket.on("user_group_message", (data: GroupMessage) => {
             mainWindow?.webContents.send("userGroupMessage", data);

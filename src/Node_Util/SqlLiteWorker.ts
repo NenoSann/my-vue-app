@@ -1,4 +1,5 @@
 import path from "path";
+import fs from 'fs';
 import Database from "better-sqlite3";
 import { cwd } from "process";
 import type {
@@ -30,12 +31,19 @@ export class SqlLiteWorker {
     private statementMap: Map<operation, Database.Statement> = new Map();
     constructor(userId: string) {
         try {
-            // create SqlLiteWorker instance, if not exists, it is created
-            this.dbPath = path.join(cwd(), "message", `${userId}.db`);
-            this.db = Database(this.dbPath);
-            this.db.pragma("journal_mode = WAL");
-            this.createTable();
-            this.prepare();
+            // 根据用户id创建sqlite实例，如果路径不存在则创建新的
+            this.dbPath = path.join(__dirname, "message");
+            if (!fs.existsSync(this.dbPath)) {
+                fs.mkdirSync(this.dbPath);
+            }
+            if (userId) {
+                this.db = Database(path.join(this.dbPath, userId + '.db'));
+                this.db.pragma("journal_mode = WAL");
+                this.createTable();
+                this.prepare();
+            } else {
+                throw new Error('userId为空');
+            }
         } catch (error) {
             console.error(error);
         }
@@ -63,7 +71,9 @@ export class SqlLiteWorker {
         lastMessage: string,
     ) {
         try {
+            console.log('insertMessage: ', id, type, date, lastMessage);
             const statement = this.statementMap.get(operation.insertMessages);
+            console.log(statement);
             const result = statement?.run({ id, type, date, lastMessage });
         } catch (error) {
             this.handleError(error);

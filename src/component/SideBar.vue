@@ -60,7 +60,7 @@ import { SideBar, TheIcon, DropDown } from "./index";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { NodeJs, Award } from "@vicons/fa";
-import { Settings, Chat, Friendship, Folder, DataBackup } from "@vicons/carbon";
+import { Settings, Chat, Friendship, Folder, DataBackup,Power } from "@vicons/carbon";
 import { Icon } from "@vicons/utils";
 import { User, ComponentState, eSideBar } from "../Pinia";
 import { ref, watch, computed } from "vue";
@@ -86,6 +86,15 @@ const dropdownItems = [
             console.log("test backup messages!");
         },
     },
+    {
+        icon: Power,
+        text: '退出登录',
+        onClick: () => {
+            // 清除localstorage, 并将路由转到登录
+            user.logout();
+            router.replace('/login');
+        }
+    }
 ];
 </script>
 
